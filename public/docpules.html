@@ -302,6 +302,7 @@ tr.mrow.on td{background:var(--ok-bg);font-weight:700}
       <section class="pg" id="pg-paid"></section>
       <section class="pg" id="pg-brk"></section>
       <section class="pg" id="pg-sched"></section>
+      <section class="pg" id="pg-users"></section>
 
       <section class="pg" id="pg-rtm"></section>
       <section class="pg" id="pg-settings">
@@ -364,14 +365,14 @@ var I18N={
   privacy:'Files are read in your browser. Nothing is uploaded.',
   year:'Year',hrs:'Hrs / session',weight:'Weighting',wOn:'By duration',wOff:'Count rows',
   export:'Export Excel',
-  nData:'Data',nSum:'Doctors',nMaster:'Master schedule',nAna:'Analysis',nPaid:'Paid extra',nBrk:'Session breakdown',nSched:'Schedule changes',nFix:'Fix list',nRtm:'Telemedicine',nRules:'Rules',nHealth:'Health',nSet:'Settings',
+  nData:'Data',nSum:'Doctors',nMaster:'Master schedule',nAna:'Analysis',nPaid:'Paid extra',nBrk:'Session breakdown',nSched:'Schedule changes',nUsers:'Users',nFix:'Fix list',nRtm:'Telemedicine',nRules:'Rules',nHealth:'Health',nSet:'Settings',
   sessions:'Sessions',closed:'Closed',opened:'Opened',net:'Net total',doctors:'Doctors',
   search:'Search doctor or ID…',all:'All'},
  ar:{appName:'DocPules',appOrg:'عيادتي · العمليات السريرية',
   privacy:'تتم قراءة الملفات داخل متصفحك. لا يتم رفع أي بيانات.',
   year:'السنة',hrs:'ساعات/جلسة',weight:'الاحتساب',wOn:'حسب المدة',wOff:'عدد السجلات',
   export:'تصدير Excel',
-  nData:'البيانات',nSum:'الأطباء',nMaster:'الجدول الرئيسي',nAna:'التحليل',nPaid:'الجلسات الإضافية',nBrk:'تفصيل الجلسات',nSched:'تغييرات الجدول',nSet:'الإعدادات',nFix:'الأخطاء',nRtm:'الطب الاتصالي',nRules:'القواعد',nHealth:'الجودة',
+  nData:'البيانات',nSum:'الأطباء',nMaster:'الجدول الرئيسي',nAna:'التحليل',nPaid:'الجلسات الإضافية',nBrk:'تفصيل الجلسات',nSched:'تغييرات الجدول',nUsers:'المستخدمون',nSet:'الإعدادات',nFix:'الأخطاء',nRtm:'الطب الاتصالي',nRules:'القواعد',nHealth:'الجودة',
   sessions:'الجلسات',closed:'المغلقة',opened:'المفتوحة',net:'الإجمالي',doctors:'الأطباء',
   search:'ابحث باسم الطبيب أو الرقم…',all:'الكل'}
 };
@@ -394,6 +395,7 @@ var S={
   setTab:'health',
   bk:{month:'',site:'',dept:'',status:'',q:'',sort:'net',dir:-1,showH:false,open:''},
   sc:{q:'',site:'',day:'',open:'',add:null,sort:'from',dir:-1,pw:false,pwMsg:'',pwOk:false},
+  us:{rows:null,msg:'',ok:false,adding:false,reset:'',busy:false},
   pd:{metric:'n',group:'doc',month:'',site:'',dept:'',status:'',q:'',min:'',
       sort:'val',dir:-1,open:'',showR:false,src:'all',trace:''}
 };
@@ -1519,6 +1521,7 @@ var PAGES=[
  {id:'paid',    i:'nPaid',  ic:'✦'},
  {id:'brk',     i:'nBrk',   ic:'∑'},
  {id:'sched',   i:'nSched', ic:'◷'},
+ {id:'users',   i:'nUsers', ic:'◌'},
  {id:'rtm',     i:'nRtm',   ic:'◈'},
  {id:'settings',i:'nSet',   ic:'⚙'},
 ];
@@ -1535,6 +1538,9 @@ function renderNav(){
   }
 
   PAGES.forEach(function(p){
+    /* managing people is an administrator's job, and the server refuses anyone
+       else, so the page is not offered to them */
+    if(p.id==='users'&&!(Srv.on&&Srv.user&&Srv.user.role==='admin')) return;
     var b=badge[p.id];
     h+='<button class="nv'+(S.page===p.id?' on':'')+'" data-go="'+p.id+'"><span class="ic">'+p.ic+'</span>'+
        '<span>'+esc(T(p.i))+'</span>'+
@@ -1597,7 +1603,7 @@ function renderPage(){
       : 'No paid extra sessions found in '+S.settings.year; }
   if(S.page==='settings'){ renderSettings(); return; }
   ({data:renderData,summary:renderSummary,analysis:renderAnalysis,fix:renderFix,paid:renderPaid,
-    brk:renderBrk,sched:renderSched,
+    brk:renderBrk,sched:renderSched,users:renderUsers,
     master:renderMaster,rtm:renderRtm,rules:renderRules,health:renderHealth})[S.page]();
 }
 
@@ -5395,6 +5401,163 @@ function schedImport(file){
     }catch(err){ alert('That file could not be loaded.\n\n'+err.message); }
   };
   fr.readAsText(file);
+}
+/* ============================================================= users page
+
+   Everyone who signs in may record schedule changes, and every record carries
+   who wrote it, so an account per person is the only thing that makes the
+   history mean anything. A shared login would make every change say the same
+   name.
+
+   Three roles. A viewer reads; the server refuses their writes rather than the
+   page hiding the buttons, because a hidden button is not a permission. An
+   editor does the daily work. An administrator also manages people. */
+function renderUsers(){
+  var f=S.us;
+  if(!Srv.on){
+    paint('pg-users','<div class="card"><div class="empty">Accounts live on the server, and this '+
+      'copy of the portal is not signed in to one. Opened from a file there is nothing to manage.</div></div>',
+      function(){});
+    return;
+  }
+  if(!(Srv.user&&Srv.user.role==='admin')){
+    paint('pg-users','<div class="card"><div class="empty">Only an administrator can manage accounts.</div></div>',
+      function(){});
+    return;
+  }
+  if(f.rows===null){ usLoad(); }
+
+  var h='';
+  h+='<div class="note i"><b>One account per person.</b> Every schedule change records who made it, '+
+     'so a shared login would make the whole history say the same name. Accounts are also how someone '+
+     'is removed later: switch them off and they are signed out everywhere at once.</div>';
+
+  if(f.msg) h+='<div class="note '+(f.ok?'s':'e')+'">'+esc(f.msg)+'</div>';
+
+  /* ---- add ---- */
+  h+='<div class="card"><h3>Add someone</h3><div class="cb">'+
+    '<div class="fb" style="align-items:flex-end;flex-wrap:wrap">'+
+    '<div><div class="hint" style="margin-bottom:3px">Name</div>'+
+    '<input type="text" id="uName" placeholder="Full name" style="min-width:170px"></div>'+
+    '<div><div class="hint" style="margin-bottom:3px">Email</div>'+
+    '<input type="email" id="uEmail" placeholder="name@myclinic.sa" style="min-width:220px"></div>'+
+    '<div><div class="hint" style="margin-bottom:3px">Password</div>'+
+    '<input type="text" id="uPass" placeholder="10 characters or more" style="min-width:190px"></div>'+
+    '<div><div class="hint" style="margin-bottom:3px">Role</div>'+
+    '<select id="uRole">'+
+      '<option value="editor">Editor — can record changes</option>'+
+      '<option value="viewer">Viewer — read only</option>'+
+      '<option value="admin">Administrator — and manage people</option>'+
+    '</select></div>'+
+    '<button class="btn sm pri" id="uAdd"'+(f.busy?' disabled':'')+'>Add</button>'+
+    '</div>'+
+    '<p class="hint" style="margin:10px 0 0">The password is shown as you type it so you can pass it on. '+
+    'Tell them to change it on the Schedule changes page once they are in — until they do, you know it '+
+    'too, and a password two people know is not a password.</p>'+
+    '</div></div>';
+
+  /* ---- the list ---- */
+  h+='<div class="card"><h3>Accounts'+(f.rows? ' <span class="tag">'+fmt(f.rows.length,0)+'</span>':'')+
+     '</h3><div class="cb">';
+  if(f.rows===null) h+='<div class="empty">Loading…</div>';
+  else if(!f.rows.length) h+='<div class="empty">No accounts.</div>';
+  else {
+    var admins=f.rows.filter(function(u){ return u.role==='admin'&&u.active; }).length;
+    h+='<div class="tw"><table><thead><tr><th class="stick">Person</th><th>Role</th>'+
+       '<th>Status</th><th>Added</th><th></th></tr></thead><tbody>';
+    f.rows.forEach(function(u){
+      var me=(Srv.user&&Srv.user.id===u.id);
+      /* the last administrator must keep the keys, or nobody can let anyone in */
+      var lastAdmin=(u.role==='admin'&&u.active&&admins<=1);
+      var at=u.created_at? new Date(u.created_at) : null;
+      h+='<tr'+(u.active?'':' style="opacity:.45"')+'><td class="stick">'+
+        '<div class="dr">'+esc(u.name||u.email)+(me? ' <span class="tag">you</span>':'')+'</div>'+
+        '<div class="mt">'+esc(u.email)+'</div></td>'+
+        '<td><select data-urole="'+esc(u.id)+'"'+(lastAdmin?' disabled title="the last administrator"':'')+'>'+
+          ['admin','editor','viewer'].map(function(r){
+            return '<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+r+'</option>'; }).join('')+
+        '</select></td>'+
+        '<td>'+(u.active? '<span class="sp o">active</span>' : '<span class="sp c">off</span>')+'</td>'+
+        '<td class="mt">'+(at&&!isNaN(at.getTime())? esc(at.getDate()+' '+MONTHS_EN[at.getMonth()]+' '+at.getFullYear()):'')+
+          (u.created_by? '<br><span class="mt">by '+esc(u.created_by)+'</span>':'')+'</td>'+
+        '<td style="white-space:nowrap">'+
+          '<button class="dchip" data-upw="'+esc(u.id)+'">set password</button> '+
+          (lastAdmin? '<span class="mt">last admin</span>'
+            : '<button class="dchip" data-uact="'+esc(u.id)+'" data-to="'+(u.active?'0':'1')+'">'+
+              (u.active?'switch off':'switch on')+'</button>')+
+        '</td></tr>';
+      if(f.reset===u.id){
+        h+='<tr><td colspan="5" style="background:#FAFBFD"><div class="fb" style="padding:9px 2px">'+
+          '<span class="hint">New password for <b>'+esc(u.name||u.email)+'</b></span>'+
+          '<input type="text" id="uNewPw" placeholder="10 characters or more" style="min-width:210px">'+
+          '<button class="btn sm pri" id="uPwGo">Set it</button>'+
+          '<button class="btn sm" id="uPwNo">Cancel</button>'+
+          '<span class="hint">They are signed out everywhere.</span>'+
+          '</div></td></tr>';
+      }
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='<p class="hint" style="margin-top:9px">Switching someone off keeps their name on everything they '+
+     'recorded and ends their sessions immediately, on every device. That is the right way to remove '+
+     'somebody who has left.</p></div></div>';
+  paint('pg-users',h,wireUsers);
+}
+function usLoad(){
+  fetch('/api/users',{credentials:'same-origin'})
+    .then(function(r){ if(!r.ok) throw new Error('could not load the accounts'); return r.json(); })
+    .then(function(j){ S.us.rows=j.users||[]; renderUsers(); })
+    .catch(function(e){ S.us.rows=[]; S.us.msg=e.message; S.us.ok=false; renderUsers(); });
+}
+function usSay(msg,ok){ S.us.msg=msg; S.us.ok=!!ok; S.us.busy=false; }
+function usDo(path,body){
+  S.us.busy=true;
+  return Srv.post(path,body)
+    .then(function(j){ S.us.rows=null; return j; })
+    .catch(function(e){ usSay(e.message||'That did not work.',false); renderUsers(); throw e; });
+}
+function wireUsers(){
+  function set(id,fn){ var n=el(id); if(n) fn(n); }
+  set('uAdd',function(n){ n.onclick=function(){
+    var name=nz(el('uName').value), email=nz(el('uEmail').value),
+        pass=nz(el('uPass').value), role=nz(el('uRole').value);
+    if(!email){ usSay('An email address is needed.',false); renderUsers(); return; }
+    if(pass.length<10){ usSay('The password needs at least 10 characters.',false); renderUsers(); return; }
+    usDo('/api/users',{name:name,email:email,password:pass,role:role}).then(function(){
+      usSay('Added '+email+' as '+role+'. Pass on the password and ask them to change it.',true);
+      renderUsers();
+    }).catch(function(){});
+  }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-users [data-urole]'),function(sel){
+    sel.onchange=function(){
+      usDo('/api/users/'+encodeURIComponent(sel.getAttribute('data-urole'))+'/role',{role:sel.value})
+        .then(function(j){ usSay('Role changed to '+(j.user&&j.user.role)+'.',true); renderUsers(); })
+        .catch(function(){});
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-users [data-uact]'),function(b){
+    b.onclick=function(){
+      var on=b.getAttribute('data-to')==='1';
+      usDo('/api/users/'+encodeURIComponent(b.getAttribute('data-uact'))+'/active',{active:on})
+        .then(function(j){ usSay((j.user&&j.user.email)+' is now '+(on?'active':'switched off')+'.',true);
+          renderUsers(); })
+        .catch(function(){});
+    };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-users [data-upw]'),function(b){
+    b.onclick=function(){ S.us.reset=b.getAttribute('data-upw'); S.us.msg=''; renderUsers();
+      var n=el('uNewPw'); if(n) n.focus(); };
+  });
+  set('uPwNo',function(n){ n.onclick=function(){ S.us.reset=''; renderUsers(); }; });
+  set('uPwGo',function(n){ n.onclick=function(){
+    var pw=nz(el('uNewPw').value), id=S.us.reset;
+    if(pw.length<10){ usSay('The password needs at least 10 characters.',false); renderUsers(); return; }
+    usDo('/api/users/'+encodeURIComponent(id)+'/password',{password:pw}).then(function(){
+      S.us.reset='';
+      usSay('Password set. They are signed out everywhere and will need the new one.',true);
+      renderUsers();
+    }).catch(function(){});
+  }; });
 }
 function renderBrk(){
   if(!S.result){
@@ -9340,7 +9503,7 @@ if(typeof module!=='undefined'&&module.exports)
     readFiltered:readFiltered,zipList:zipList,rtReadRules:rtReadRules,rtAutoMap:rtAutoMap,
     listSheets:listSheets,mb:mb,renderRtm:renderRtm,rtVisible:rtVisible,rtRebuild:rtRebuild,
     rtAddDoctor:rtAddDoctor,rtRemoveDoctor:rtRemoveDoctor,rtHHMM:rtHHMM,rtFromHHMM:rtFromHHMM,rtHasSchedule:rtHasSchedule,rptAutoMap:rptAutoMap,rptTime:rptTime,rptSrc:rptSrc,rptCell:rptCell,rptResourceMatches:rptResourceMatches,rtToks:rtToks,rtHasSchedule:rtHasSchedule,rtSetDay:rtSetDay,rtDayOn:rtDayOn,rtIdent:rtIdent,rtMigrateKeys:rtMigrateKeys,rtApplyPreset:rtApplyPreset,rtOnList:rtOnList,rtSaveDoctor:rtSaveDoctor,rtUnsaveDoctor:rtUnsaveDoctor,rtSync:rtSync,rtDayWindow:rtDayWindow,rtScheduleText:rtScheduleText,rtWeeklyHours:rtWeeklyHours,rptMinutes:rptMinutes,rptBuild:rptBuild,rtText:rtText,rtExport:rtExport,rtPivot:rtPivot,rtPvValues:rtPvValues,RPT_OUT:RPT_OUT,RPT_AX:RPT_AX,rtCfgAll:function(){return RT.cfg;},
-    bkRows:bkRows,bkDayCells:bkDayCells,schedPlanMap:schedPlanMap,SchedStore:SchedStore,schedWeekOn:schedWeekOn,schedWindow:schedWindow,schedKey:schedKey,schedFor:schedFor,schedChOn:schedChOn,schedSrc:schedSrc,liveOn:liveOn,Srv:Srv,srvBoot:srvBoot,renderSched:renderSched,schedExport:schedExport,schedAddFromForm:schedAddFromForm,schedApplySrc:schedApplySrc,bkDayIndex:bkDayIndex,bkHolIndex:bkHolIndex,bkHolClosed:bkHolClosed,bkPlanOn:bkPlanOn,bkHolDates:bkHolDates,exportBrkPDT:exportBrkPDT,exportBrk:exportBrk,renderBrk:renderBrk,xlBuild:xlBuild,xlCol:xlCol,dgDays:dgDays,refresh:refresh};
+    bkRows:bkRows,bkDayCells:bkDayCells,schedPlanMap:schedPlanMap,SchedStore:SchedStore,schedWeekOn:schedWeekOn,schedWindow:schedWindow,schedKey:schedKey,schedFor:schedFor,schedChOn:schedChOn,schedSrc:schedSrc,liveOn:liveOn,Srv:Srv,srvBoot:srvBoot,renderUsers:renderUsers,usLoad:usLoad,renderSched:renderSched,schedExport:schedExport,schedAddFromForm:schedAddFromForm,schedApplySrc:schedApplySrc,bkDayIndex:bkDayIndex,bkHolIndex:bkHolIndex,bkHolClosed:bkHolClosed,bkPlanOn:bkPlanOn,bkHolDates:bkHolDates,exportBrkPDT:exportBrkPDT,exportBrk:exportBrk,renderBrk:renderBrk,xlBuild:xlBuild,xlCol:xlCol,dgDays:dgDays,refresh:refresh};
 })();
 </script>
 </body>
