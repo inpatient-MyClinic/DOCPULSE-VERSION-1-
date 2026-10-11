@@ -70,6 +70,23 @@ function guard(fn) {                       /* one place to turn a throw into 400
 }
 const who = (req) => (req.user ? (req.user.name || req.user.email) : '');
 
+/* What the sign-in page needs to know before anybody has signed in: whether an
+   account exists at all, and if not, why not. It says nothing about any real
+   account, and it sits behind the IP gate like everything else. Without it an
+   unconfigured portal just repeats "those details did not match an account"
+   with no way to find out that the details were never set. */
+api.get('/setup', guard((req, res) => {
+  const n = Users.count();
+  ok(res, {
+    users: n,
+    needsSetup: n === 0,
+    /* a problem worth showing even when an account exists, because a reset that
+       quietly did nothing looks exactly like a wrong password */
+    note: n === 0 ? (SETUP_NOTE || 'No account has been created yet.') : SETUP_NOTE,
+    emailHint: String(process.env.ADMIN_EMAIL || '').trim()
+  });
+}));
+
 /* ------------------------------------------------------------------- sign in */
 api.post('/login', guard(A.login));
 api.post('/logout', guard(A.logout));
@@ -314,19 +331,24 @@ app.use((req, res) => {
    while there are no users at all, and the variables can be deleted afterwards.
    Change the password as soon as you are in: a password set this way has been
    visible in your platform's dashboard. */
+let SETUP_NOTE = '';
 function seedAdmin() {
   const email = String(process.env.ADMIN_EMAIL || '').trim();
   const pass = String(process.env.ADMIN_PASSWORD || '');
-  if (!email && !pass) return;
+  if (!email && !pass) {
+    SETUP_NOTE = 'ADMIN_EMAIL and ADMIN_PASSWORD are not set, so no account could be created.';
+    return;
+  }
   if (Users.count() > 0) {
     /* The way back in when the password is lost and there is no terminal to
        run a reset in. It is deliberately explicit: setting a password alone
        never overwrites an existing account, ADMIN_RESET=1 has to be set too. */
-    if (String(process.env.ADMIN_RESET || '') === '1') {
+    if (/^(1|true|yes|on)$/i.test(String(process.env.ADMIN_RESET || '').trim())) {
       const u = Users.byEmail(email);
       if (!u) {
-        console.error('  ADMIN_RESET is set but no account has the address ' + email + '.');
-        console.error('  Existing accounts: ' + Users.all().map((x) => x.email).join(', ') + '\n');
+        SETUP_NOTE = 'ADMIN_RESET is set, but no account has the address ' + email +
+          '. The accounts that do exist: ' + Users.all().map((x) => x.email).join(', ');
+        console.error('  ' + SETUP_NOTE + '\n');
         return;
       }
       try {
@@ -339,8 +361,15 @@ function seedAdmin() {
         console.log('  NOW DELETE ADMIN_RESET and ADMIN_PASSWORD, or the reset runs again\n' +
                     '  on every restart and the password stays visible in your dashboard.\n');
       } catch (e) {
-        console.error('  Could not reset that password: ' + e.message + '\n');
+        SETUP_NOTE = 'ADMIN_PASSWORD was rejected, so the password was NOT changed: ' + e.message;
+        console.error('  ' + SETUP_NOTE + '\n');
       }
+      return;
+    }
+    if (process.env.ADMIN_RESET !== undefined && String(process.env.ADMIN_RESET).trim() !== '') {
+      SETUP_NOTE = 'ADMIN_RESET is set to "' + String(process.env.ADMIN_RESET).trim() +
+        '", which is not recognised. Set it to 1 to reset the password.';
+      console.log('  ' + SETUP_NOTE + '\n');
       return;
     }
     console.log('  ADMIN_EMAIL is set but accounts already exist, so it was ignored.');
@@ -349,16 +378,20 @@ function seedAdmin() {
     return;
   }
   if (!email || !pass) {
-    console.error('  ADMIN_EMAIL and ADMIN_PASSWORD must both be set to create the first account.\n');
+    SETUP_NOTE = 'Only one of ADMIN_EMAIL and ADMIN_PASSWORD is set. Both are needed.';
+    console.error('  ' + SETUP_NOTE + '\n');
     return;
   }
   try {
     const u = Users.create({ email, name: String(process.env.ADMIN_NAME || '').trim(),
       password: pass, role: 'admin', by: 'environment' });
     Audit.add('environment', '', 'user.create', u.email + ' as admin (first run)');
+    SETUP_NOTE = '';
     console.log('  Created the first administrator: ' + u.email);
-    console.log('  Sign in, change that password, then delete ADMIN_PASSWORD.\n');
+    console.log('  Sign in with ' + u.email + ' and the password in ADMIN_PASSWORD.');
+    console.log('  Then change it and delete ADMIN_PASSWORD.\n');
   } catch (e) {
+    SETUP_NOTE = 'ADMIN_PASSWORD was rejected: ' + e.message;
     console.error('  Could not create the first administrator: ' + e.message + '\n');
   }
 }

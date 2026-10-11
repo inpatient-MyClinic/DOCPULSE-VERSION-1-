@@ -55,6 +55,19 @@
     color:var(--loss); border:1px solid color-mix(in srgb,var(--loss) 26%, transparent);
   }
   .foot{margin:14px 2px 0; font-size:12px; color:var(--mut)}
+  .setup{
+    margin:0 0 16px; padding:13px 14px; border-radius:var(--r); font-size:13.5px; line-height:1.5;
+    background:color-mix(in srgb,#B7791F 11%, var(--card));
+    border:1px solid color-mix(in srgb,#B7791F 38%, transparent);
+  }
+  .setup b{display:block; margin-bottom:5px}
+  .setup code{
+    font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;
+    background:color-mix(in srgb,var(--ink) 9%, transparent);
+    padding:1px 5px; border-radius:4px;
+  }
+  .setup ol{margin:8px 0 0; padding-inline-start:19px}
+  .setup li{margin:3px 0}
 </style>
 </head>
 <body>
@@ -66,6 +79,7 @@
         <p>Clinical operations &middot; session analytics</p>
       </div>
     </div>
+    <div id="setup" class="setup" hidden></div>
     <form id="f" novalidate>
       <div class="f">
         <label for="email">Email</label>
@@ -84,6 +98,35 @@
 (function(){
   var f=document.getElementById('f'), go=document.getElementById('go'), msg=document.getElementById('msg');
   function show(t){ msg.textContent=t; msg.hidden=!t; }
+
+  /* Before anybody has an account, "those details did not match" is a dead end:
+     nothing the person types can ever work and the page gives no way to find
+     that out. So ask the server whether it has been set up, and if not, say
+     exactly what is missing. */
+  fetch('/api/setup',{credentials:'same-origin'})
+    .then(function(r){ return r.ok? r.json() : null; })
+    .then(function(j){
+      if(!j||(!j.needsSetup&&!j.note)) return;
+      var box=document.getElementById('setup');
+      var esc=function(t){ return String(t||'').replace(/[&<>]/g,function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); };
+      box.innerHTML =
+        '<b>' + (j.needsSetup
+          ? 'No account exists yet, so no password will work.'
+          : 'The last password reset did not take effect.') + '</b>' +
+        esc(j.note) +
+        '<ol>' +
+          '<li>In your hosting dashboard, set <code>ADMIN_EMAIL</code> and ' +
+            '<code>ADMIN_PASSWORD</code>.</li>' +
+          '<li>The password must be <b>10 characters or more</b>, or it is refused ' +
+            'and no account is made.</li>' +
+          '<li>Restart the service, then reload this page.</li>' +
+        '</ol>' +
+        (j.emailHint? '<div style="margin-top:8px">ADMIN_EMAIL is currently <code>' +
+          esc(j.emailHint) + '</code> \u2014 sign in with exactly that.</div>' : '');
+      box.hidden=false;
+    })
+    .catch(function(){ /* an older server has no such route; nothing to show */ });
   f.addEventListener('submit', function(e){
     e.preventDefault();
     show('');
