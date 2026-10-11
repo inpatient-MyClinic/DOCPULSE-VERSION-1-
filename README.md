@@ -120,10 +120,21 @@ Three roles:
 | **editor** | Read everything, record schedule changes, upload workbooks, change shared settings |
 | **viewer** | Read only. The server refuses their writes; the portal tells them so |
 
-The first account is created with `npm run adduser` because there is nobody to
-sign in as yet. After that, an administrator adds users through the API
-(`POST /api/users`). The server will not let you demote or switch off the last
-remaining administrator — that is the one mistake that would lock everybody out.
+The first account is created with `npm run adduser`, or from `ADMIN_EMAIL` and
+`ADMIN_PASSWORD` where there is no terminal, because there is nobody to sign in
+as yet. After that, an administrator adds people on the **Users** page in the
+portal — name, email, password, role, and they are in.
+
+The page only appears for administrators, and the server refuses everyone else
+regardless of what the page shows: a hidden button is not a permission.
+
+The server will not let you demote or switch off the last remaining
+administrator, which is the one mistake that would lock everybody out.
+
+**Switching someone off** rather than deleting them is how to handle a leaver.
+Their sessions end immediately on every device, they cannot sign in, and their
+name stays on every schedule change they recorded — which is the point of having
+accounts at all.
 
 ### Permanent storage
 
