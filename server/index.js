@@ -1,0 +1,333 @@
+'use strict';
+/* ---------------------------------------------------------------------------
+   DocPules server.
+
+   Serves the portal and the small API behind it. The portal itself still does
+   all the reading and arithmetic in the browser, exactly as it did before; what
+   moved to the server is the data that has to outlive a browser tab: the
+   schedule change history, the portal's own master schedule, the shared
+   settings, the workbooks, and who is allowed in.
+
+   Start it with:  npm start
+   --------------------------------------------------------------------------- */
+
+const fs = require('fs');
+const path = require('path');
+const express = require('express');
+
+/* .env, read without a dependency */
+(function loadEnv() {
+  const f = path.join(__dirname, '..', '.env');
+  if (!fs.existsSync(f)) return;
+  fs.readFileSync(f, 'utf8').split(/\r?\n/).forEach((line) => {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/i);
+    if (!m) return;
+    let v = m[2];
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")))
+      v = v.slice(1, -1);
+    if (process.env[m[1]] === undefined) process.env[m[1]] = v;
+  });
+})();
+
+const DB = require('./db');
+const { Users, Sessions, Changes, Schedules, Settings, Files, Audit } = DB;
+const A = require('./auth');
+
+const app = express();
+app.disable('x-powered-by');
+if (process.env.TRUST_PROXY === '1') app.set('trust proxy', true);
+
+/* The IP gate comes before everything, including the login page. */
+app.use(A.ipGuard);
+
+/* A workbook is a few megabytes; the JSON bodies are small. */
+app.use(express.json({ limit: '4mb' }));
+app.use(express.raw({ type: 'application/octet-stream', limit: '64mb' }));
+
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'same-origin');
+  res.setHeader('X-Frame-Options', 'DENY');
+  next();
+});
+app.use(A.attach);
+
+const api = express.Router();
+const ok = (res, body) => res.json(body === undefined ? { ok: true } : body);
+function guard(fn) {                       /* one place to turn a throw into 400 */
+  return (req, res) => {
+    try { fn(req, res); }
+    catch (e) {
+      console.error(req.method, req.path, '-', e.message);
+      if (!res.headersSent) res.status(400).json({ error: e.message || 'That did not work.' });
+    }
+  };
+}
+const who = (req) => (req.user ? (req.user.name || req.user.email) : '');
+
+/* ------------------------------------------------------------------- sign in */
+api.post('/login', guard(A.login));
+api.post('/logout', guard(A.logout));
+api.get('/me', guard((req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Please sign in.' });
+  ok(res, {
+    user: req.user,
+    ipRestricted: A.ALLOW.length > 0,
+    counts: {
+      users: Users.count(),
+      changes: Changes.count(new Date().getFullYear())
+    }
+  });
+}));
+
+/* --------------------------------------------------------------------- users */
+api.get('/users', A.requireUser, A.isAdmin, guard((req, res) => ok(res, { users: Users.all() })));
+
+api.post('/users', A.requireUser, A.isAdmin, guard((req, res) => {
+  const u = Users.create({ ...req.body, by: who(req) });
+  Audit.add(who(req), req.clientIp, 'user.create', u.email + ' as ' + u.role);
+  ok(res, { user: u });
+}));
+
+api.post('/users/:id/role', A.requireUser, A.isAdmin, guard((req, res) => {
+  /* An admin must not be able to lock every admin out of the portal. */
+  const target = Users.byId(req.params.id);
+  if (!target) throw new Error('No such user.');
+  if (target.role === 'admin' && req.body.role !== 'admin') {
+    const admins = Users.all().filter((u) => u.role === 'admin' && u.active).length;
+    if (admins <= 1) throw new Error('That is the last administrator — make somebody else an administrator first.');
+  }
+  const u = Users.setRole(req.params.id, req.body.role);
+  Audit.add(who(req), req.clientIp, 'user.role', u.email + ' -> ' + u.role);
+  ok(res, { user: u });
+}));
+
+api.post('/users/:id/active', A.requireUser, A.isAdmin, guard((req, res) => {
+  const target = Users.byId(req.params.id);
+  if (!target) throw new Error('No such user.');
+  if (!req.body.active && target.role === 'admin') {
+    const admins = Users.all().filter((u) => u.role === 'admin' && u.active).length;
+    if (admins <= 1) throw new Error('That is the last administrator — you would lock everyone out.');
+  }
+  const u = Users.setActive(req.params.id, !!req.body.active);
+  Audit.add(who(req), req.clientIp, 'user.active', u.email + ' -> ' + (u.active ? 'on' : 'off'));
+  ok(res, { user: u });
+}));
+
+api.post('/users/:id/password', A.requireUser, guard((req, res) => {
+  /* your own password, or anyone's if you are an administrator */
+  const mine = req.user.id === req.params.id;
+  if (!mine && req.user.role !== 'admin')
+    return res.status(403).json({ error: 'You can only change your own password.' });
+  if (mine) {
+    const self = Users.byEmail(req.user.email);
+    if (!DB.verifyPassword(String(req.body.current || ''), self.pass_hash))
+      throw new Error('Your current password did not match.');
+  }
+  Users.setPassword(req.params.id, String(req.body.password || ''));
+  Audit.add(who(req), req.clientIp, 'user.password', mine ? 'own' : req.params.id);
+  ok(res);
+}));
+
+/* ------------------------------------------------------------------- changes
+   The portal holds every record for the year in memory and reads it
+   synchronously, so this endpoint hands over the whole year in one go. */
+api.get('/changes', A.requireUser, guard((req, res) => {
+  const year = +(req.query.year || new Date().getFullYear());
+  ok(res, { year, rows: Changes.list(year).map(toPortal) });
+}));
+
+api.post('/changes', A.requireUser, A.canWrite, guard((req, res) => {
+  const recs = Array.isArray(req.body) ? req.body : [req.body];
+  if (recs.length > 500) throw new Error('Too many records in one go.');
+  const added = [], dup = [];
+  /* All or nothing: a half-written batch would be worse than a rejected one. */
+  DB.db.transaction(() => {
+    recs.forEach((r) => {
+      const out = Changes.add(r, who(req));
+      (out.duplicate ? dup : added).push(out.id);
+    });
+  })();
+  if (added.length) Audit.add(who(req), req.clientIp, 'change.add', added.join(','));
+  ok(res, { added: added.length, duplicates: dup.length, ids: added });
+}));
+
+api.post('/changes/:id/revoke', A.requireUser, A.canWrite, guard((req, res) => {
+  const row = Changes.revoke(req.params.id, who(req));
+  Audit.add(who(req), req.clientIp, 'change.revoke', req.params.id);
+  ok(res, { row: toPortal(row) });
+}));
+
+/* the database columns, in the shape the portal already works with */
+function toPortal(r) {
+  const out = {
+    id: r.id, key: r.doc_key, kind: r.kind,
+    from: r.from_date || '', to: r.to_date || '',
+    note: r.note || '', at: r.recorded_at, by: r.recorded_by || ''
+  };
+  if (r.kind === 'day') {
+    out.day = r.day;
+    out.sessions = r.sessions;
+    if (r.hours !== null && r.hours !== undefined) out.hours = r.hours;
+  }
+  if (r.void_at) { out.void = r.void_at; out.voidBy = r.void_by || ''; }
+  return out;
+}
+
+/* ------------------------------------------------------- the portal schedule */
+api.get('/schedule', A.requireUser, guard((req, res) => {
+  const year = +(req.query.year || new Date().getFullYear());
+  const row = Schedules.latest(year);
+  if (!row) return ok(res, { year, schedule: null, versions: [] });
+  ok(res, {
+    year,
+    schedule: JSON.parse(row.body),
+    savedAt: row.saved_at, savedBy: row.saved_by, lines: row.lines,
+    versions: Schedules.versions(year)
+  });
+}));
+
+api.put('/schedule', A.requireUser, A.canWrite, guard((req, res) => {
+  const year = +(req.body.year || new Date().getFullYear());
+  if (!req.body.schedule) throw new Error('No schedule in that request.');
+  const row = Schedules.save(year, req.body.schedule, who(req), req.body.note);
+  Audit.add(who(req), req.clientIp, 'schedule.save', year + ' v' + row.id + ' (' + row.lines + ' lines)');
+  ok(res, { version: row.id, savedAt: row.saved_at, lines: row.lines });
+}));
+
+api.get('/schedule/:id', A.requireUser, guard((req, res) => {
+  const row = Schedules.get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'No such version.' });
+  ok(res, { year: row.year, schedule: JSON.parse(row.body), savedAt: row.saved_at, savedBy: row.saved_by });
+}));
+
+/* ------------------------------------------------------------------ settings
+   The rules, the holiday list, hours per session, the colour key. These used to
+   live per-browser, which is why two people could read different numbers off
+   the same workbook. */
+api.get('/settings', A.requireUser, guard((req, res) => ok(res, { settings: Settings.all() })));
+
+api.put('/settings', A.requireUser, A.canWrite, guard((req, res) => {
+  const body = req.body && req.body.settings;
+  if (!body || typeof body !== 'object') throw new Error('No settings in that request.');
+  const keys = Object.keys(body);
+  if (keys.length > 100) throw new Error('Too many settings at once.');
+  DB.db.transaction(() => { keys.forEach((k) => Settings.put(k, body[k], who(req))); })();
+  Audit.add(who(req), req.clientIp, 'settings.put', keys.join(','));
+  ok(res, { saved: keys.length });
+}));
+
+/* --------------------------------------------------------------------- files
+   The workbooks, kept so the portal can load the last ones by itself. Sent as
+   a raw body with the name in the query, which keeps a multipart parser out of
+   the dependency list. */
+api.get('/files', A.requireUser, guard((req, res) => ok(res, {
+  master: Files.list('master'),
+  capacity: Files.list('capacity')
+})));
+
+api.get('/files/latest/:kind', A.requireUser, guard((req, res) => {
+  const row = Files.latest(req.params.kind);
+  if (!row) return res.status(404).json({ error: 'Nothing uploaded yet.' });
+  sendFile(res, row);
+}));
+
+api.get('/files/:id', A.requireUser, guard((req, res) => {
+  const row = Files.get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'No such file.' });
+  sendFile(res, row);
+}));
+
+function sendFile(res, row) {
+  const p = Files.path(row);
+  if (!fs.existsSync(p))
+    return res.status(410).json({ error: 'That file is recorded but missing from disk.' });
+  res.setHeader('Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition',
+    'attachment; filename="' + row.name.replace(/[^\w.\- ]+/g, '_') + '"');
+  res.setHeader('X-File-Name', encodeURIComponent(row.name));
+  res.setHeader('X-File-Id', row.id);
+  fs.createReadStream(p).pipe(res);
+}
+
+api.post('/files/:kind', A.requireUser, A.canWrite, guard((req, res) => {
+  if (!Buffer.isBuffer(req.body) || !req.body.length)
+    throw new Error('Send the workbook as the request body, with Content-Type: application/octet-stream.');
+  const row = Files.add({
+    kind: req.params.kind,
+    name: String(req.query.name || 'workbook.xlsx'),
+    buf: req.body, who: who(req)
+  });
+  Audit.add(who(req), req.clientIp, 'file.upload', req.params.kind + ' ' + row.name);
+  ok(res, { file: { id: row.id, kind: row.kind, name: row.name, bytes: row.bytes, uploadedAt: row.uploaded_at } });
+}));
+
+/* --------------------------------------------------------------------- audit */
+api.get('/audit', A.requireUser, A.isAdmin, guard((req, res) =>
+  ok(res, { rows: Audit.recent(+(req.query.limit || 200)) })));
+
+/* ------------------------------------------------------- everything in one go
+   What the portal asks for on boot, so a cold start is a single request. */
+api.get('/bootstrap', A.requireUser, guard((req, res) => {
+  const year = +(req.query.year || new Date().getFullYear());
+  const sched = Schedules.latest(year);
+  ok(res, {
+    user: req.user,
+    year,
+    changes: Changes.list(year).map(toPortal),
+    settings: Settings.all(),
+    schedule: sched ? { lines: sched.lines, savedAt: sched.saved_at, savedBy: sched.saved_by } : null,
+    files: { master: Files.latest('master') || null, capacity: Files.latest('capacity') || null }
+  });
+}));
+
+app.use('/api', api);
+
+/* ------------------------------------------------------------------ the page */
+const PUB = path.join(__dirname, '..', 'public');
+app.get('/health', (req, res) => res.type('text/plain').send('ok\n'));
+
+/* The portal is only served to somebody signed in; otherwise the sign-in page.
+   It is one HTML file, and the browser must not hold a stale copy of it after a
+   deploy, hence no-store. */
+app.get('/', (req, res) => {
+  if (!req.user) return res.sendFile(path.join(PUB, 'login.html'));
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(PUB, 'docpules.html'));
+});
+app.get('/login', (req, res) => res.sendFile(path.join(PUB, 'login.html')));
+app.use(express.static(PUB, { index: false, maxAge: '1h' }));
+
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'No such endpoint.' });
+  res.status(404).type('text/plain').send('Not found\n');
+});
+
+/* ----------------------------------------------------------------- start up */
+const PORT = +(process.env.PORT || 3000);
+Sessions.sweep();
+setInterval(() => { try { Sessions.sweep(); } catch (e) { /* not worth stopping for */ } },
+  6 * 3600 * 1000).unref();
+
+const server = app.listen(PORT, () => {
+  const n = Users.count();
+  console.log('\n  DocPules on http://localhost:' + PORT);
+  console.log('  data        ' + DB.DATA_DIR + '  (' + DB.DRIVER + ')');
+  console.log('  IP gate     ' + (A.ALLOW.length
+    ? A.ALLOW.map((r) => r.text).join(', ')
+    : 'OPEN — every address is allowed, set ALLOW_IPS before this is reachable from outside'));
+  console.log('  users       ' + n);
+  if (!n) console.log('\n  No users yet. Create the first administrator:\n    npm run adduser\n');
+  else console.log('');
+});
+
+function shutdown() {
+  console.log('\n  stopping');
+  server.close(() => { try { DB.db.close(); } catch (e) {} process.exit(0); });
+  setTimeout(() => process.exit(0), 4000).unref();
+}
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+module.exports = app;

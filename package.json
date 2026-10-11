@@ -1,0 +1,21 @@
+{
+  "name": "docpules",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DocPules \u2014 doctor session analytics for My Clinic / CareBlock, with the schedule history kept in a database",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "adduser": "node server/adduser.js",
+    "backup": "node server/backup.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^13.0.3"
+  }
+}
