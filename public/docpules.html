@@ -393,7 +393,7 @@ var S={
   ot:null,
   setTab:'health',
   bk:{month:'',site:'',dept:'',status:'',q:'',sort:'net',dir:-1,showH:false,open:''},
-  sc:{q:'',site:'',day:'',open:'',add:null,sort:'from',dir:-1},
+  sc:{q:'',site:'',day:'',open:'',add:null,sort:'from',dir:-1,pw:false,pwMsg:'',pwOk:false},
   pd:{metric:'n',group:'doc',month:'',site:'',dept:'',status:'',q:'',min:'',
       sort:'val',dir:-1,open:'',showR:false,src:'all',trace:''}
 };
@@ -5059,9 +5059,24 @@ function renderSched(){
         (Srv.user&&Srv.user.role? ' · '+esc(Srv.user.role) : '')+'</span>'+
       '<div class="spacer" style="flex:1"></div>'+
       (q? '<span class="hint" style="color:var(--warn)"><b>'+fmt(q,0)+'</b> waiting to send</span>' : '')+
+      '<button class="btn sm" id="scPw">Change password</button>'+
       '<button class="btn sm" id="scExp">↓ Save a copy</button>'+
       '<button class="btn sm" id="scOut">Sign out</button>'+
       '</div>'+
+      (f.pw? '<div class="fb" style="margin-top:11px;padding-top:11px;border-top:1px solid var(--line-s);'+
+        'align-items:flex-end;flex-wrap:wrap">'+
+        '<div><div class="hint" style="margin-bottom:3px">Current password</div>'+
+        '<input type="password" id="pwOld" autocomplete="current-password" style="max-width:185px"></div>'+
+        '<div><div class="hint" style="margin-bottom:3px">New password</div>'+
+        '<input type="password" id="pwNew" autocomplete="new-password" style="max-width:185px"></div>'+
+        '<div><div class="hint" style="margin-bottom:3px">Again</div>'+
+        '<input type="password" id="pwNew2" autocomplete="new-password" style="max-width:185px"></div>'+
+        '<button class="btn sm pri" id="pwGo">Change it</button>'+
+        '<div class="spacer" style="flex:1"></div>'+
+        '<span class="hint">At least 10 characters. Every device is signed out, this one included.</span>'+
+        '</div>'+
+        (f.pwMsg? '<div class="note '+(f.pwOk?'s':'e')+'" style="margin:10px 0 0">'+esc(f.pwMsg)+'</div>' : '')
+       : '')+
       (Srv.err? '<div class="note e" style="margin:10px 0 0"><b>The server could not be reached.</b> '+
         esc(Srv.err)+'. Anything you record is kept and sent again once it is back — keep this tab '+
         'open until the count above reaches zero.</div>' : '')+
@@ -5198,6 +5213,30 @@ function schedBackupCard(st,live){
      '</div></div></div>';
   return h;
 }
+/* Changing your own password. The server checks the current one first, so a tab
+   left open on somebody else's screen cannot be used to take the account over. */
+function schedChangePassword(){
+  var cur=nz(el('pwOld').value), a=nz(el('pwNew').value), b=nz(el('pwNew2').value);
+  S.sc.pwOk=false;
+  if(!cur){ S.sc.pwMsg='Type your current password first.'; renderSched(); return; }
+  if(a.length<10){ S.sc.pwMsg='The new password needs at least 10 characters.'; renderSched(); return; }
+  if(a!==b){ S.sc.pwMsg='The two new passwords do not match.'; renderSched(); return; }
+  if(!Srv.on||!Srv.user){ S.sc.pwMsg='You are not signed in to a server.'; renderSched(); return; }
+  var btn=el('pwGo'); if(btn){ btn.disabled=true; btn.textContent='Changing\u2026'; }
+  Srv.post('/api/users/'+encodeURIComponent(Srv.user.id)+'/password',{current:cur,password:a})
+    .then(function(){
+      /* the server ends every session, this one included, so the only place to
+         go is back to the sign-in page */
+      S.sc.pwOk=true;
+      S.sc.pwMsg='Password changed. Taking you back to the sign-in page\u2026';
+      renderSched();
+      setTimeout(function(){ location.replace('/login'); },1400);
+    })
+    .catch(function(e){
+      S.sc.pwMsg=e.message||'That did not work.';
+      renderSched();
+    });
+}
 function schedNice(d){
   var m=nz(d).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if(!m) return '';
@@ -5221,6 +5260,11 @@ function wireSched(){
   set('scSort',function(n){ n.onchange=function(){ f.sort=this.value; renderSched(); }; });
   set('scExp',function(n){ n.onclick=schedExport; });
   set('scOut',function(n){ n.onclick=function(){ Srv.signOut(); }; });
+  set('scPw',function(n){ n.onclick=function(){
+    S.sc.pw=!S.sc.pw; S.sc.pwMsg=''; renderSched();
+    var b=el('pwOld'); if(b) b.focus();
+  }; });
+  set('pwGo',function(n){ n.onclick=schedChangePassword; });
   set('scImpBtn',function(n){ n.onclick=function(){ var i=el('scImp'); if(i) i.click(); }; });
   set('scImp',function(n){ n.onchange=function(){ if(n.files&&n.files[0]) schedImport(n.files[0]); }; });
   /* the kind of change decides which boxes are even meaningful */

@@ -319,8 +319,33 @@ function seedAdmin() {
   const pass = String(process.env.ADMIN_PASSWORD || '');
   if (!email && !pass) return;
   if (Users.count() > 0) {
+    /* The way back in when the password is lost and there is no terminal to
+       run a reset in. It is deliberately explicit: setting a password alone
+       never overwrites an existing account, ADMIN_RESET=1 has to be set too. */
+    if (String(process.env.ADMIN_RESET || '') === '1') {
+      const u = Users.byEmail(email);
+      if (!u) {
+        console.error('  ADMIN_RESET is set but no account has the address ' + email + '.');
+        console.error('  Existing accounts: ' + Users.all().map((x) => x.email).join(', ') + '\n');
+        return;
+      }
+      try {
+        Users.setPassword(u.id, pass);
+        if (u.role !== 'admin') Users.setRole(u.id, 'admin');
+        if (!u.active) Users.setActive(u.id, true);
+        Audit.add('environment', '', 'user.password', u.email + ' reset via ADMIN_RESET');
+        console.log('  Password reset for ' + u.email + ', and the account is an active administrator.');
+        console.log('  Every signed-in device has been signed out.');
+        console.log('  NOW DELETE ADMIN_RESET and ADMIN_PASSWORD, or the reset runs again\n' +
+                    '  on every restart and the password stays visible in your dashboard.\n');
+      } catch (e) {
+        console.error('  Could not reset that password: ' + e.message + '\n');
+      }
+      return;
+    }
     console.log('  ADMIN_EMAIL is set but accounts already exist, so it was ignored.');
-    console.log('  Delete that variable, and ADMIN_PASSWORD with it.\n');
+    console.log('  Delete that variable, and ADMIN_PASSWORD with it.');
+    console.log('  To reset a forgotten password instead, set ADMIN_RESET=1 and restart.\n');
     return;
   }
   if (!email || !pass) {

@@ -212,6 +212,26 @@ and refuses everybody.
 built in. On Node 20 the only driver is the native one, and if its build fails
 the service cannot start.
 
+### A forgotten password, with no terminal
+
+Setting `ADMIN_PASSWORD` on its own never overwrites an existing account — that
+would mean anyone who can edit a variable could silently take one over. To reset
+it deliberately, set all three and restart:
+
+```
+ADMIN_EMAIL      the account's address
+ADMIN_PASSWORD   the new password, 10 characters or more
+ADMIN_RESET      1
+```
+
+The log confirms the reset and says every device has been signed out. **Then
+delete `ADMIN_RESET` and `ADMIN_PASSWORD`** — otherwise the reset runs again on
+every restart and the password sits readable in your dashboard.
+
+Once you are in, change it properly on the **Schedule changes** page: the
+Storage card has a *Change password* button, and that route asks for the current
+password first.
+
 ### When it will not start
 
 The log says why, in words, as the first thing it prints. The three that
