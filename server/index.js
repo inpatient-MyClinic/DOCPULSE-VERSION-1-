@@ -229,7 +229,10 @@ api.get('/schedule/:id', A.requireUser, guard((req, res) => {
    the same workbook. */
 api.get('/settings', A.requireUser, guard((req, res) => ok(res, { settings: Settings.all() })));
 
-api.put('/settings', A.requireUser, A.canWrite, guard((req, res) => {
+/* PUT is the method; POST is accepted too, because a browser holding an older
+   copy of the page sends POST, and a shared setting that silently fails to save
+   is worse than a tidy route list. */
+const saveSettings = guard((req, res) => {
   const body = req.body && req.body.settings;
   if (!body || typeof body !== 'object') throw new Error('No settings in that request.');
   const keys = Object.keys(body);
@@ -237,7 +240,9 @@ api.put('/settings', A.requireUser, A.canWrite, guard((req, res) => {
   DB.db.transaction(() => { keys.forEach((k) => Settings.put(k, body[k], who(req))); })();
   Audit.add(who(req), req.clientIp, 'settings.put', keys.join(','));
   ok(res, { saved: keys.length });
-}));
+});
+api.put('/settings', A.requireUser, A.canWrite, saveSettings);
+api.post('/settings', A.requireUser, A.canWrite, saveSettings);
 
 /* --------------------------------------------------------------------- files
    The workbooks, kept so the portal can load the last ones by itself. Sent as
