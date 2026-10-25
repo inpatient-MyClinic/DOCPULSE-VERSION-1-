@@ -436,7 +436,8 @@ const Settings = {
 /* ---------------------------------------------------------------------- files */
 const Files = {
   latest(kind) {
-    return db.prepare(`SELECT * FROM files WHERE kind=? ORDER BY id DESC LIMIT 1`).get(kind);
+    /* by upload time: ids are random, so ordering by id picked an older file */
+    return db.prepare(`SELECT * FROM files WHERE kind=? ORDER BY uploaded_at DESC, rowid DESC LIMIT 1`).get(kind);
   },
   list(kind, limit = 20) {
     return db.prepare(
@@ -449,7 +450,12 @@ const Files = {
     const sha = crypto.createHash('sha256').update(buf).digest('hex');
     /* the same workbook uploaded again is the same workbook */
     const same = db.prepare(`SELECT * FROM files WHERE kind=? AND sha256=?`).get(kind, sha);
-    if (same) return same;
+    if (same) {
+      /* uploading an older workbook again makes it the current one again */
+      db.prepare(`UPDATE files SET uploaded_at=?, uploaded_by=?, name=? WHERE id=?`)
+        .run(nowISO(), who || '', String(name || same.name).slice(0, 200), same.id);
+      return Files.get(same.id);
+    }
     const id = newId('f');
     const stored = id + '.xlsx';
     fs.writeFileSync(path.join(DATA_DIR, 'files', stored), buf);
