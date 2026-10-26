@@ -12240,10 +12240,13 @@ async function zipStream(file,entry){
 async function zipText(file,entry,onChunk){
   var stream=await zipStream(file,entry);
   var reader=stream.pipeThrough(new TextDecoderStream()).getReader();
+  var lastYield=Date.now();
   for(;;){
     var r=await reader.read();
     if(r.done) break;
     onChunk(r.value);
+    /* let the page breathe: without this a big file froze the tab until done */
+    if(Date.now()-lastYield>60){ await new Promise(function(res){ setTimeout(res,0); }); lastYield=Date.now(); }
   }
 }
 
@@ -12293,7 +12296,23 @@ async function readSharedStrings(file,entries,onProgress){
 /* ---- sheet rows ------------------------------------------------------- */
 /* onRow(values, rowIndex) is called once per <row>; return nothing.
    Only the columns listed in `need` are materialised when `need` is given. */
-async function streamSheet(file,entries,path,sst,onRow,onProgress){
+/* one cell's value out of a row's XML, found by its reference (K123) */
+function rdCell(inner,ref,sst){
+  var k=inner.indexOf('r="'+ref+'"'); if(k<0) return '';
+  var s0=inner.lastIndexOf('<c',k), e0=inner.indexOf('>',k);
+  if(s0<0||e0<0) return '';
+  if(inner.charCodeAt(e0-1)===47) return '';
+  var attr=inner.slice(s0+2,e0), close=inner.indexOf('</c>',e0);
+  var body=inner.slice(e0+1,close<0?inner.length:close);
+  var tm=/t="([^"]+)"/.exec(attr), ty=tm?tm[1]:'n';
+  if(ty==='inlineStr'){ var txt='', tre=/<t[^>]*>([\s\S]*?)<\/t>/g, t; while((t=tre.exec(body))) txt+=t[1]; return xmlUnescape(txt); }
+  var vm=/<v>([\s\S]*?)<\/v>/.exec(body); if(!vm) return '';
+  if(ty==='s'){ var ix=+vm[1]; return sst[ix]!==undefined?sst[ix]:''; }
+  if(ty==='str'||ty==='e') return xmlUnescape(vm[1]);
+  return vm[1];
+}
+function rdLetters(ci){ var s1=''; ci++; while(ci>0){ var m=(ci-1)%26; s1=String.fromCharCode(65+m)+s1; ci=Math.floor((ci-1)/26); } return s1; }
+async function streamSheet(file,entries,path,sst,onRow,onProgress,gate){
   var e=entries[path];
   if(!e) throw new Error('Missing sheet part: '+path);
   var buf='', rowN=0, bytes=0;
@@ -12308,11 +12327,14 @@ async function streamSheet(file,entries,path,sst,onRow,onProgress){
     }
     var head=buf.slice(0,last+6);
     buf=buf.slice(last+6);
-    var rre=/<row[^>]*?(?:\/>|>([\s\S]*?)<\/row>)/g, rm;
+    var rre=/<row([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g, rm;
     while((rm=rre.exec(head))){
       rowN++;
-      var inner=rm[1];
+      var inner=rm[2];
       if(inner===undefined){ onRow([],rowN); continue; }
+      /* a row the filter will throw away is skipped without being parsed */
+      if(gate){ var rn=/\br="(\d+)"/.exec(rm[1]);
+        if(rn&&gate(inner,rn[1])===false){ onRow(null,rowN); continue; } }
       var vals=[], cre=/<c\s+([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g, cm;
       while((cm=cre.exec(inner))){
         var attr=cm[1], body=cm[2];
@@ -12400,6 +12422,33 @@ function looksLikeHeader(vals){
   return filled-dup*2;
 }
 function normHdr(s2){ return nz(s2).toLowerCase().replace(/[\s_]/g,''); }
+/* The same reader, in a background thread: the page stays usable and the
+   progress line keeps moving while a large export is read. */
+var RD_WORKER_URL=null;
+function readFilteredBg(file,rules,onProgress,only){
+  var fns=[nz,zipList,zipStream,zipText,xmlUnescape,colOf,readSharedStrings,rdCell,rdLetters,
+           streamSheet,readSheetMap,looksLikeHeader,normHdr,readFiltered];
+  try{
+    if(typeof Worker==='undefined'||typeof Blob==='undefined') throw new Error('no worker');
+    if(!RD_WORKER_URL) RD_WORKER_URL=URL.createObjectURL(new Blob([fns.map(String).join('\n')+
+      '\nonmessage=function(e){var d=e.data;readFiltered(d.file,d.rules,function(p){postMessage({t:"p",p:p});},d.only)'+
+      '.then(function(r){postMessage({t:"done",r:r});},function(err){postMessage({t:"err",m:(err&&err.message)||String(err)});});};'],
+      {type:'text/javascript'}));
+    var w=new Worker(RD_WORKER_URL);
+  }catch(e){ return readFiltered(file,rules,onProgress,only); }
+  return new Promise(function(res,rej){
+    var settled=false;
+    w.onmessage=function(e){ var d=e.data;
+      if(d.t==='p'){ if(onProgress) onProgress(d.p); return; }
+      settled=true; w.terminate();
+      if(d.t==='done') res(d.r); else rej(new Error(d.m)); };
+    w.onerror=function(ev){ if(settled) return; settled=true; w.terminate();
+      if(ev&&ev.preventDefault) ev.preventDefault();
+      /* a browser that will not run it: read on the page instead */
+      readFiltered(file,rules,onProgress,only).then(res,rej); };
+    w.postMessage({file:file,rules:rules,only:only});
+  });
+}
 async function readFiltered(file,rules,onProgress,only){
   var entries=await zipList(file);
   if(onProgress) onProgress({phase:'strings'});
@@ -12436,6 +12485,7 @@ async function readFiltered(file,rules,onProgress,only){
     };
     var take=function(vals){
       scanned++;
+      if(vals===null) return;
       for(var k=0;k<st.use.length;k++){
         var cell=vals[st.use[k].ci];
         var v=cell==null?'':String(cell).trim().toLowerCase();
@@ -12453,7 +12503,17 @@ async function readFiltered(file,rules,onProgress,only){
       return true;
     };
 
+    var gate=function(inner,rn){
+      if(!st.decided||!st.use||!st.use.length) return true;
+      for(var k=0;k<st.use.length;k++){
+        var u=st.use[k]; if(!u.L) u.L=rdLetters(u.ci);
+        var v=String(rdCell(inner,u.L+rn,sst)).trim().toLowerCase();
+        if(!u.set[v]) return false;
+      }
+      return true;
+    };
     await streamSheet(file,entries,sh.path,sst,function(vals,n){
+      if(vals===null&&!st.decided) return;
       if(!st.decided){
         st.pre.push(vals);
         if(looksLikeHeader(vals)>=3||st.pre.length>=40) flushPre(st.pre.length>=40);
@@ -12461,8 +12521,8 @@ async function readFiltered(file,rules,onProgress,only){
       }
       take(vals);
     },function(n,b){
-      if(onProgress&&n%20000===0) onProgress({phase:'sheet',sheet:sh.name,rows:n,kept:rows.length});
-    });
+      if(onProgress&&(n-(st.lastP||0))>=20000){ st.lastP=n; onProgress({phase:'sheet',sheet:sh.name,rows:n,kept:rows.length}); }
+    },gate);
     if(!st.decided&&st.pre.length) flushPre(false);
     per.push({name:sh.name,kept:rows.length-st.before,missing:st.miss});
   }
@@ -14159,7 +14219,8 @@ function rtDoRead(kind){
   RT.busy=(kind==='ax'?'AX':'Billing')+': reading '+(only.length?only.join(', '):'the workbook')+' …';
   renderRtm();
   var rules=rtReadRules(kind);
-  readFiltered(file,rules,function(p){
+  var t0=Date.now();
+  readFilteredBg(file,rules,function(p){
     if(p.phase==='strings') RT.busy='Reading text table'+(p.n?' — '+fmt(p.n,0)+' entries':'')+' …';
     else if(p.rows!==undefined)
       RT.busy='Scanning '+p.sheet+' — '+fmt(p.rows,0)+' rows read, '+fmt(p.kept,0)+' kept';
@@ -14175,7 +14236,7 @@ function rtDoRead(kind){
     RT.files[kind]={name:file.name,wb:null,parsed:parsed,streamed:true};
     RT.map[kind]=rtAutoMap(parsed); RT.filt[kind]={};
     toast(res.rows.length
-      ? (kind==='ax'?'AX':'Billing')+': kept '+fmt(res.kept,0)+' of '+fmt(res.scanned,0)+' rows'
+      ? (kind==='ax'?'AX':'Billing')+': kept '+fmt(res.kept,0)+' of '+fmt(res.scanned,0)+' rows in '+((Date.now()-t0)/1000).toFixed(1)+'s'
       : 'No rows matched the read filter — see the panel');
     renderRtm();
   }).catch(function(err){
