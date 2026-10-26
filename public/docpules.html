@@ -730,7 +730,7 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .fin-kpi div{background:#fff;border:1px solid #E6E9EF;border-radius:14px;padding:12px 14px}
 .fin-kpi b{display:block;font-size:24px;font-weight:800;color:#15202E;font-variant-numeric:tabular-nums}.fin-kpi span{font-size:12px;color:#7A8699}
 .fin-warn{background:#FFF7ED;border:1px solid #FED7AA;color:#7C2D12;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:10px}
-.fin-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.fin-g{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 @media (max-width:1100px){.fin-g{grid-template-columns:1fr}}
 .fin-t{background:#fff;border:1px solid #E6E9EF;border-radius:16px;overflow:hidden;min-width:0}
 .fin-th{display:flex;gap:10px;align-items:baseline;padding:12px 16px;border-bottom:1px solid #EEF1F6}
@@ -744,6 +744,27 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .fin-mo{color:#64748B;font-size:11px}.fin-id{font-variant-numeric:tabular-nums;color:#334155}.fin-nm{font-weight:600;color:#15202E;white-space:normal!important;min-width:140px}
 .fin-site{display:inline-block;min-width:28px;text-align:center;font-weight:800;font-size:11.5px;border-radius:6px;padding:2px 6px;color:#0F172A}
 .fin-st{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px}.fin-st.ft{background:#C6E0F4;color:#1E3A5F}.fin-st.pt{background:#FFE699;color:#6B4E00}.fin-st.h{background:#E9D5FF;color:#5B21B6}.fin-st.o{background:#E7E6E6;color:#334155}
+.pd-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#FCE7F3;color:#9D174D;border:1px solid #F9A8D4;vertical-align:middle;letter-spacing:.02em;text-transform:none}
+.pd-note{display:flex;gap:10px;align-items:center;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#FDF2F8;border:1px solid #FBCFE8;font-size:13px;color:#831843}
+.pd-ic.sm{width:26px;height:26px;border-radius:8px;font-size:13px;flex:none}
+.pdw-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.pdw-d{border:1px solid #EEF1F6;border-radius:10px;padding:7px 4px;text-align:center;background:#FBFCFE}.pdw-d.on{background:#fff;border-color:#DCE3ED}
+.pdw-d>b{display:block;font-size:11.5px;color:#475569;margin-bottom:5px}
+@media (max-width:700px){.pdw-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.pd-card{border-radius:16px!important;overflow:hidden}
+.pd-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(135deg,#FDF2F8,#F5F3FF);flex-wrap:wrap}
+.pd-ic{width:38px;height:38px;border-radius:11px;background:#DB2777;color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px}
+.pd-tt{flex:1;min-width:240px;display:flex;flex-direction:column;gap:2px}.pd-tt b{font-size:15px;color:#831843}.pd-tt span{font-size:12.5px;color:#6B21A8}
+.pd-sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:12.5px;font-weight:600;color:#475569}.pd-sw input{display:none}
+.pd-sw i{width:38px;height:22px;border-radius:99px;background:#CBD5E1;position:relative;transition:.2s}.pd-sw i:after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.pd-sw input:checked+i{background:#DB2777}.pd-sw input:checked+i:after{left:19px}
+.pd-months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;padding:12px 18px 4px}
+.pd-m{font:inherit;border:1px solid #E6E9EF;border-radius:10px;background:#F8FAFC;padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:1px;color:#94A3B8;cursor:default}
+.pd-m b{font-size:12px}.pd-m small{font-size:10.5px}.pd-m.has{background:#fff;border-color:#F9A8D4;color:#9D174D;cursor:pointer}.pd-m.has:hover{background:#FDF2F8}.pd-m.on{background:#DB2777;border-color:#DB2777;color:#fff}
+.pd-sum{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:8px 18px 12px;font-size:12.5px}.pd-ok{color:#0F766E;font-weight:600}.pd-bad{color:#B45309;font-weight:600}
+.pd-t td,.pd-t th{text-align:center}.pd-t td.stick,.pd-t th.stick{text-align:left}
+.pd-d{display:inline-flex;gap:2px}.pd-s{font-size:10px;font-weight:700;padding:2px 4px;border-radius:5px;border:1px solid #E2E8F0;color:#CBD5E1}.pd-s.y{color:#0F172A;background:#ECFDF5;border-color:#6EE7B7}
+@media (max-width:900px){.pd-months{grid-template-columns:repeat(6,1fr)}}
 .sd{border:0!important;border-radius:18px!important;overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.06),0 0 0 2px #F59E0B33}
 .sd-top{display:flex;gap:14px;align-items:center;padding:18px 20px;background:linear-gradient(135deg,#FFFBEB,#FFF7ED);flex-wrap:wrap}
 .sd-ic{width:42px;height:42px;border-radius:12px;background:#F59E0B;color:#fff;display:grid;place-items:center;font-size:20px;font-weight:800}
@@ -820,7 +841,13 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .ms-clr{font:inherit;font-size:12px;border:0;background:transparent;color:#B91C1C;cursor:pointer;text-decoration:underline;padding:3px 6px}
 .ms-x{font-size:11px;font-weight:700;color:#0F766E}
 .card:has(.ms-pop){overflow:visible!important}
-.fin-bar-pg{padding:14px 16px 4px}#pg-master .fb select,#pg-summary .fb select{border-radius:999px;max-width:260px}#pg-master .fb .btn,#pg-summary .fb .btn{border-radius:999px}.fin-bar-pg input[type=search]{min-width:230px}
+.fin-bar-pg{padding:14px 16px 4px}
+.fin-t tfoot td{color:#0F172A!important;font-weight:700}
+.fin-t thead th.fin-sc{background:#24476B!important;color:#fff!important}
+.fin-t thead th.fin-tot{background:#1E3A8A!important;color:#fff!important}
+.fin-t tbody td.fin-sc{background:#F8FAFC;color:#0F172A!important;font-weight:600}
+.fin-t tbody td.fin-tot,.fin-t tfoot td.fin-tot{background:#EEF2FF;color:#1E3A8A!important;font-weight:800}
+.fin-tk .ms-toks{padding:0 0 10px;border:0}#pg-master .fb select,#pg-summary .fb select{border-radius:999px;max-width:260px}#pg-master .fb .btn,#pg-summary .fb .btn{border-radius:999px}.fin-bar-pg input[type=search]{min-width:230px}
 .fin-t td.n{color:#CBD5E1;font-variant-numeric:tabular-nums}.fin-t td.n.on{color:#15202E;font-weight:800}
 .fin-t tfoot td{background:#F1F4F8;font-weight:800;color:#15202E;border-top:2px solid #CBD5E1}
 .hol-l{display:flex;flex-wrap:wrap;gap:8px}
@@ -1491,6 +1518,111 @@ function parseMaster(wb,sheet){
           legend:parseLegend(wb,sheet,lastData+1)};
 }
 
+
+/* ---------------------------------------------------------------------------
+   Pedia: the 'Pedia Format' sheet holds one block per month (JULY, AUGUST …),
+   each with its own week for the J1 paediatric doctors. For a month that has a
+   block, that block is the doctor's week; every other month keeps the main
+   sheet. Rows are matched to the main sheet's J1 lines by name. */
+var PEDIA_MON=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+var PEDIA_BLK={AM:'(9-1)',MOR:'(9-1)',AF:'(1-5)',AFT:'(1-5)',PM:'(5-9)',EVE:'(5-9)'};
+function pediaSheet(wb){ return ((wb&&wb.SheetNames)||[]).filter(function(n){ return /pedia\s*format/i.test(n); })[0]||null; }
+function pediaIsJ1(site){ return /^(mc)?\s*j\s*1$|^mc\s*j?\s*1$/i.test(nz(site).replace(/\s+/g,' ')); }
+function parsePedia(wb){
+  var sh=pediaSheet(wb); if(!sh) return null;
+  var ws=wb.Sheets[sh]; if(!ws||!ws['!ref']) return null;
+  var rng=XLSX.utils.decode_range(ws['!ref']), r0=rng.s.r, c0=rng.s.c;
+  var g=grid(wb,sh), blocks=[], cur=null;
+  function rowOf(i){ return ((g[i]||[])).map(nz); }
+  for(var i=0;i<g.length;i++){
+    var row=rowOf(i), filled=row.filter(Boolean);
+    /* a month title: a row holding a month's name and nothing else */
+    if(filled.length===1){
+      var mt=/^([a-z]+)\.?\s*(\d{4})?$/i.exec(filled[0]);
+      var mi=mt? PEDIA_MON.indexOf(low(mt[1]).slice(0,3)) : -1;
+      if(mi>=0&&low(mt[1]).length>=3&&('january february march april may june july august september october november december'.indexOf(low(mt[1]))>=0)){
+        cur={m:mi,y:mt[2]? +mt[2] : null,title:filled[0],rows:[],hdr:null,done:false,xlRow:r0+i+1}; blocks.push(cur); continue; }
+    }
+    if(!cur||cur.done) continue;
+    var cName=-1,cSite=-1;
+    row.forEach(function(x,j){ if(cName<0&&/^doctors?$/i.test(x)) cName=j; if(cSite<0&&/^site$/i.test(x)) cSite=j; });
+    if(cName>=0&&cSite>=0){
+      /* day names sit on this row or the one above; slot labels on this row or the one below */
+      var hasDay=function(r){ return r.some(function(x){ return DAY_MAP.hasOwnProperty(x.toUpperCase().replace(/[^A-Z]/g,'')); }); };
+      var isLab=function(x){ return /^(MOR|AFT|EVE|AM|AF|PM)\b/i.test(x); };
+      var D=hasDay(row)? row : rowOf(i-1);
+      var L=row.some(isLab)? row : rowOf(i+1);
+      var slots=[], curDay=null;
+      for(var j=Math.max(cName,cSite)+1;j<Math.max(D.length,L.length);j++){
+        var lab=nz(D[j]).toUpperCase().replace(/[^A-Z]/g,'');
+        if(DAY_MAP.hasOwnProperty(lab)) curDay=DAY_MAP[lab]; else if(lab) curDay=null;
+        var sl=nz(L[j]);
+        if(curDay===null||!isLab(sl)) continue;
+        var key=sl.toUpperCase().match(/^(MOR|AFT|EVE|AM|AF|PM)/)[1];
+        var blk=mstBlock(sl)||mstBlock(PEDIA_BLK[key]);
+        slots.push({c:j,d:curDay,blk:blk,lab:key});
+      }
+      cur.hdr={cName:cName,cSite:cSite,cSpec:findCol(row,[/^specialty/i]),cSt:findCol(row,[/^ft\s*\/?\s*pt$/i]),slots:slots};
+      if(L!==row) i++;               /* the label row is not a doctor */
+      continue;
+    }
+    if(!cur.hdr) continue;
+    if(row.some(function(x){ return /^rooms?$/i.test(x); })){ cur.done=true; continue; }
+    var H=cur.hdr, name=nz(row[H.cName]), site=nz(row[H.cSite]);
+    if(!name||!/[a-z]/i.test(name)) continue;
+    var spans=[[],[],[],[],[],[],[]];
+    H.slots.forEach(function(sl){
+      var v=nz(row[sl.c]); if(!v||v.toUpperCase().indexOf('OPEN')<0) return;
+      var f=fillOf(ws[XLSX.utils.encode_cell({r:r0+i,c:c0+sl.c})]);
+      var sp=mstSpan(v,sl.blk)||(sl.blk? {f:sl.blk.f,t:sl.blk.t} : {f:null,t:null});
+      spans[sl.d].push({f:sp.f,t:sp.t,fill:f==='none'?'':f,lab:sl.lab});
+    });
+    cur.rows.push({name:name,site:site,spec:H.cSpec>=0? nz(row[H.cSpec]) : '',status:H.cSt>=0? nz(row[H.cSt]) : '',
+      j1:pediaIsJ1(site),spans:spans,xlRow:r0+i+1});
+  }
+  blocks=blocks.filter(function(b){ return b.hdr&&b.rows.length; });
+  return blocks.length? {sheet:sh,blocks:blocks} : null;
+}
+function pediaOn(){ return S.settings.pediaOn!==false; }
+/* turn the blocks into dated week records for the doctors they match */
+function pediaBuild(list){
+  S.pediaRecs=null; S.pediaStamp=''; S.pediaInfo=null;
+  try{
+    if(S.wbM&&S._pediaWb!==S.wbM){ S.pedia=parsePedia(S.wbM); S._pediaWb=S.wbM; }
+    if(!S.wbM){ S.pedia=null; S._pediaWb=null; }
+  }catch(e){ S.pedia=null; }
+  var P=S.pedia; if(!P) return;
+  var Y=+S.settings.year, H=num(S.settings.hrs)||4;
+  var ix={}, ix2={};
+  (list||[]).forEach(function(t){ if(!t||!pediaIsJ1(t.site)) return;
+    ix[nameKey(t.name)]=t; ix2[nameKey(nz(t.name).replace(/\(.*?\)/g,'').replace(/^dr\.?\s*/i,''))]=t; });
+  function match(n){ return ix[nameKey(n)]||ix2[nameKey(nz(n).replace(/\(.*?\)/g,'').replace(/^dr\.?\s*/i,''))]||null; }
+  var recs={}, seq=0, info={sheet:P.sheet,months:[],matched:{},unmatched:{},rows:{}};
+  P.blocks.forEach(function(b){
+    var y=b.y||Y; if(y!==Y) return;
+    var last=new Date(Date.UTC(y,b.m+1,0)).getUTCDate();
+    var from=y+'-'+String(b.m+1).padStart(2,'0')+'-01', to=y+'-'+String(b.m+1).padStart(2,'0')+'-'+String(last).padStart(2,'0');
+    info.months.push(b.m);
+    b.rows.forEach(function(r){
+      if(!r.j1) return;
+      var t=match(r.name);
+      if(!t){ info.unmatched[r.name]=1; return; }
+      info.matched[t.key]=t.name;
+      (info.rows[b.m]=info.rows[b.m]||[]).push({key:t.key,name:t.name,spans:r.spans});
+      for(var d=0;d<7;d++){
+        var keep=r.spans[d].filter(function(sp){ return colorCounts(sp.fill||'none'); });
+        var hrs=keep.reduce(function(a,sp){ return a+((sp.f!==null&&sp.t!==null)? (sp.t-sp.f)/60 : H); },0);
+        (recs[t.key]=recs[t.key]||[]).push({id:'pd'+(++seq),key:t.key,kind:'day',day:d,sessions:keep.length,
+          hours:hrs,from:from,to:to,note:'Pedia Format · '+b.title});
+      }
+    });
+  });
+  S.pediaInfo=info;
+  if(!pediaOn()) return;
+  S.pediaRecs=recs;
+  S.pediaStamp=info.months.join(',')+'|'+Object.keys(recs).length+'|'+seq+'|'+JSON.stringify(S.settings.colorRules||{})+'|'+H;
+}
+
 /* A capacity sheet often carries three date-ish columns — the request date, a
    label like "5-Sep", and the clinic date written out. Matching the header is
    not enough, so every candidate is tried against the rows and the one that
@@ -1888,11 +2020,12 @@ function compute(){
   });
 
   indexByBase();
+  try{ pediaBuild(order.map(function(k){ return byKey[k]; })); }catch(e){ S.pediaRecs=null; S.pediaStamp=''; }
 
   /* monthly buckets */
   function blank(){ var a=[]; for(var m=0;m<12;m++) a.push({s:0,c:0,o:0}); return a; }
   Object.keys(byKey).forEach(function(k){
-    var t=byKey[k]; t.m=blank();
+    var t=byKey[k]; t.m=blank(); t.reqN=0; t.reqM={};
     var only=(S.dayFilter===''||S.dayFilter===null)? null : +S.dayFilter;
     t.whole=wholeSession(t.key);
     /* how often each day actually runs */
@@ -1955,6 +2088,9 @@ function compute(){
     var pick=(side==='c')? S.closeR : S.openR;
     if(Object.keys(pick).length&&!pick[k]){ r._used=false; r._why='reason not selected for '+
       (side==='c'?'Closed':'Opened'); return; }
+    /* the Doctors page's Sub reason filter narrows Closed and Opened the same way */
+    var subPick=S.flt&&S.flt.subM; if(subPick&&Object.keys(subPick).length&&!subPick[nz(r.sub)]){
+      r._used=false; r._why='sub reason not in the Doctors page filter'; return; }
     stats.counted++;
     /* A request carries the doctor's name, so when a branch has more than one
        clinic for the same ID the request goes to the clinic it names. Without a
@@ -1997,6 +2133,9 @@ function compute(){
     }
     if(!t.fromMaster) stats.unmatchedRows[kk]=(stats.unmatchedRows[kk]||0)+1;
     t.m[r.date.m][side]+=w; r._used=true;
+    t.reqN=(t.reqN||0)+1; (t.reqM=t.reqM||{})[r.date.m]=(t.reqM[r.date.m]||0)+1;
+    /* an H doctor's allowance is spent by Annual Leave closures only */
+    if(side==='c'&&/annual\s*leave/i.test(nz(r.sub)+' '+nz(r.main))) t.m[r.date.m].cAL=(t.m[r.date.m].cAL||0)+w;
 
     var ra=reasonAgg[k]||(reasonAgg[k]={main:r.main,sub:r.sub,c:0,o:0,n:0});
     ra[side]+=w; ra.n++;
@@ -2039,15 +2178,17 @@ function compute(){
     t.yt=t.ys-t.yc+t.yo;
     t.hybrid=isHybrid(t.id,t.site);
   });
-  /* A hybrid doctor's free closures are spent in date order. What is closed
-     within the allowance does not reduce the total; the rest does. */
+  /* A hybrid doctor's free closures are spent in date order. Only closures
+     filed as Annual Leave use the allowance; while it lasts they do not reduce
+     the total. Every other closure counts against him as usual. */
   rows.forEach(function(t){
-    t.allow=0; t.allowUsed=0; t.allowLeft=0;
+    t.allow=0; t.allowUsed=0; t.allowLeft=0; t.yAL=0;
     if(!t.hybrid) return;
     t.allow=hybAllowance(t);
     var left=t.allow;
     for(var m=0;m<12;m++){
-      var c=t.m[m].c, free=Math.min(left,c);
+      var c=t.m[m].c, al=Math.min(c,t.m[m].cAL||0), free=Math.min(left,al);
+      t.yAL+=al;
       t.m[m].cFree=free; t.m[m].cRaw=c;
       t.m[m].c=c-free; left-=free;
       t.m[m].t=t.m[m].s-t.m[m].c+t.m[m].o;
@@ -2184,7 +2325,7 @@ function srvPushSettings(){
        were each saved to nothing. The names below are the ones the app uses. */
     ['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -2525,9 +2666,9 @@ function mstWeeklyFromSpans(spans,week){
 function hybChip(t){
   if(!t.hybrid) return '';
   var left=t.allowLeft, counted=t.yc||0;
-  return '<span class="hyb" title="'+esc('Allowed to close '+fmt(t.allow)+' sessions a year. '+
+  return '<span class="hyb" title="'+esc('Allowed '+fmt(t.allow)+' sessions of Annual Leave a year. Only Annual Leave closures use it. '+
       fmt(t.allowUsed)+' used, '+fmt(left)+' left'+
-      (counted>0.0001? '. '+fmt(counted)+' closed beyond the allowance, which counts against him.':'.'))+'">'+
+      (counted>0.0001? '. '+fmt(counted)+' closed sessions count against him (other reasons, or Annual Leave beyond the allowance).':'.'))+'">'+
     '<b>H</b>'+
     '<button class="hb" data-hyb="'+esc(t.key)+'|-" title="one fewer">−</button>'+
     '<span class="hn">'+fmt(t.allow)+'</span>'+
@@ -2961,6 +3102,14 @@ function mgChip(list,b,attrs,title){
     (segs.length? ' style="background:'+bg+';color:'+MG_TX[k]+';border-color:'+MG_ON[k]+'"' : '')+
     ' title="'+esc(title||'')+'">'+k+'</span>';
 }
+/* the block a session's own time label belongs under: the first one it touches */
+function mgFirstBlock(sp){ for(var b=0;b<3;b++) if(mgSegs([sp],b).length) return b; return -1; }
+/* a chip with its own time label directly beneath it, so a label can never
+   drift under the neighbouring block */
+function mgCol(chip,labels){
+  if(!labels) return chip;
+  return '<span class="mg-col">'+chip+'<small>'+labels+'</small></span>';
+}
 function mgBlocksOf(sp){
   return [0,1,2].filter(function(b){ return mgSegs([sp],b).length; }).map(function(b){ return DPG_BLK[b].k; });
 }
@@ -3095,6 +3244,7 @@ function mgeWire(){
   if(bg) bg.onmousedown=function(e){ if(e.target===bg){ S.mEdit=''; S.mDraft=null; S.mgCopy=''; renderMaster(); } };
 }
 if(typeof document!=='undefined') document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&S&&S.msOpen) return;
   if(e.key==='Escape'&&S&&S.mEdit&&el('mgeBox')){ S.mEdit=''; S.mDraft=null; S.mgCopy=''; renderMaster(); }
   else if(e.key==='Escape'&&S&&S.otAdd&&el('otBox')){ S.otAdd=null; S.otEdit=null; renderOT(); } });
 /* ==================================================== master schedule versions
@@ -3487,6 +3637,12 @@ function renderMaster(){
         '<button type="button" class="btn sm pri" id="mvPrevX">Back to current</button></div>';
     }
   }
+  /* a chosen month shows each Pedia doctor's week for that month */
+  if(S.mvPrev&&S.mView!=='day'){
+    rows=pdOverlay(rows,S.mvPrev.y,S.mvPrev.m);
+    var pdn=pdNote(rows,S.mvPrev.y,S.mvPrev.m);
+    if(pdn) prevNote=prevNote.replace('Showing the current master.','Showing the current master, with each Pedia doctor\'s '+MONTHS_EN[S.mvPrev.m]+' week.')+pdn;
+  }
   var sites={},depts={},specs={},types={};
   S.result.rows.forEach(function(t){ if(!t.fromMaster) return;
     if(t.site) sites[t.site]=1; if(t.dept) depts[t.dept]=1;
@@ -3515,7 +3671,7 @@ function renderMaster(){
   var h='';
   if(S.pendingDiff) h+=sdPanelHTML(S.pendingDiff);
   else h+=sdKeptHTML();
-  h+=mvCardHTML()+prevNote;
+  h+=mvCardHTML()+pdCardHTML()+prevNote;
   h+='<div class="card"><h3>Master schedule <span class="tag">'+fmt(rows.length,0)+' doctors</span>'+
     '<span class="tag">'+fmt(totSlots,0)+' sessions a week</span>'+
     '<span class="tag">'+fmt(totHours,0)+' hours a week</span>'+
@@ -3621,7 +3777,8 @@ function renderMaster(){
       : '');
 
   if(S.mView==='day'){
-    h+=dayBoard(rows)+'</div>';
+    var dbp=dbParse(S.mDate||dbIso(new Date())), dbRows=dbp? pdOverlay(rows,dbp.y,dbp.m) : rows;
+    h+=(dbp? pdNote(dbRows,dbp.y,dbp.m) : '')+dayBoard(dbRows)+'</div>';
     paint('pg-master',(S.noteHide?'':noteCard())+h,wireMaster);
     return;
   }
@@ -3645,22 +3802,23 @@ function renderMaster(){
       var blocks=mgBlocks(list,d);
       var odd=list.filter(function(sp){ return S.mTimes==='all' || !mstIsStd(sp); });
       var many=list.filter(function(sp){ return sp.n>1; });
+      var anyLab=list.some(function(sp){ return odd.indexOf(sp)>=0||sp.n>1; });
       cells+='<td class="dpg-dy">'+blocks.map(function(b){
           var B=DPG_BLK[b], inB=list.filter(function(sp){ return mgSegs([sp],b).length; });
           var hx=inB.length? nz(inB[0].fill).toUpperCase() : '';
           var ttl=DPG_DAYN[d]+' '+B.n+': '+(inB.length? inB.map(function(sp){
               return mstFmt(sp.f)+'–'+mstFmt(sp.t)+(sp.n>1?' ×'+sp.n:'')+(nz(sp.fill)? ' · '+(colorName(nz(sp.fill).toUpperCase())||('#'+sp.fill)) : ''); }).join(', ') : 'off')+
             ' — right-click to edit';
-          return mgChip(inB,b,'data-mrc="'+esc(t.key)+'"',ttl); }).join('')+
-        (odd.length||many.length? '<div class="mg-t">'+list.filter(function(sp){ return odd.indexOf(sp)>=0||sp.n>1; }).map(function(sp){
-            return '<span>'+esc(mstCellHrs(sp))+(sp.n>1?' ×'+sp.n:'')+'</span>'; }).join('')+'</div>' : '')+
+          var labs=list.filter(function(sp){ return (odd.indexOf(sp)>=0||sp.n>1)&&mgFirstBlock(sp)===b; })
+            .map(function(sp){ return esc(mstCellHrs(sp))+(sp.n>1?' ×'+sp.n:''); }).join('<br>');
+          return mgCol(mgChip(inB,b,'data-mrc="'+esc(t.key)+'"',ttl),labs||(anyLab?'&nbsp;':'')); }).join('')+
         (isAlt? '<div class="altn">'+esc(altLabel((t.altSpec||[])[d]))+'</div>':'')+
         '</td>';
     }
     h+='<tr class="click" data-mkey="'+esc(t.key)+'">'+
       '<td>'+finSiteTag(t.site)+'</td>'+
       '<td><div class="dpg-nm"'+(hasLeft(t)?' style="text-decoration:line-through;opacity:.65"':'')+'>'+
-        esc(t.name)+statusDot(t.fName,'Name')+'</div>'+
+        esc(t.name)+statusDot(t.fName,'Name')+(t.pdM!==undefined? ' <span class="pd-tag" title="This row shows the '+esc(MONTHS_EN[t.pdM])+' week from the Pedia Format sheet">'+MONTHS_EN[t.pdM].slice(0,3)+' schedule</span>' : '')+'</div>'+
         '<div class="dpg-sub">'+finStTag(t)+' '+esc(t.dept||'')+(t.id? ' · '+esc(t.id) : '')+
         (hasLeft(t)?' <span class="pill" style="background:#FDECEC;color:var(--loss)">left</span>':'')+
         (t.added?' <span class="pill" style="background:var(--ok-bg);color:var(--teal)">added</span>':'')+
@@ -3949,6 +4107,7 @@ function wireMaster(){
   var mm=el('meMore'); if(mm) mm.ontoggle=function(){ S.mMore=mm.open; };
   mgeWire();
   mvWire();
+  pdWire();
   /* view switches, the colour key and the day board's date controls */
   function on(id,fn){ var n=el(id); if(n) n.onclick=fn; }
   on('mvWeek',function(){ S.mView='week'; renderMaster(); });
@@ -4746,6 +4905,8 @@ function filtered(){
     if(!picked(f.deptM,t.dept)) return false;
     if(!picked(f.specM,t.spec)) return false;
     if(!picked(f.statusM,typeOf(t))) return false;
+    if(f.subM&&Object.keys(f.subM).length){ var sm=selMonth();
+      if(!(sm===null? t.reqN : (t.reqM||{})[sm])) return false; }
     if(f.site&&t.site!==f.site) return false;
     if(f.dept&&t.dept!==f.dept) return false;
     if(f.spec&&t.spec!==f.spec) return false;
@@ -5075,8 +5236,7 @@ function valFilterBar(V){
   }
   return '<div class="fb">'+
     '<input type="search" id="vfQ" placeholder="Search doctor, ID, department…" value="'+esc(f.q||'')+'">'+
-    sel('site','Site',Object.keys(sites).sort())+
-    sel('dept','Department',Object.keys(depts).sort())+
+    msBtn('v','status')+msBtn('v','site')+msBtn('v','dept')+msBtn('v','spec')+
     '<select data-vf="mark"><option value="">Marks: any</option>'+
       ['E','R','B','AB'].map(function(k){
         return '<option value="'+k+'"'+(f.mark===k?' selected':'')+'>has '+k+' · '+VAL_STYLE[k].t+'</option>'; }).join('')+
@@ -5088,7 +5248,7 @@ function valFilterBar(V){
     '<div class="spacer"></div>'+
     '<span class="hint">'+fmt((V.rows||[]).length,0)+' of '+fmt(V.all||0,0)+' doctors</span>'+
     '<button class="btn sm" id="vfClear">Clear</button>'+
-    '</div>';
+    '</div>'+msTokens('v');
 }
 function valEyePanel(){
   if(!S.valEye) return '';
@@ -5344,7 +5504,10 @@ function finBuild(m){
       var v=bkPlanOn(t,y,m,+h.d.slice(8,10)); if(!(v>0)) return;
       var r=row(t.id,t.site,t); r[c]+=v; }); });
   var out=order.map(function(k){ var r=by[k]; r.fix+=r.fixManual;
-    ['ex','nat','eid','fix'].forEach(function(f){ r[f]=Math.round(r[f]*100)/100; });
+    /* the month as the Doctors page counts it: planned, closed, opened, net */
+    var mm=r.t&&r.t.m&&r.t.m[m];
+    r.ses=mm? mm.s||0 : 0; r.cl=mm? mm.c||0 : 0; r.op=mm? mm.o||0 : 0; r.tot=mm? (mm.t!==undefined? mm.t : r.ses-r.cl+r.op) : 0;
+    ['ex','nat','eid','fix','ses','cl','op','tot'].forEach(function(f){ r[f]=Math.round(r[f]*100)/100; });
     r.grp=r.t? finGroup(r.t) : (nz(r.status).toUpperCase()==='PT'? 'PT' : nz(r.status).toUpperCase()==='FT'? 'FT' : 'Other');
     r.st=r.t? (r.t.hybrid? 'H' : nz(r.t.status).toUpperCase()) : nz(r.status).toUpperCase();
     return r; })
@@ -5352,7 +5515,16 @@ function finBuild(m){
     .sort(function(a,b){ return a.site<b.site? -1 : a.site>b.site? 1 : (low(a.name)<low(b.name)? -1 : 1); });
   return {y:y,m:m,rows:out,hols:hols,unnamed:unnamed,month:MONTHS_EN[m].slice(0,3)+' ( '+y+')'};
 }
-var FIN_COLS=['Month','Site','EMP Status','EMP ID','Doctor','Extra sessions','National Day','Eid','Fixed sessions'];
+var FIN_COLS=['Month','Site','EMP Status','EMP ID','Doctor','Session','Close','Open','Extra sessions','National Day','Eid','Fixed sessions','Total'];
+var FIN_NUM=['ses','cl','op','ex','nat','eid','fix','tot'];
+/* which rows the pop-up's filters keep; the export uses the same */
+function finPass(r){
+  var f=S.finF||{}, q=low((S.fin&&S.fin.q)||''), t=r.t||{};
+  if(S.fin&&S.fin.site&&r.site!==S.fin.site) return false;
+  if(!picked(f.siteM,r.site)||!picked(f.statusM,r.st)||!picked(f.deptM,t.dept)||!picked(f.specM,t.spec)) return false;
+  if(q&&low(r.name).indexOf(q)<0&&low(r.id).indexOf(q)<0) return false;
+  return true;
+}
 /* ---- the Excel file: two tables side by side, coloured like finance's ---- */
 function finXlsx(F){
   var groups=['FT','PT','Other'].filter(function(g){ return g!=='Other'||F.rows.some(function(r){ return r.grp==='Other'; }); });
@@ -5386,19 +5558,19 @@ function finXlsx(F){
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
     '<cellXfs count="'+xfs.length+'">'+xfs.join('')+'</cellXfs>'+
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
-  var rows={}, tables=[], widths=[12,7,12,11,32,15,14,8,15];
+  var NC=FIN_COLS.length, GAP=NC+1, rows={}, tables=[], widths=[12,7,12,11,32,10,9,9,15,14,8,15,10];
   function put(r,c,v,s){ (rows[r]=rows[r]||[]).push({c:c,v:v,s:s}); }
   groups.forEach(function(g,gi){
-    var c0=gi*10, list=F.rows.filter(function(r){ return r.grp===g; });
+    var c0=gi*GAP, list=F.rows.filter(function(r){ return r.grp===g; });
     put(1,c0,g,1);
     FIN_COLS.forEach(function(h,j){ put(2,c0+j,h,2); });
     list.forEach(function(r,i){ var rr=3+i;
       put(rr,c0,F.month,5); put(rr,c0+1,r.site,siteXf[r.site]); put(rr,c0+2,r.st||g,r.st==='PT'?7:(r.st==='FT'||r.st==='H')?6:8);
       put(rr,c0+3,r.id.charAt(0)==='~'?'':(/^\d+$/.test(r.id)? +r.id : r.id),4); put(rr,c0+4,r.name,3);
-      put(rr,c0+5,r.ex,4); put(rr,c0+6,r.nat,4); put(rr,c0+7,r.eid,4); put(rr,c0+8,r.fix,4); });
+      FIN_NUM.forEach(function(f,j){ put(rr,c0+5+j,r[f]||0,4); }); });
     var last=2+Math.max(1,list.length);
-    if(!list.length) for(var j=0;j<9;j++) put(3,c0+j,'',j===4?3:4);
-    tables.push({name:g+'_Table',ref:col(c0)+'2:'+col(c0+8)+last});
+    if(!list.length) for(var j=0;j<NC;j++) put(3,c0+j,'',j===4?3:4);
+    tables.push({name:g+'_Table',ref:col(c0)+'2:'+col(c0+NC-1)+last});
   });
   var sd='';
   Object.keys(rows).map(Number).sort(function(a,b){ return a-b; }).forEach(function(r){
@@ -5406,8 +5578,8 @@ function finXlsx(F){
       var ref=col(z.c)+r;
       if(typeof z.v==='number') return '<c r="'+ref+'" s="'+z.s+'"><v>'+z.v+'</v></c>';
       return '<c r="'+ref+'" s="'+z.s+'" t="inlineStr"><is><t>'+x(z.v)+'</t></is></c>'; }).join('')+'</row>'; });
-  var cols='<cols>'+groups.map(function(g,gi){ return widths.map(function(w,j){ var n=gi*10+j+1; return '<col min="'+n+'" max="'+n+'" width="'+w+'" customWidth="1"/>'; }).join('')+
-    (gi<groups.length-1? '<col min="'+(gi*10+10)+'" max="'+(gi*10+10)+'" width="4" customWidth="1"/>' : ''); }).join('')+'</cols>';
+  var cols='<cols>'+groups.map(function(g,gi){ return widths.map(function(w,j){ var n=gi*GAP+j+1; return '<col min="'+n+'" max="'+n+'" width="'+w+'" customWidth="1"/>'; }).join('')+
+    (gi<groups.length-1? '<col min="'+(gi*GAP+GAP)+'" max="'+(gi*GAP+GAP)+'" width="4" customWidth="1"/>' : ''); }).join('')+'</cols>';
   var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
     '<sheetViews><sheetView workbookViewId="0"><pane ySplit="2" topLeftCell="A3" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'+
     '<sheetFormatPr defaultRowHeight="15"/>'+cols+'<sheetData>'+sd+'</sheetData>'+
@@ -5416,7 +5588,7 @@ function finXlsx(F){
     '<tableParts count="'+tables.length+'">'+tables.map(function(t,i){ return '<tablePart r:id="rId'+(i+1)+'"/>'; }).join('')+'</tableParts></worksheet>';
   var tableXml=tables.map(function(t,i){
     return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<table xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" id="'+(i+1)+'" name="'+t.name+'" displayName="'+t.name+'" ref="'+t.ref+'" totalsRowShown="0">'+
-      '<autoFilter ref="'+t.ref+'"/><tableColumns count="9">'+FIN_COLS.map(function(h,j){ return '<tableColumn id="'+(j+1)+'" name="'+x(h)+'"/>'; }).join('')+'</tableColumns>'+
+      '<autoFilter ref="'+t.ref+'"/><tableColumns count="'+FIN_COLS.length+'">'+FIN_COLS.map(function(h,j){ return '<tableColumn id="'+(j+1)+'" name="'+x(h)+'"/>'; }).join('')+'</tableColumns>'+
       '<tableStyleInfo showFirstColumn="0" showLastColumn="0" showRowStripes="0" showColumnStripes="0"/></table>'; });
   var files={
     '[Content_Types].xml':'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
@@ -5450,33 +5622,33 @@ function finHTML(){
   if(!S.fin) return '';
   var F=finBuild(S.fin.m); if(!F) return '';
   S.finLast=F;
-  var q=low(S.fin.q||''), fs=S.fin.site||'';
-  var rows=F.rows.filter(function(r){ return (!fs||r.site===fs)&&(!q||low(r.name).indexOf(q)>=0||low(r.id).indexOf(q)>=0); });
+  var rows=F.rows.filter(finPass);
   var sites=[]; F.rows.forEach(function(r){ if(sites.indexOf(r.site)<0) sites.push(r.site); });
   function sum(l,f){ return Math.round(l.reduce(function(a,r){ return a+r[f]; },0)*100)/100; }
   function tbl(g){
     var l=rows.filter(function(r){ return r.grp===g; });
     if(g==='Other'&&!l.length) return '';
     return '<div class="fin-t"><div class="fin-th"><b>'+g+'</b><span>'+l.length+' doctor'+(l.length===1?'':'s')+'</span></div>'+
-      '<div class="fin-tw"><table><thead><tr>'+['Month','Site','Status','EMP ID','Doctor','Extra','National Day','Eid','Fixed'].map(function(c,i){ return '<th'+(i>=5?' class="n"':'')+' title="'+esc(FIN_COLS[i])+'">'+c+'</th>'; }).join('')+'</tr></thead><tbody>'+
+      '<div class="fin-tw"><table><thead><tr>'+['Month','Site','Status','EMP ID','Doctor','Session','Close','Open','Extra','National Day','Eid','Fixed','Total'].map(function(c,i){ return '<th'+(i>=5?' class="n'+(i===12?' fin-tot':'')+(i>=5&&i<=7?' fin-sc':'')+'"':'')+' title="'+esc(FIN_COLS[i])+'">'+c+'</th>'; }).join('')+'</tr></thead><tbody>'+
       (l.length? l.map(function(r){
         return '<tr><td class="fin-mo">'+esc(F.month)+'</td>'+
           '<td><span class="fin-site" style="background:#'+finSiteHex(r.site)+'">'+esc(r.site)+'</span></td>'+
           '<td><span class="fin-st '+(r.st==='PT'?'pt':'ft')+'">'+esc(r.st||g)+'</span></td>'+
           '<td class="fin-id">'+esc(r.id.charAt(0)==='~'?'—':r.id)+'</td><td class="fin-nm">'+esc(r.name)+'</td>'+
-          ['ex','nat','eid','fix'].map(function(f){ return '<td class="n'+(r[f]?' on':'')+'">'+(r[f]? fmt(r[f]) : '0')+'</td>'; }).join('')+'</tr>'; }).join('')
-        : '<tr><td colspan="9" class="fin-empty">Nobody in '+g+' this month.</td></tr>')+
-      '</tbody><tfoot><tr><td colspan="5">Total</td>'+['ex','nat','eid','fix'].map(function(f){ return '<td class="n">'+fmt(sum(l,f))+'</td>'; }).join('')+'</tr></tfoot></table></div></div>'; }
+          FIN_NUM.map(function(f){ return '<td class="n'+(f==='tot'?' fin-tot':'')+(f==='ses'||f==='cl'||f==='op'?' fin-sc':'')+(r[f]&&f!=='ses'&&f!=='tot'?' on':'')+'">'+
+            (f==='cl'&&r[f]? '−'+fmt(r[f]) : f==='op'&&r[f]? '+'+fmt(r[f]) : r[f]? fmt(r[f]) : '0')+'</td>'; }).join('')+'</tr>'; }).join('')
+        : '<tr><td colspan="'+FIN_COLS.length+'" class="fin-empty">Nobody in '+g+' this month.</td></tr>')+
+      '</tbody><tfoot><tr><td colspan="5">Total</td>'+FIN_NUM.map(function(f){ return '<td class="n'+(f==='tot'?' fin-tot':'')+'">'+fmt(sum(l,f))+'</td>'; }).join('')+'</tr></tfoot></table></div></div>'; }
   var natN=F.hols.filter(function(h){ return holCat(h.n)==='nat'; }).length, eidN=F.hols.filter(function(h){ return holCat(h.n)==='eid'; }).length;
   return '<div class="mge-bg" id="finBg"><div class="mge fin" id="finBox" role="dialog" aria-label="Finance report">'+
     '<div class="fin-hd"><div><div class="dsh-k" style="color:#A5B4FC">Finance</div><h2>Monthly sessions for payroll</h2>'+
       '<p>Extra sessions as Paid extra pays them · sessions on National Day and Eid · fixed OT sessions.</p></div>'+
       '<button type="button" class="mge-cl" id="finClose" style="background:rgba(255,255,255,.14);color:#fff">✕</button></div>'+
     '<div class="fin-bar"><select id="finM">'+MONTHS_EN.map(function(mn,i){ return '<option value="'+i+'"'+(i===F.m?' selected':'')+'>'+mn+' '+F.y+'</option>'; }).join('')+'</select>'+
-      '<div class="fin-sites"><button type="button" class="db2-fc'+(fs?'':' on')+'" data-fins="">All branches</button>'+
-        sites.map(function(s){ return '<button type="button" class="db2-fc'+(fs===s?' on':'')+'" data-fins="'+esc(s)+'"><i style="background:#'+finSiteHex(s)+'"></i>'+esc(s)+'</button>'; }).join('')+'</div>'+
+      msBtn('f','status')+msBtn('f','site')+msBtn('f','dept')+msBtn('f','spec')+
       '<input type="search" id="finQ" placeholder="Search doctor or ID" value="'+esc(S.fin.q||'')+'">'+
       '<div style="flex:1"></div><button type="button" class="btn pri" id="finX">↓ Export Excel</button></div>'+
+    (function(){ var tk=msTokens('f'); return tk? '<div class="fin-tk">'+tk+'</div>' : ''; })()+
     '<div class="fin-kpi">'+
       '<div><b>'+fmt(sum(rows,'ex'))+'</b><span>extra sessions</span></div>'+
       '<div><b>'+fmt(sum(rows,'nat'))+'</b><span>on National Day · '+natN+' day'+(natN===1?'':'s')+'</span></div>'+
@@ -5500,7 +5672,7 @@ function finRender(){
   var sy=el('finBox')? el('finBox').scrollTop : 0, act=document.activeElement&&document.activeElement.id;
   host.innerHTML=dpgStyle()+finHTML();
   var bx=el('finBox'); if(bx) bx.scrollTop=sy;
-  if(act==='finQ'){ var qi=el('finQ'); if(qi){ qi.focus(); qi.setSelectionRange(qi.value.length,qi.value.length); } }
+  if(act==='finQ'||act==='msQ'){ var qi=el(act); if(qi){ qi.focus(); try{ qi.setSelectionRange(qi.value.length,qi.value.length); }catch(e){} } }
   function close(){ S.fin=null; finRender(); }
   var c=el('finClose'); if(c) c.onclick=close;
   var bg=el('finBg'); if(bg) bg.onmousedown=function(e){ if(e.target===bg) close(); };
@@ -5510,11 +5682,9 @@ function finRender(){
     b.onclick=function(){ S.fin.site=b.getAttribute('data-fins'); finRender(); }; });
   var xb=el('finX'); if(xb) xb.onclick=function(){
     var F=S.finLast; if(!F) return;
-    var fs=S.fin.site, q=low(S.fin.q||'');
-    finExport({y:F.y,m:F.m,month:F.month,hols:F.hols,unnamed:F.unnamed,
-      rows:F.rows.filter(function(r){ return (!fs||r.site===fs)&&(!q||low(r.name).indexOf(q)>=0||low(r.id).indexOf(q)>=0); })}); };
+    finExport({y:F.y,m:F.m,month:F.month,hols:F.hols,unnamed:F.unnamed,rows:F.rows.filter(finPass)}); };
 }
-if(typeof document!=='undefined') document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S&&S.fin){ S.fin=null; finRender(); } });
+if(typeof document!=='undefined') document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S&&S.fin&&!S.msOpen){ S.fin=null; finRender(); } });
 function renderSummary(){
   dpnApply();
   if(!S.result){ el('pg-summary').innerHTML=emptyState(); return; }
@@ -5527,7 +5697,7 @@ function renderSummary(){
         MONTHS_EN.map(function(x,i){ return '<option value="'+i+'"'+(S.flt.month===String(i)?' selected':'')+'>'+esc(M[i])+' '+R.year+'</option>'; }).join('')+'</select>',
       search:'<input type="search" id="q" placeholder="'+esc(T('search'))+'" value="'+escv(S.flt.q)+'">'})+
     '<div class="fb">'+
-    msBtn('d','dept')+msBtn('d','spec')+msBtn('d','status')+
+    msBtn('d','dept')+msBtn('d','spec')+msBtn('d','status')+msBtn('d','sub')+
     '<select id="f_day"><option value="">Day: all</option>'+
       MST_DAYS.map(function(d,i){ return '<option value="'+i+'"'+(S.dayFilter===String(i)?' selected':'')+
         '>'+esc(d)+' only</option>'; }).join('')+'</select>'+
@@ -5683,7 +5853,7 @@ function renderSummary(){
   Array.prototype.forEach.call(document.querySelectorAll('#pg-summary [data-vf]'),function(sl){
     sl.onchange=function(){ S.vf[sl.getAttribute('data-vf')]=sl.value; renderSummary(); }; });
   var vfc=el('vfClear');
-  if(vfc) vfc.onclick=function(){ S.vf={q:'',site:'',dept:'',mark:'',only:''}; renderSummary(); };
+  if(vfc) vfc.onclick=function(){ S.vf={q:'',site:'',dept:'',mark:'',only:'',siteM:{},deptM:{},specM:{},statusM:{}}; renderSummary(); };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-summary [data-veye]'),function(b){
     b.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation();
       S.valEye=b.getAttribute('data-veye'); S.valEyeAll=false; renderSummary(); }; });
@@ -5765,14 +5935,21 @@ function finStTag(t){ var s=t&&t.hybrid? 'H' : nz(t&&t.status).toUpperCase();
    need (the page updates as you tick), type to find, "only" to jump to one.
    Picks show as chips you can remove with ×. Nothing picked = everything.
    Filters only hide rows; no count is changed. */
-var MS_HEAD={site:'Branch',dept:'Department',spec:'Specialty',status:'Type',day:'Works on'};
+var MS_HEAD={site:'Branch',dept:'Department',spec:'Specialty',status:'Status',day:'Works on',sub:'Sub reason'};
 var MS_DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-function msObj(sc){ return sc==='m'? S.mf : S.flt; }
+function msObj(sc){ if(sc==='v') return (S.vf=S.vf||{}); if(sc==='f') return (S.finF=S.finF||{}); return sc==='m'? S.mf : S.flt; }
 function msSet(sc,k){ var o=msObj(sc); if(!o[k+'M']||typeof o[k+'M']!=='object') o[k+'M']={}; return o[k+'M']; }
 function msLab(k,v){ return k==='day'? (MS_DAY[+v]||v) : v; }
 function msOpts(sc,k){
   var rows=S.result? S.result.rows : [], cnt={};
   if(sc==='m') rows=rows.filter(function(t){ return t.fromMaster; });
+  if(sc==='f'&&S.finLast){ var fc={};
+    S.finLast.rows.forEach(function(r){ var v=k==='status'? r.st : k==='site'? r.site : (r.t||{})[k]; if(v) fc[v]=(fc[v]||0)+1; });
+    return Object.keys(fc).sort().map(function(v){ return {v:v,l:v,n:fc[v]}; }); }
+  if(k==='sub'){ var y=+S.settings.year, sc2={};
+    ((S.capacity&&S.capacity.rows)||[]).forEach(function(r){ if(!r.date||r.date.y!==y) return;
+      var v=nz(r.sub); if(v) sc2[v]=(sc2[v]||0)+1; });
+    return Object.keys(sc2).sort(function(a,b){ return low(a)<low(b)?-1:1; }).map(function(v){ return {v:v,l:v,n:sc2[v]}; }); }
   if(k==='day') return MS_DAY.map(function(d,i){
     return {v:String(i),l:d,n:rows.filter(function(t){ return t.week&&t.week[i]; }).length}; });
   rows.forEach(function(t){
@@ -5812,7 +5989,7 @@ function msBtn(sc,k){
   return h+'</span>';
 }
 function msTokens(sc){
-  var o=msObj(sc), keys=['site','dept','spec','status','day'], h='';
+  var o=msObj(sc), keys=['site','dept','spec','status','day','sub'], h='';
   keys.forEach(function(k){
     Object.keys(o[k+'M']||{}).forEach(function(v){
       h+='<span class="ms-tok"'+(k==='site'?' style="border-color:#'+finSiteHex(v)+'"':'')+'><small>'+esc(MS_HEAD[k])+'</small> '+esc(msLab(k,v))+
@@ -5820,7 +5997,7 @@ function msTokens(sc){
   if(!h) return '';
   return '<div class="ms-toks">'+h+'<button type="button" class="ms-clr" data-msclr="'+sc+'">Clear all filters</button></div>';
 }
-function msRender(sc){ if(sc==='m') renderMaster(); else renderSummary(); }
+function msRender(sc,k){ if(k==='sub'||k==='*') refresh(); else if(sc==='m') renderMaster(); else if(sc==='f') finRender(); else renderSummary(); }
 function msSplit(raw){ var a=raw.split('|'); return {sc:a[0],k:a[1],v:a.slice(2).join('|')}; }
 if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
@@ -5828,29 +6005,30 @@ if(typeof document!=='undefined'){
     var n;
     if((n=t.closest('[data-msonly]'))){ e.preventDefault(); e.stopPropagation();
       var x=msSplit(n.getAttribute('data-msonly')), o=msObj(x.sc); o[x.k+'M']={}; o[x.k+'M'][x.v]=1;
-      if(x.k!=='day') o[x.k]=''; S.msOpen=null; S.msQ=''; msRender(x.sc); return; }
+      if(x.k!=='day'&&x.k!=='sub') o[x.k]=''; S.msOpen=null; S.msQ=''; msRender(x.sc,x.k); return; }
     if((n=t.closest('[data-msb]'))){ var id=n.getAttribute('data-msb');
       S.msOpen=(S.msOpen===id)? null : id; S.msQ=''; msRender(id.split('|')[0]);
       var qq=el('msQ'); if(qq) try{ qq.focus({preventScroll:true}); }catch(_){ qq.focus(); }
       return; }
     if((n=t.closest('[data-msall]'))){ var a=n.getAttribute('data-msall').split('|'), so=msObj(a[0]), st={};
-      msOpts(a[0],a[1]).forEach(function(op){ st[op.v]=1; }); so[a[1]+'M']=st; msRender(a[0]); return; }
+      msOpts(a[0],a[1]).forEach(function(op){ st[op.v]=1; }); so[a[1]+'M']=st; msRender(a[0],a[1]); return; }
     if((n=t.closest('[data-msnone]'))){ var b=n.getAttribute('data-msnone').split('|');
-      msObj(b[0])[b[1]+'M']={}; if(b[1]!=='day') msObj(b[0])[b[1]]=''; msRender(b[0]); return; }
+      msObj(b[0])[b[1]+'M']={}; if(b[1]!=='day'&&b[1]!=='sub') msObj(b[0])[b[1]]=''; msRender(b[0],b[1]); return; }
     if((n=t.closest('[data-msdone]'))){ var sc0=(S.msOpen||'').split('|')[0]; S.msOpen=null; S.msQ=''; msRender(sc0); return; }
     if((n=t.closest('[data-mstok]'))){ var y=msSplit(n.getAttribute('data-mstok'));
-      delete msSet(y.sc,y.k)[y.v]; msRender(y.sc); return; }
+      delete msSet(y.sc,y.k)[y.v]; msRender(y.sc,y.k); return; }
     if((n=t.closest('[data-msclr]'))){ var sc=n.getAttribute('data-msclr'), ob=msObj(sc);
-      ['site','dept','spec','status','day'].forEach(function(k){ ob[k+'M']={}; if(k!=='day') ob[k]=''; });
-      S.msOpen=null; msRender(sc); return; }
+      var hadSub=ob.subM&&Object.keys(ob.subM).length;
+      ['site','dept','spec','status','day','sub'].forEach(function(k){ ob[k+'M']={}; if(k!=='day'&&k!=='sub') ob[k]=''; });
+      S.msOpen=null; msRender(sc,hadSub?'*':''); return; }
     if(S.msOpen&&!t.closest('.ms-w')){ var sc1=S.msOpen.split('|')[0]; S.msOpen=null; S.msQ=''; msRender(sc1); }
   });
   document.addEventListener('change',function(e){
     var t=e.target; if(!t||!t.getAttribute||!t.getAttribute('data-msp')) return;
     var x=msSplit(t.getAttribute('data-msp')), st=msSet(x.sc,x.k);
     if(t.checked) st[x.v]=1; else delete st[x.v];
-    if(x.k!=='day') msObj(x.sc)[x.k]='';
-    msRender(x.sc);
+    if(x.k!=='day'&&x.k!=='sub') msObj(x.sc)[x.k]='';
+    msRender(x.sc,x.k);
   });
   document.addEventListener('input',function(e){
     var t=e.target; if(!t||t.id!=='msQ') return;
@@ -6060,6 +6238,98 @@ function sdWire(){
   var sv=el('sdSave');
   if(sv) sv.onclick=function(){ if(sdFinish()) refresh(); };
 }
+
+function pdCardHTML(){
+  var I=S.pediaInfo;
+  if(!I){ return S.wbM&&!pediaSheet(S.wbM)? '' : ''; }
+  var on=pediaOn(), months=I.months.slice().sort(function(a,b){ return a-b; });
+  var mk=Object.keys(I.matched).length, um=Object.keys(I.unmatched);
+  var sel=(S.pdMonth!==undefined&&months.indexOf(S.pdMonth)>=0)? S.pdMonth : null;
+  var h='<div class="card pd-card"><div class="pd-top">'+
+    '<div class="pd-ic">P</div><div class="pd-tt"><b>Pedia schedule · J1</b>'+
+      '<span>From the <b>'+esc(I.sheet)+'</b> sheet. In these months each Pedia doctor is counted with that month\'s week; other months use the main sheet.</span></div>'+
+    '<label class="pd-sw"><input type="checkbox" id="pdOn"'+(on?' checked':'')+'><i></i><span>'+(on?'Counting':'Off')+'</span></label></div>'+
+    '<div class="pd-months">'+MONTHS_EN.map(function(mn,i){ var has=months.indexOf(i)>=0;
+      return '<button type="button" class="pd-m'+(has?' has':'')+(sel===i?' on':'')+'"'+(has?' data-pdm="'+i+'"':' disabled')+'>'+
+        '<b>'+mn.slice(0,3)+'</b><small>'+(has? (I.rows[i]||[]).length+' dr' : '—')+'</small></button>'; }).join('')+'</div>'+
+    '<div class="pd-sum"><span class="pd-ok">✓ '+mk+' doctor'+(mk===1?'':'s')+' matched</span>'+
+      (um.length? '<span class="pd-bad" title="'+esc(um.join(', '))+'">⚠ '+um.length+' not found on the main sheet (J1): '+esc(um.slice(0,4).join(', '))+(um.length>4?' …':'')+'</span>' : '')+
+      (!months.length? '<span class="pd-bad">No month block for '+esc(String(S.settings.year))+' in this sheet</span>' : '')+
+      '<span class="hint">Click a month to see its week.</span></div>';
+  if(sel!==null){
+    var list=(I.rows[sel]||[]).slice().sort(function(a,b){ return low(a.name)<low(b.name)?-1:1; });
+    h+='<div class="tw" style="max-height:420px"><table class="pd-t"><thead><tr><th class="stick">Doctor · '+MONTHS_EN[sel]+'</th>'+
+      MST_DAYS.map(function(d){ return '<th>'+d+'</th>'; }).join('')+'<th class="n">A week</th></tr></thead><tbody>'+
+      list.map(function(r){ var tot=0;
+        return '<tr><td class="stick"><b>'+esc(r.name)+'</b></td>'+r.spans.map(function(day){
+          var cells=['AM','AF','PM'].map(function(lb,bi){
+            var hit=day.filter(function(sp){ var mid=(sp.f+sp.t)/2; return sp.f===null? false : bi===0? sp.f<13*60&&sp.t>9*60 : bi===1? sp.f<17*60&&sp.t>13*60 : sp.t>17*60; })[0];
+            return '<span class="pd-s'+(hit?' y':'')+'"'+(hit&&hit.fill?' style="background:#'+esc(hit.fill)+'22;border-color:#'+esc(hit.fill)+'"':'')+(hit?' title="'+esc(mstFmt(hit.f)+'–'+mstFmt(hit.t))+'"':'')+'>'+lb+'</span>'; }).join('');
+          tot+=day.filter(function(sp){ return colorCounts(sp.fill||'none'); }).length;
+          return '<td><div class="pd-d">'+cells+'</div></td>'; }).join('')+
+          '<td class="n"><b>'+tot+'</b></td></tr>'; }).join('')+'</tbody></table></div>';
+  }
+  return h+'</div>';
+}
+function pdWire(){
+  var o=el('pdOn'); if(o) o.onchange=function(){ S.settings.pediaOn=this.checked; refresh();
+    toast(this.checked? 'Pedia months are counted from the Pedia Format sheet' : 'Pedia Format ignored — the main sheet is used'); };
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-pdm]'),function(b){
+    b.onclick=function(){ var m=+b.getAttribute('data-pdm'), y=+S.settings.year;
+      if(S.pdMonth===m){ S.pdMonth=undefined; S.mvPrev=null; } else { S.pdMonth=m; S.mvPrev={y:y,m:m}; S.mvMonth=m; S.mView='week'; }
+      renderMaster(); }; });
+}
+
+/* ---- the Pedia month, shown wherever a month is chosen ---- */
+function pdMonthRows(y,m){
+  var I=S.pediaInfo; if(!I||!pediaOn()||+y!==+S.settings.year||m===null||m===undefined) return null;
+  var l=I.rows&&I.rows[m]; if(!l||!l.length) return null;
+  var by={}; l.forEach(function(r){ by[r.key]=r; }); return by;
+}
+function pdSpans(p){
+  return p.spans.map(function(day){ return day.filter(function(sp){ return colorCounts(sp.fill||'none'); })
+    .map(function(sp){ return {f:sp.f===null?17*60:sp.f,t:sp.t===null?21*60:sp.t,fill:sp.fill||''}; }); });
+}
+/* rows with each Pedia doctor's week swapped for that month's block; copies, so
+   nothing counted is touched */
+function pdOverlay(rows,y,m){
+  var by=pdMonthRows(y,m); if(!by) return rows;
+  return rows.map(function(t){ var p=by[t.key]; if(!p) return t;
+    var c={}; for(var k in t) c[k]=t[k];
+    c.spans=pdSpans(p); c.week=c.spans.map(function(x){ return x.length; }); c.pdM=m; c.pdY=y;
+    return c; });
+}
+function pdNote(rows,y,m){
+  var n=rows.filter(function(t){ return t.pdM===m; }).length; if(!n) return '';
+  return '<div class="pd-note"><span class="pd-ic sm">P</span><div><b>'+MONTHS_EN[m]+' '+y+' schedule</b> for '+n+' Pedia doctor'+(n===1?'':'s')+
+    ' — taken from the <b>Pedia Format</b> sheet, tagged <span class="pd-tag">'+MONTHS_EN[m].slice(0,3)+' schedule</span>. Everyone else shows the main sheet.</div></div>';
+}
+/* one doctor's week for a month: the Pedia block where there is one, else the main sheet */
+function pdWeekOf(t,y,m){
+  var by=pdMonthRows(y,m), p=by&&by[t.key];
+  if(p) return {spans:pdSpans(p),src:'pedia'};
+  return {spans:(t.spans||[[],[],[],[],[],[],[]]),src:'main'};
+}
+function pdWeekHTML(t,y,m){
+  var W=pdWeekOf(t,y,m), H=num(S.settings.hrs)||4, n=0, hrs=0;
+  var label=(m===null||m===undefined)? 'Weekly schedule' : 'Schedule for '+MONTHS_EN[m]+' '+y;
+  var cells=MST_DAYS.map(function(dn,d){
+    var list=mstDay(W.spans[d]||[]);
+    list.forEach(function(sp){ n+=sp.n; hrs+=(sp.t-sp.f)/60*sp.n; });
+    var chips=mgBlocks(list,d).map(function(b){
+      var inB=list.filter(function(sp){ return mgSegs([sp],b).length; });
+      var labs=inB.filter(function(sp){ return !mstIsStd(sp)&&mgFirstBlock(sp)===b; }).map(function(sp){ return esc(mstCellHrs(sp)); }).join('<br>');
+      return mgCol(mgChip(inB,b,'',DPG_DAYN[d]+' '+DPG_BLK[b].n+': '+(inB.length? inB.map(function(sp){ return mstFmt(sp.f)+'–'+mstFmt(sp.t); }).join(', ') : 'off')),
+        labs||(list.some(function(sp){ return !mstIsStd(sp); })?'&nbsp;':'')); }).join('');
+    return '<div class="pdw-d'+(list.length?' on':'')+'"><b>'+dn+'</b><div>'+chips+'</div></div>'; }).join('');
+  return dpgStyle()+'<div class="card pdw"><h3>'+esc(label)+
+      (W.src==='pedia'? ' <span class="pd-tag">Pedia Format · '+MONTHS_EN[m].slice(0,3)+'</span>' : ' <span class="tag">main sheet</span>')+
+      ' <span class="tag">'+fmt(n,0)+' a week · '+fmt(hrs)+' h</span></h3>'+
+    '<div class="cb dpg"><div class="pdw-g">'+cells+'</div>'+
+    (W.src==='pedia'? '<p class="hint" style="margin-top:8px">This month this doctor works the week in the <b>Pedia Format</b> sheet, and the sessions above are counted from it.</p>'
+      : (m===null||m===undefined? '<p class="hint" style="margin-top:8px">Choose a month to see the schedule for that month.</p>' : ''))+
+    '</div></div>';
+}
 /* the finance-style filter: a month, one chip per branch, a search */
 function finBarHTML(o){
   return '<div class="fin-bar fin-bar-pg">'+(o.month||'')+
@@ -6219,12 +6489,17 @@ function renderDrawer(){
       '<button class="btn sm" id="dwAllYear">Show the whole year instead</button></div>')+
     '</div>';
 
+  if(t.fromMaster){
+    var nowD=new Date(), wm=(dm!==null)? dm : (nowD.getFullYear()===year? nowD.getMonth() : null);
+    h+=pdWeekHTML(t,year,wm);
+  }
   if(t.hybrid){
     var rawC=0; for(var hm=0;hm<12;hm++) rawC+=(t.m[hm].cRaw!==undefined? t.m[hm].cRaw : t.m[hm].c);
-    var over=Math.max(0,rawC-t.allow);
+    var over=Math.max(0,rawC-t.allowUsed);
     h+='<div class="card"><h3>Hybrid allowance <span class="tag">'+esc(t.status||'H')+'</span></h3><div class="cb">'+
-       '<p class="hint" style="margin-bottom:11px">A hybrid doctor may close this many sessions in the year '+
-       'without it counting. The allowance is spent in date order; anything closed beyond it reduces the total.</p>'+
+       '<p class="hint" style="margin-bottom:11px">A hybrid doctor may take this many sessions of <b>Annual Leave</b> in the year '+
+       'without it counting. Only closures filed as Annual Leave use the allowance, in date order. Every other closure, '+
+       'and Annual Leave beyond the allowance, reduces the total.</p>'+
        '<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end">'+
          '<div><label class="hint" style="font-weight:700;display:block;margin-bottom:3px">Sessions allowed a year</label>'+
            '<input type="number" min="0" step="0.25" id="dwAllow" value="'+esc(String(t.allow))+'" '+
@@ -6232,6 +6507,8 @@ function renderDrawer(){
            'font-family:var(--mono);text-align:end;font-size:14px;font-weight:700"></div>'+
          '<div><div class="hint" style="font-weight:700">Closed in the year</div>'+
            '<div style="font-size:19px;font-weight:800">'+fmt(rawC)+'</div></div>'+
+         '<div><div class="hint" style="font-weight:700">of which Annual Leave</div>'+
+           '<div style="font-size:19px;font-weight:800">'+fmt(t.yAL||0)+'</div></div>'+
          '<div><div class="hint" style="font-weight:700">Used from the allowance</div>'+
            '<div style="font-size:19px;font-weight:800;color:var(--teal)">'+fmt(t.allowUsed)+'</div></div>'+
          '<div><div class="hint" style="font-weight:700">Left</div>'+
@@ -6292,7 +6569,10 @@ function renderDrawer(){
   merged.forEach(function(list){ list.forEach(function(sp){ totalH+=(sp.t-sp.f)/60*sp.n; }); });
 
   var dsel=(S.dayFilter===''||S.dayFilter===null)? null : +S.dayFilter;
-  h+='<div class="card"><h3>Weekly template'+
+  var pdHere=(function(){ var nd=new Date(), wm2=(S.dw.month!==null)? S.dw.month : (nd.getFullYear()===year? nd.getMonth() : null);
+    var by=pdMonthRows(year,wm2); return by&&by[t.key]? wm2 : null; })();
+  h+='<div class="card"><h3>'+(pdHere!==null? 'Main sheet template' : 'Weekly template')+
+     (pdHere!==null? ' <span class="tag" style="background:#FCE7F3;color:#9D174D">not used in '+MONTHS_EN[pdHere]+' — Pedia Format applies</span>' : '')+
      (dsel!==null? '<span class="tag" style="background:var(--ok-bg);color:var(--teal)">'+
        wk[dsel]+' only</span>':'<span class="tag">click a day</span>')+'</h3><div class="cb">'+
      '<table style="width:100%"><thead><tr>'+
@@ -8137,12 +8417,22 @@ function schedChOn(){
    every change effective by then applied on top. n is the session count, h is
    what those sessions are worth, which is the figure used when counting by
    duration. A record with times sets both; one without means whole sessions. */
-function schedWeekOn(t,ms){
+function schedWeekOn(t,ms,withPedia){
   var base={n:[],h:[]}, d;
   for(d=0;d<7;d++){
     base.n[d]=(t.week&&t.week[d])||0;
     base.h[d]=(t.wk&&t.wk[d]!==undefined)? t.wk[d] : base.n[d];
   }
+  /* the Pedia Format month block, where there is one, is this doctor's week */
+  /* counting only: the master grids, the export and the Data-tab comparison
+     show the master as written */
+  var pr=withPedia&&S.pediaRecs&&S.pediaRecs[schedKey(t)];
+  if(pr) pr.forEach(function(r){
+    var from=schedYMD(r.from), to=schedYMD(r.to);
+    if(ms<from||ms>to) return;
+    base.n[r.day]=r.sessions;
+    base.h[r.day]=(r.hours>0)? r.hours/(num(S.settings.hrs)||4) : r.sessions;
+  });
   if(!schedChOn()) return base;
   var recs=schedFor(schedKey(t));
   if(!recs.length) return base;
@@ -8161,7 +8451,7 @@ function schedWeekOn(t,ms){
    per-doctor memo cannot serve a stale week */
 function schedStamp(){
   var st=SchedStore.load();
-  return [schedSrc(),schedChOn()?1:0,st.rows.length,S.settings.hrs,S.dayFilter,schedSrc()==='versions'?S.mvStamp:''].join('~');
+  return [schedSrc(),schedChOn()?1:0,st.rows.length,S.settings.hrs,S.dayFilter,schedSrc()==='versions'?S.mvStamp:'',S.pediaStamp||''].join('~');
 }
 function schedPlanMap(t,year,m){
   var c=t._planMap||(t._planMap={}), stamp=schedStamp(), k=year+'|'+m;
@@ -8175,12 +8465,12 @@ function schedPlanMap(t,year,m){
      in date order. A doctor whose week changes mid-month has the allowance of
      each week applied from the day it starts. */
   var left=[], d;
-  var w0=schedWeekOn(t,Date.UTC(year,m,1));
+  var w0=schedWeekOn(t,Date.UTC(year,m,1),true);
   for(d=0;d<7;d++) left[d]=perOf(w0,d)*dayCount(t,d,m,wc);
   var out=[], seen={};
   for(var dd=1;dd<=lastD;dd++){
     var ms=Date.UTC(year,m,dd), dow=new Date(ms).getUTCDay();
-    var wk=schedWeekOn(t,ms), per=perOf(wk,dow);
+    var wk=schedWeekOn(t,ms,true), per=perOf(wk,dow);
     /* a change that raises the week part-way through the month brings its own
        allowance with it, or the rest of the month would read zero */
     var sig=dow+':'+per;
@@ -8988,6 +9278,8 @@ function dpgStyle(){
     '.dpg-c sup{font-size:8.5px;margin-left:1px}'+
     '.dpg .mg-t{display:flex;justify-content:center;gap:2px;margin-top:3px;font-size:9.5px;color:#7A8699;font-variant-numeric:tabular-nums}'+
     '.dpg .mg-t span{min-width:27px;text-align:center}'+
+    '.dpg .mg-col{display:inline-flex;flex-direction:column;align-items:center;vertical-align:top}'+
+    '.dpg .mg-col>small{font-size:9.5px;line-height:1.25;color:#7A8699;margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}'+
     '.mg-st{display:flex;flex-wrap:wrap;gap:4px;align-items:center}'+
     '.mg-st .dpg-p,.mge-st .dpg-p{font-size:11px;padding:3px 8px}.mg-pp{border:1px solid #DCE3ED;background:#fff;color:#334155;cursor:pointer;font:inherit}'+
     '.mg-pp:hover{border-color:#94A3B8}.mg-act{border:1px solid transparent;cursor:pointer;font:inherit}.mg-act.active:hover{border-color:#86EFAC}'+
@@ -9970,6 +10262,7 @@ function valFilter(rows){
   var f=S.vf||{}, q=low(f.q);
   return rows.filter(function(r){
     if(!matchQ(r.t,f.q)) return false;
+    if(!picked(f.statusM,typeOf(r.t))||!picked(f.siteM,r.t.site)||!picked(f.deptM,r.t.dept)||!picked(f.specM,r.t.spec)) return false;
     if(f.site && r.t.site!==f.site) return false;
     if(f.dept && r.t.dept!==f.dept) return false;
     if(f.mark){
@@ -10374,10 +10667,11 @@ function renderOT(){
     if(legacy) h+='<td colspan="7" class="dpg-sub">Dates: '+(o.days.length? esc(o.days.slice().sort(function(x,y){return x-y;}).join(', ')) : 'a monthly total')+'</td>';
     else for(var d2=0;d2<7;d2++){
       var l=(o.days||{})[MST_DAYS[d2]]||[];
+      var anyL=l.some(function(sp){ return !mstIsStd(sp); });
       h+='<td class="dpg-dy">'+mgBlocks(l,d2).map(function(b){
-          return mgChip(l,b,'',DPG_DAYN[d2]+' '+DPG_BLK[b].n+': '+(mgSegs(l,b).length? l.filter(function(sp){ return mgSegs([sp],b).length; })
-            .map(function(sp){ return mstFmt(sp.f)+'–'+mstFmt(sp.t); }).join(', ') : 'off')); }).join('')+
-        (l.some(function(sp){ return !mstIsStd(sp); })? '<div class="mg-t">'+l.map(function(sp){ return '<span>'+esc(mstCellHrs(sp))+'</span>'; }).join('')+'</div>' : '')+
+          var labs=l.filter(function(sp){ return !mstIsStd(sp)&&mgFirstBlock(sp)===b; }).map(function(sp){ return esc(mstCellHrs(sp)); }).join('<br>');
+          return mgCol(mgChip(l,b,'',DPG_DAYN[d2]+' '+DPG_BLK[b].n+': '+(mgSegs(l,b).length? l.filter(function(sp){ return mgSegs([sp],b).length; })
+            .map(function(sp){ return mstFmt(sp.f)+'–'+mstFmt(sp.t); }).join(', ') : 'off')),labs||(anyL?'&nbsp;':'')); }).join('')+
         '</td>'; }
     h+='<td><span class="dpg-ss">'+fmt(n)+'</span><div class="dpg-sub">'+fmt(n*H)+' h</div></td>'+
        '<td><div class="mg-st"><button type="button" class="dchip" data-otedit="'+i+'">edit</button>'+
@@ -15350,7 +15644,7 @@ function init(){
   el('btnLang').onclick=function(){ S.lang=S.lang==='en'?'ar':'en'; syncControls(); renderNav(); renderPage(); saveConfig(); };
   el('btnXlsx').onclick=exportXlsx;
   el('scrim').onclick=closeDrawer;
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!(S&&S.msOpen)) closeDrawer(); });
 }
 if(typeof document!=='undefined'&&document.addEventListener)
   document.addEventListener('DOMContentLoaded',function(){
