@@ -744,6 +744,20 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .fin-mo{color:#64748B;font-size:11px}.fin-id{font-variant-numeric:tabular-nums;color:#334155}.fin-nm{font-weight:600;color:#15202E;white-space:normal!important;min-width:140px}
 .fin-site{display:inline-block;min-width:28px;text-align:center;font-weight:800;font-size:11.5px;border-radius:6px;padding:2px 6px;color:#0F172A}
 .fin-st{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px}.fin-st.ft{background:#C6E0F4;color:#1E3A5F}.fin-st.pt{background:#FFE699;color:#6B4E00}.fin-st.h{background:#E9D5FF;color:#5B21B6}.fin-st.o{background:#E7E6E6;color:#334155}
+.hyb-m{display:inline-flex;align-items:center;gap:2px;font-size:11px;padding:2px 5px;max-width:100%;box-sizing:border-box;border-radius:999px;background:#F5F3FF;border:1px solid #DDD6FE;color:#5B21B6;white-space:nowrap}
+.hyb-m b{font-size:10px}.hyb-m button{font:inherit;font-weight:700;width:18px;height:18px;padding:0;border-radius:50%;border:0;background:#fff;color:#5B21B6;cursor:pointer;line-height:1}
+.hyb-m button:hover{background:#EDE9FE}.hyb-m input{width:30px;font:inherit;font-weight:700;text-align:center;border:1px solid #DDD6FE;border-radius:6px;padding:1px 2px;background:#fff}
+.hyb-m em{font-style:normal;font-weight:700;margin-left:2px}.hyb-m em.ok{color:#0F766E}.hyb-m em.no{color:#94A3B8}
+.ot-mt{width:100%}.ot-mt td,.ot-mt th{vertical-align:middle}
+.ot-tm{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.ot-cl{font-size:12px;padding:2px 8px;border-radius:999px;background:#FEF3C7;color:#92400E;white-space:nowrap}
+.ot-op{font-size:12px;padding:2px 8px;border-radius:999px;background:#ECFDF5;color:#065F46}
+.ot-pk{display:inline-flex;border:1px solid #CBD5E1;border-radius:999px;overflow:hidden}
+.ot-pk button{font:inherit;font-size:11.5px;font-weight:600;padding:4px 10px;border:0;background:#fff;color:#475569;cursor:pointer;white-space:nowrap}
+.ot-pk button+button{border-left:1px solid #CBD5E1}.ot-pk button:hover{background:#F1F5F9}.ot-pk button.on{background:#0F766E;color:#fff}
+.ot-st{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}.ot-st.y{background:#CCFBF1;color:#0F766E}.ot-st.w{background:#FEF3C7;color:#B45309}.ot-st.n{background:#F1F5F9;color:#64748B}
+.ot-rules summary{cursor:pointer;padding:14px 18px;list-style:none}.ot-rules ol{margin:0 0 4px 18px;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#334155}
+.ot-chk{margin-top:14px}
 .pd-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:#FCE7F3;color:#9D174D;border:1px solid #F9A8D4;vertical-align:middle;letter-spacing:.02em;text-transform:none}
 .pd-note{display:flex;gap:10px;align-items:center;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#FDF2F8;border:1px solid #FBCFE8;font-size:13px;color:#831843}
 .pd-ic.sm{width:26px;height:26px;border-radius:8px;font-size:13px;flex:none}
@@ -751,6 +765,7 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .pdw-d{border:1px solid #EEF1F6;border-radius:10px;padding:7px 4px;text-align:center;background:#FBFCFE}.pdw-d.on{background:#fff;border-color:#DCE3ED}
 .pdw-d>b{display:block;font-size:11.5px;color:#475569;margin-bottom:5px}
 @media (max-width:700px){.pdw-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.pd-m em{font-style:normal;font-size:9.5px;font-weight:700;margin-top:2px}.pd-m em.ok{color:#0F766E}.pd-m em.no{color:#B45309}.pd-m.on em{color:#fff}
 .pd-card{border-radius:16px!important;overflow:hidden}
 .pd-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(135deg,#FDF2F8,#F5F3FF);flex-wrap:wrap}
 .pd-ic{width:38px;height:38px;border-radius:11px;background:#DB2777;color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px}
@@ -811,6 +826,7 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .sd-ch{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
 .sd-ch i{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.12)}.sd-ch i.no{background:#fff}
 .sd-ch.old{background:#F1F5F9;color:#64748B;text-decoration:line-through}.sd-ch.new{background:#ECFDF5;color:#065F46;font-weight:600;box-shadow:inset 0 0 0 1px #A7F3D0}
+.sd-ch.bad{box-shadow:inset 0 0 0 2px #F59E0B!important;background:#FFFBEB!important;color:#92400E!important}
 .sd-none{font-size:12.5px;color:#94A3B8;font-style:italic}.sd-none.x{color:#BE123C;font-weight:600;font-style:normal;background:#FFF1F2;padding:3px 10px;border-radius:999px}
 .sd-arr{color:#94A3B8;font-weight:700}
 .sd-k{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em}
@@ -1409,13 +1425,20 @@ function mstSpan(cell,blk){
   var v=nz(cell), up=v.toUpperCase(), oi=up.indexOf('OPEN');
   if(oi<0) return null;
   var f=blk.f, t=blk.t;
+  /* a whole range in one bracket: "OPEN (12PM to 1PM)", "(9-11) OPEN" */
+  var rg=/\(\s*([0-9:.\sapmAPM]+?)\s*(?:-|–|—|to|till|until)\s*([0-9:.\sapmAPM]+?)\s*\)/i.exec(v);
+  if(rg){ var rf=mstTime(rg[1].replace('.',':'),blk), rt=mstTime(rg[2].replace('.',':'),blk);
+    if(rf!==null&&rt!==null){ if(rt<=rf&&rt+720>rf) rt+=720; if(rt>rf) return {f:rf,t:rt}; } }
   var re=/\(([^)]*)\)/g, m;
   while((m=re.exec(v))){
     var val=mstTime(m[1],blk);
     if(val===null) continue;              /* a tag such as (Pulmo), not a time */
     if(m.index<oi) f=val; else t=val;
   }
-  return (t>f)? {f:f,t:t} : {f:blk.f,t:blk.t};
+  if(t>f) return {f:f,t:t};
+  /* the brackets give a time that cannot be right (it ends before it starts):
+     the whole slot is used, and the cell is flagged so nobody trusts a guess */
+  return {f:blk.f,t:blk.t,bad:v};
 }
 /* One slot is one session. A doctor working 1–5 and then 5–9 has two sessions,
    not one 1–9 block, and each keeps its own colour — so an OR list sitting next
@@ -1487,10 +1510,27 @@ function parseMaster(wb,sheet){
     var spans=[[],[],[],[],[],[],[]];
     /* one entry per OPEN cell, keeping its colour next to its own times so a
        colour rule can include or exclude that slot on its own */
-    var cells=[[],[],[],[],[],[],[]], marks=[[],[],[],[],[],[],[]];
+    var cells=[[],[],[],[],[],[],[]], marks=[[],[],[],[],[],[],[]], prevOpen=-9;
     for(var s=0;s<slots.length;s++){
       var v=nz(r[slots[s].c]);
-      if(!(v && v.toUpperCase().indexOf('OPEN')>=0)){
+      var isOpen=!!(v && v.toUpperCase().indexOf('OPEN')>=0);
+      /* "(12) OPEN" in the morning and "OPEN (1)" in the afternoon is one
+         session, 12 to 1: an end time that falls before its own slot starts
+         belongs to the session opened in the cell just before it */
+      if(isOpen&&s>0&&prevOpen===s-1&&slots[s-1].d===slots[s].d){
+        var spx=mstSpan(v,blocks[slots[s].c]);
+        if(spx&&spx.bad&&cells[slots[s].d].length){
+          var oi=v.toUpperCase().indexOf('OPEN'), mm=/\(([^)]*)\)/.exec(v.slice(oi));
+          var pb=blocks[slots[s-1].c], te=mm&&pb? mstTime(mm[1],pb) : null;
+          var pc=cells[slots[s].d][cells[slots[s].d].length-1], ps=spans[slots[s].d][spans[slots[s].d].length-1];
+          if(te!==null&&pc&&pc.f!==null&&te>pc.f&&te<=pb.t+60){
+            pc.t=te; pc.join=v; if(ps&&ps.f===pc.f){ ps.t=te; }
+            continue;
+          }
+        }
+      }
+      if(isOpen) prevOpen=s;
+      if(!isOpen){
         /* not a session; kept only so the change list can say what the cell holds */
         var mf0=FM?fillOf(FM.ws[XLSX.utils.encode_cell({r:i,c:slots[s].c})]):'none', bk=blocks[slots[s].c];
         if(bk&&((mf0&&mf0!=='none')||v)) marks[slots[s].d].push({f:bk.f,t:bk.t,fill:(mf0==='none'?'':mf0),txt:v});
@@ -1502,7 +1542,7 @@ function parseMaster(wb,sheet){
         wcol[slots[s].d].push(f);
         var sp=mstSpan(v,blocks[slots[s].c]);
         if(sp){ sp.fill=(f==='none')?'':f; spans[slots[s].d].push(sp); }
-        cells[slots[s].d].push({f:sp?sp.f:null,t:sp?sp.t:null,fill:f});
+        cells[slots[s].d].push({f:sp?sp.f:null,t:sp?sp.t:null,fill:f,bad:sp&&sp.bad?sp.bad:''});
       }
     }
     lastData=i;
@@ -3308,7 +3348,7 @@ function mvLoad(y,force){
 }
 function mvRows(lines){ return (lines||[]).map(schedLineToRow); }
 /* save one version: lines, the date it applies from, and where it came from */
-function mvSave(lines,eff,src,file,isCurrent){
+function mvSave(lines,eff,src,file,isCurrent,extra){
   var y=+eff.slice(0,4);
   return fetch('/api/schedule?year='+mvSlot(y),{credentials:'same-origin'})
     .then(function(r){ return r.ok? r.json() : null; })
@@ -3322,7 +3362,8 @@ function mvSave(lines,eff,src,file,isCurrent){
         else sum='first';
       }catch(e){}
       var body={v:3,at:(new Date()).toISOString(),by:schedWho(),eff:eff,src:src,file:file||'',legend:S.legend||[],lines:lines};
-      var note=JSON.stringify({d:eff,src:src,f:String(file||'').slice(0,120),s:sum});
+      var nt={d:eff,src:src,f:String(file||'').slice(0,120),s:sum}; if(extra) for(var xk in extra) nt[xk]=extra[xk];
+      var note=JSON.stringify(nt);
       return fetch('/api/schedule',{method:'PUT',credentials:'same-origin',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({year:mvSlot(y),schedule:body,note:note})})
         .then(function(r){ return r.json().then(function(x){ if(!r.ok) throw new Error((x&&x.error)||'server said '+r.status); return x; }); })
@@ -3393,7 +3434,7 @@ function mvCardHTML(){
         var n=mvNote(v), e=mvEff(v), t=new Date(v.saved_at), parts=String(n.s||'').split(' ').filter(Boolean);
         h+='<div class="mv-v'+(i===0?' latest':'')+'">'+
           '<div class="mv-date"><b>'+(+e.slice(8,10))+'</b><span>'+MONTHS_EN[+e.slice(5,7)-1].slice(0,3)+'</span></div>'+
-          '<div class="mv-body"><div class="mv-t">'+(n.src==='upload'? 'Uploaded file' : 'Saved from the portal')+
+          '<div class="mv-body"><div class="mv-t">'+(n.src==='pedia'? 'Pedia Format · '+MONTHS_EN[+String(n.d).slice(5,7)-1] : n.src==='upload'? 'Uploaded file' : 'Saved from the portal')+
               (i===0? '<span class="mv-latest">latest</span>' : '')+
               '<span class="mv-time">'+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0')+
                 ' · saved '+t.getDate()+' '+MONTHS_EN[t.getMonth()].slice(0,3)+' '+t.getFullYear()+'</span></div>'+
@@ -3412,7 +3453,7 @@ function mvCardHTML(){
     binned.sort(function(a,b){ return mvDaysLeft(a.id)-mvDaysLeft(b.id); }).forEach(function(v){
       var d=mvDaysLeft(v.id), e=mvEff(v), n=mvNote(v), cls=d>14?'ok':d>7?'mid':'low';
       h+='<div class="mv-v bin"><div class="mv-date"><b>'+(+e.slice(8,10))+'</b><span>'+MONTHS_EN[+e.slice(5,7)-1].slice(0,3)+' '+e.slice(2,4)+'</span></div>'+
-        '<div class="mv-body"><div class="mv-t">'+(n.src==='upload'? 'Uploaded file' : 'Saved from the portal')+'</div>'+
+        '<div class="mv-body"><div class="mv-t">'+(n.src==='pedia'? 'Pedia Format · '+MONTHS_EN[+String(n.d).slice(5,7)-1] : n.src==='upload'? 'Uploaded file' : 'Saved from the portal')+'</div>'+
           '<div class="mv-s">'+esc(n.f||'')+' · '+fmt(v.lines,0)+' lines</div>'+
           '<div class="mv-left '+cls+'"><i style="width:'+Math.max(4,d/30*100).toFixed(0)+'%"></i></div></div>'+
         '<div class="mv-act"><span class="mv-days '+cls+'">'+d+' day'+(d===1?'':'s')+' left</span>'+
@@ -3632,7 +3673,7 @@ function renderMaster(){
       rows=mvPreviewRows(S.mvBody[prevV.id].lines);
       var pe=mvEff(prevV), pn=mvNote(prevV);
       prevNote='<div class="mv-prev"><span class="mv-eye">👁</span><div><b>Looking at '+pm+'</b> — the version in force at the end of the month: '+
-        (pn.src==='upload'? 'uploaded file ' : 'saved ')+'applying from <b>'+(+pe.slice(8,10))+' '+MONTHS_EN[+pe.slice(5,7)-1].slice(0,3)+' '+pe.slice(0,4)+'</b>'+
+        (pn.src==='pedia'? 'the Pedia Format month, ' : pn.src==='upload'? 'uploaded file ' : 'saved ')+'applying from <b>'+(+pe.slice(8,10))+' '+MONTHS_EN[+pe.slice(5,7)-1].slice(0,3)+' '+pe.slice(0,4)+'</b>'+
         (pn.f? ' · '+esc(pn.f) : '')+'. View only — nothing here is counted or edited.</div>'+
         '<button type="button" class="btn sm pri" id="mvPrevX">Back to current</button></div>';
     }
@@ -3831,7 +3872,11 @@ function renderMaster(){
         '<button type="button" class="dpg-p mg-act '+(hasLeft(t)?'off':'active')+'" data-mact="'+esc(t.key)+'" title="Click to mark as '+(hasLeft(t)?'active':'inactive (left)')+'">'+(hasLeft(t)?'Inactive':'Active')+'</button>'+
         '<button type="button" class="dpg-p mg-pp" data-mwhole="'+esc(t.key)+'" title="'+esc(t.whole? 'Counted by the session, however long it runs — click to count by the hour'
                                : 'Counted by the hour — click to count whole sessions')+'">'+(t.whole?'Per session':'Per hour')+'</button>'+
-        (t.hybrid? '<span class="dpg-p later" title="Hybrid allowance — change it on the Doctors page">H · '+fmt(t.allowLeft)+' left</span>' : '')+
+        (t.hybrid? '<span class="hyb-m" title="H doctor: Annual Leave sessions allowed a year. Only Annual Leave closures use it — '+esc(fmt(t.allowUsed))+' used, '+esc(fmt(t.allowLeft))+' left.">'+
+            '<b>AL</b><button type="button" data-mhyb="'+esc(t.key)+'|-" aria-label="one fewer">−</button>'+
+            '<input type="number" min="0" step="1" data-mhybv="'+esc(t.key)+'" value="'+esc(String(t.allow))+'" aria-label="sessions allowed a year">'+
+            '<button type="button" data-mhyb="'+esc(t.key)+'|+" aria-label="one more">+</button>'+
+            '<em class="'+(t.allowLeft>0.0001?'ok':'no')+'">'+fmt(t.allowLeft)+' left</em></span>' : '')+
         (prevV? '' : '<button type="button" class="dchip" data-medit="'+esc(t.key)+'">edit</button>')+
         (t.added? '<button type="button" class="dchip" data-mdel="'+esc(t.key)+'">remove</button>' : '')+
       '</div>'+
@@ -4084,6 +4129,17 @@ function wireMaster(){
     sl.onchange=function(){ S.mf[sl.getAttribute('data-mf')]=sl.value; renderMaster(); }; });
   var c=el('mfClear'); if(c) c.onclick=function(){
     S.mf={site:'',dept:'',spec:'',status:'',day:'',notes:'',q:'',group:S.mf.group,siteM:{},deptM:{},specM:{},statusM:{},dayM:{}}; renderMaster(); };
+  /* H doctors: the Annual Leave allowance, edited right on the row */
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-mhyb]'),function(b){
+    b.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation();
+      var raw=b.getAttribute('data-mhyb'), i=raw.lastIndexOf('|'), k=raw.slice(0,i);
+      var t=S.result.rows.filter(function(x){ return x.key===k; })[0]; if(!t) return;
+      setHybAllowance(k,Math.max(0,(t.allow||0)+(raw.slice(i+1)==='+'?1:-1))); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-mhybv]'),function(inp){
+    inp.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation(); };
+    inp.onkeydown=function(e){ if(e.key==='Enter') inp.blur(); };
+    inp.onchange=function(){ var v=num(inp.value); setHybAllowance(inp.getAttribute('data-mhybv'),(v===null||v<0)? 0 : v);
+      toast('Annual Leave allowance saved'); }; });
   var mss=el('mfSaveSched');
   if(mss) mss.onclick=function(){
     var n=saveSchedule();
@@ -4766,7 +4822,7 @@ function schedIndex(rows){
     var e=ix[k]||(ix[k]={key:k,id:r.id,name:r.name,site:r.site,spec:r.spec,status:r.status,days:{},
       raw:[[],[],[],[],[],[],[]],marks:[[],[],[],[],[],[],[]]});
     for(var d=0;d<7;d++){
-      ((r.cells&&r.cells[d])||[]).forEach(function(c){ e.raw[d].push({f:c.f,t:c.t,fill:(c.fill&&c.fill!=='none')?nz(c.fill).toUpperCase():''}); });
+      ((r.cells&&r.cells[d])||[]).forEach(function(c){ e.raw[d].push({f:c.f,t:c.t,fill:(c.fill&&c.fill!=='none')?nz(c.fill).toUpperCase():'',bad:c.bad||''}); });
       ((r.marks&&r.marks[d])||[]).forEach(function(m){ e.marks[d].push(m); });
     }
   });
@@ -5097,7 +5153,7 @@ function renderValidation(){
      '<th class="n">Expected</th>'+
      '<th class="n">Claimed sessions</th>'+
      '<th class="n">Claimed hours</th>'+
-     (isH? '<th class="n">Allowance</th><th class="n">Used</th><th class="n">Left</th>':'')+
+     (isH? '<th class="n" title="Annual Leave sessions allowed a year">AL allowed</th><th class="n" title="Annual Leave closures taken from the allowance">AL used</th><th class="n">Left</th>':'')+
      '</tr></thead><tbody>';
   var TS={s:0,e:0,a:0,x:0,cs:0,ch:0,fr:0,ot:0};
   V.rows.forEach(function(r){
@@ -5404,7 +5460,7 @@ function valSheets(){
   var isH=(V.rows||[]).some(function(r){ return r.t.hybrid; });
   var h2=['ID','Doctor','Site','Type','Department','Specialty','Sessions','Extra/Coverage',
           'Friday extra','Fixed OT','Attendance','Expected','Claimed sessions','Claimed hours'];
-  if(isH) h2.push('Allowance','Used','Left');
+  if(isH) h2.push('AL allowed','AL used','Left');
   var sum=[h2];
   function r6(n){ return Math.round(n*1e6)/1e6; }
   V.rows.forEach(function(r){
@@ -6003,6 +6059,11 @@ if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
     var n;
+    if((n=t.closest('[data-otpk]'))){ var raw=n.getAttribute('data-otpk'), ix=raw.lastIndexOf('|');
+      S.settings.otClash=S.settings.otClash||{};
+      var id=raw.slice(0,ix), pk=raw.slice(ix+1);
+      if(S.settings.otClash[id]===pk) delete S.settings.otClash[id]; else S.settings.otClash[id]=pk;
+      saveConfig(); refresh(); if(S.dw) renderDrawer(); if(S.page==='ot') renderOT(); return; }
     if((n=t.closest('[data-msonly]'))){ e.preventDefault(); e.stopPropagation();
       var x=msSplit(n.getAttribute('data-msonly')), o=msObj(x.sc); o[x.k+'M']={}; o[x.k+'M'][x.v]=1;
       if(x.k!=='day'&&x.k!=='sub') o[x.k]=''; S.msOpen=null; S.msQ=''; msRender(x.sc,x.k); return; }
@@ -6055,14 +6116,14 @@ var SD_DAY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturda
 function sdTime(c){ return (c.f===null||c.f===undefined)? 'time not set' : mstFmt(c.f)+' – '+mstFmt(c.t); }
 function sdChip(c,cls){
   var nm=c.fill? colorName(c.fill) : '';
-  return '<span class="sd-ch '+cls+'" title="'+esc(nm||(c.fill?'#'+c.fill:'no colour'))+'">'+
+  return '<span class="sd-ch '+cls+(c.bad?' bad':'')+'" title="'+esc(c.bad? 'The cell says “'+c.bad+'” — that time does not fit this slot, so the whole slot was used' : (nm||(c.fill?'#'+c.fill:'no colour')))+'">'+(c.bad?'⚠ ':'')+
     (c.fill? '<i style="background:#'+esc(c.fill)+'"></i>' : '<i class="no"></i>')+esc(sdTime(c))+'</span>'; }
 function sdDayKind(x){
   var na=x.a.length, nb=x.b.length;
   if(!nb) return {k:'gone',t:na>1? na+' sessions removed' : 'Session removed'};
   if(!na) return {k:'add',t:nb>1? nb+' new sessions' : 'New session'};
-  if(nb<na) return {k:'gone',t:(na-nb)+' fewer'};
-  if(nb>na) return {k:'add',t:(nb-na)+' more'};
+  if(nb<na) return {k:'gone',t:'−'+(na-nb)+' session'+(na-nb===1?'':'s')};
+  if(nb>na) return {k:'add',t:'+'+(nb-na)+' session'+(nb-na===1?'':'s')};
   var sameT=x.a.every(function(c,i){ return c.f===x.b[i].f&&c.t===x.b[i].t; });
   return sameT? {k:'col',t:'Colour changed'} : {k:'time',t:'Time moved'};
 }
@@ -6097,9 +6158,16 @@ function sdHue(h){ var c=sdRgb(h), r=c[0]/255,g=c[1]/255,b=c[2]/255, mx=Math.max
   var H=mx===r? ((g-b)/d)%6 : mx===g? (b-r)/d+2 : (r-g)/d+4; H=(H*60+360)%360;
   var n=H<15||H>=340?'red':H<40?'orange':H<65?'yellow':H<170?'green':H<200?'teal':H<255?'blue':H<290?'purple':'pink';
   return (L<0.35?'dark ':L>0.8?'light ':'')+n; }
+function sdBad(x){
+  var b=(x.b||[]).filter(function(c){ return c.bad; });
+  if(!b.length) return '';
+  return b.map(function(c){ var blk=(c.f!==null)? mstFmt(c.f)+' – '+mstFmt(c.t) : 'the slot';
+    return 'The '+SD_DAY[x.d]+' cell says <b>“'+esc(c.bad)+'”</b>. The time in brackets does not fit this slot (it would end before it starts), so the portal could not tell what you meant and '+
+      'read it as the <b>whole slot '+esc(blk)+'</b>. Please fix the cell: a number <b>before</b> OPEN is the start, a number <b>after</b> OPEN is the end.'; }).join('<br>');
+}
 function sdInfo(c){
   var kinds={}, flag=false;
-  c.dd.forEach(function(x){ kinds[sdDayKind(x).k]=1; var w=sdWhy(x); if(w&&w.flag) flag=true; });
+  c.dd.forEach(function(x){ kinds[sdDayKind(x).k]=1; var w=sdWhy(x); if(w&&w.flag) flag=true; if(sdBad(x)) flag=true; });
   var cat=c.wb<c.wa? 'fewer' : c.wb>c.wa? 'more' : kinds.time? 'time' : kinds.col? 'col' : 'other';
   return {cat:cat,flag:flag};
 }
@@ -6151,6 +6219,7 @@ function sdPanelHTML(D){
         '<div class="sd-now">'+(x.b.length? x.b.map(function(cc){ return sdChip(cc,'new'); }).join('') : '<span class="sd-none x">no session</span>')+'</div>'+
         '<span class="sd-k '+k.k+'">'+esc(k.t)+'</span>'+
         (w? '<div class="sd-why'+(w.flag?' flag':'')+'">'+(w.flag?'⚠ ':'ℹ ')+w.html+'</div>' : '')+
+        (sdBad(x)? '<div class="sd-why flag">⚠ '+sdBad(x)+'</div>' : '')+
       '</div>'; }).join('')+'</div>';
     h+='</div>';
   });
@@ -6245,17 +6314,24 @@ function pdCardHTML(){
   var on=pediaOn(), months=I.months.slice().sort(function(a,b){ return a-b; });
   var mk=Object.keys(I.matched).length, um=Object.keys(I.unmatched);
   var sel=(S.pdMonth!==undefined&&months.indexOf(S.pdMonth)>=0)? S.pdMonth : null;
+  var vst={}; try{ vst=pdVersionState(); }catch(e){}
+  var unsaved=Object.keys(vst).filter(function(m){ return !vst[m].saved; }).length;
   var h='<div class="card pd-card"><div class="pd-top">'+
     '<div class="pd-ic">P</div><div class="pd-tt"><b>Pedia schedule · J1</b>'+
       '<span>From the <b>'+esc(I.sheet)+'</b> sheet. In these months each Pedia doctor is counted with that month\'s week; other months use the main sheet.</span></div>'+
-    '<label class="pd-sw"><input type="checkbox" id="pdOn"'+(on?' checked':'')+'><i></i><span>'+(on?'Counting':'Off')+'</span></label></div>'+
+    '<label class="pd-sw"><input type="checkbox" id="pdOn"'+(on?' checked':'')+'><i></i><span>'+(on?'Counting':'Off — the main sheet is used')+'</span></label></div>'+
     '<div class="pd-months">'+MONTHS_EN.map(function(mn,i){ var has=months.indexOf(i)>=0;
       return '<button type="button" class="pd-m'+(has?' has':'')+(sel===i?' on':'')+'"'+(has?' data-pdm="'+i+'"':' disabled')+'>'+
-        '<b>'+mn.slice(0,3)+'</b><small>'+(has? (I.rows[i]||[]).length+' dr' : '—')+'</small></button>'; }).join('')+'</div>'+
+        '<b>'+mn.slice(0,3)+'</b><small>'+(has? (I.rows[i]||[]).length+' dr' : '—')+'</small>'+
+        (has&&vst[i]? '<em class="'+(vst[i].saved?'ok':'no')+'">'+(vst[i].saved?'✓ version':'not saved')+'</em>' : '')+'</button>'; }).join('')+'</div>'+
     '<div class="pd-sum"><span class="pd-ok">✓ '+mk+' doctor'+(mk===1?'':'s')+' matched</span>'+
       (um.length? '<span class="pd-bad" title="'+esc(um.join(', '))+'">⚠ '+um.length+' not found on the main sheet (J1): '+esc(um.slice(0,4).join(', '))+(um.length>4?' …':'')+'</span>' : '')+
       (!months.length? '<span class="pd-bad">No month block for '+esc(String(S.settings.year))+' in this sheet</span>' : '')+
-      '<span class="hint">Click a month to see its week.</span></div>';
+      '<span class="hint">Click a month to see its week.</span>'+
+      '<div style="flex:1"></div>'+
+      (Srv.on&&months.length? (unsaved? '<button type="button" class="btn sm pri" id="pdSaveV"'+(S.pdSaving?' disabled':'')+' style="background:#DB2777;border-color:#DB2777">'+
+          (S.pdSaving? 'Saving…' : 'Save '+unsaved+' month'+(unsaved===1?'':'s')+' as versions')+'</button>'
+        : '<span class="pd-ok">✓ Every month is saved in Versions</span>') : '')+'</div>';
   if(sel!==null){
     var list=(I.rows[sel]||[]).slice().sort(function(a,b){ return low(a.name)<low(b.name)?-1:1; });
     h+='<div class="tw" style="max-height:420px"><table class="pd-t"><thead><tr><th class="stick">Doctor · '+MONTHS_EN[sel]+'</th>'+
@@ -6272,6 +6348,7 @@ function pdCardHTML(){
   return h+'</div>';
 }
 function pdWire(){
+  var sv=el('pdSaveV'); if(sv) sv.onclick=pdSaveVersions;
   var o=el('pdOn'); if(o) o.onchange=function(){ S.settings.pediaOn=this.checked; refresh();
     toast(this.checked? 'Pedia months are counted from the Pedia Format sheet' : 'Pedia Format ignored — the main sheet is used'); };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-pdm]'),function(b){
@@ -6280,6 +6357,128 @@ function pdWire(){
       renderMaster(); }; });
 }
 
+
+
+/* ---- one doctor's fixed OT for a month, day by day, with the clash choice ---- */
+var OT_PICK={master:'Master schedule',fixed:'OT fixed session',both:'Both'};
+function otMonthRows(t,y,m){
+  var list=otDetail(t,y,m);
+  return list.map(function(x){
+    var clash=!!x.roster, st, cls;
+    if(clash&&!x.pick){ st='Waiting — choose'; cls='w'; }
+    else if(clash&&x.pick==='master'){ st='Not counted (it was the clinic)'; cls='n'; }
+    else if(clash){ st='Counted as fixed OT'; cls='y'; }
+    else { st='Counted as fixed OT'; cls='y'; }
+    return {day:x.day,wd:x.wd,ot:x.ot,roster:x.roster,open:x.open,pick:x.pick,clash:clash,st:st,cls:cls,id:t.key+'|'+y+'-'+m+'-'+x.day};
+  });
+}
+function otPickBtns(r){
+  if(!r.clash) return '<span class="hint">no clash</span>';
+  return '<div class="ot-pk">'+['master','fixed','both'].map(function(k){
+    return '<button type="button" class="'+(r.pick===k?'on':'')+'" data-otpk="'+esc(r.id)+'|'+k+'">'+OT_PICK[k]+'</button>'; }).join('')+'</div>';
+}
+function otTime(a){ return a&&a.f!==null&&a.f!==undefined? mstFmt(a.f)+'–'+mstFmt(a.t) : '—'; }
+function otDoctorTableHTML(t,y,m,showName){
+  var rows=otMonthRows(t,y,m); if(!rows.length) return '';
+  return rows.map(function(r){
+    return '<tr>'+(showName? '<td><b>'+esc(t.name)+'</b><div class="dpg-sub">'+esc(t.site)+' · '+esc(t.id)+'</div></td>' : '')+
+      '<td><b>'+r.day+' '+MONTHS_EN[m].slice(0,3)+'</b><div class="dpg-sub">'+DPG_DAYN[r.wd]+'</div></td>'+
+      '<td class="ot-tm">'+esc(otTime(r.ot))+'</td>'+
+      '<td>'+(r.roster? '<span class="ot-cl">clinic '+esc(otTime(r.roster))+'</span>' : '<span class="hint">no clinic then</span>')+'</td>'+
+      '<td>'+(r.open? '<span class="ot-op">'+esc(nz(r.open.sub)||'Open')+'</span>' : '<span class="hint">—</span>')+'</td>'+
+      '<td>'+otPickBtns(r)+'</td>'+
+      '<td><span class="ot-st '+r.cls+'">'+esc(r.st)+'</span></td></tr>'; }).join('');
+}
+function otTableHead(showName){
+  return '<thead><tr>'+(showName?'<th>Doctor</th>':'')+'<th>Day</th><th>OT time</th><th>Master schedule that time</th><th>Request in the log</th><th>What did he work?</th><th>Result</th></tr></thead>';
+}
+/* the doctor card: this doctor's fixed OT for the month on view */
+function otDrawerHTML(t,y,m){
+  if(!otList().some(function(o){ return otKeyOf(o)===t.key; })) return '';
+  if(m===null||m===undefined) return '<div class="card"><h3>Fixed OT sessions</h3><div class="cb"><p class="hint">Choose a month to see this doctor\'s fixed OT day by day.</p></div></div>';
+  var P=otMonthFor(t,y,m,S.result.rows), body=otDoctorTableHTML(t,y,m,false);
+  return '<div class="card"><h3>Fixed OT sessions · '+MONTHS_EN[m]+' '+y+
+    ' <span class="tag">'+fmt(P.total)+' counted</span>'+(P.held? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(P.held)+' waiting</span>' : '')+'</h3>'+
+    (body? '<div class="tw"><table class="ot-mt">'+otTableHead(false)+'<tbody>'+body+'</tbody></table></div>'
+      : '<div class="cb"><p class="hint">No fixed OT this month.</p></div>')+
+    '<div class="cb" style="padding-top:6px"><span class="hint">Set these here or on the <b>OT fixed session</b> page — it is the same choice.</span></div></div>';
+}
+/* the OT page: every OT doctor's month, with the clash choices */
+function otMonthCheckHTML(){
+  if(!S.result) return '';
+  var y=+S.settings.year, nd=new Date(), m=(S.otMonth!==undefined)? S.otMonth : (nd.getFullYear()===y? nd.getMonth() : 0);
+  var keys={}; otList().forEach(function(o){ var k=otKeyOf(o); if(k) keys[k]=1; });
+  var docs=S.result.rows.filter(function(t){ return keys[t.key]; }).sort(function(a,b){ return low(a.name)<low(b.name)?-1:1; });
+  var waiting=0, counted=0, body='', fl=S.otFl||'';
+  docs.forEach(function(t){ var P=otMonthFor(t,y,m,S.result.rows); waiting+=P.held; counted+=P.total;
+    if(fl==='wait'&&!(P.held>0)) return;
+    if(fl==='clash'&&!otMonthRows(t,y,m).some(function(r){ return r.clash; })) return;
+    body+=otDoctorTableHTML(t,y,m,true); });
+  return '<div class="card ot-chk"><h3>Month check · day by day'+
+      ' <span class="tag">'+fmt(counted)+' counted</span>'+(waiting? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(waiting)+' waiting for you</span>' : '')+'</h3>'+
+    '<div class="cb" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
+      '<select id="otMonthSel">'+MONTHS_EN.map(function(mn,i){ return '<option value="'+i+'"'+(i===m?' selected':'')+'>'+mn+' '+y+'</option>'; }).join('')+'</select>'+
+      [['','All days'],['clash','Clashes only'],['wait','Waiting only']].map(function(x){ return '<button type="button" class="db2-fc'+(fl===x[0]?' on':'')+'" data-otfl="'+x[0]+'">'+x[1]+'</button>'; }).join('')+
+      (waiting? '<div style="flex:1"></div><span class="hint">Set all waiting:</span>'+['master','fixed','both'].map(function(k){ return '<button type="button" class="btn sm" data-otallm="'+k+'">'+OT_PICK[k]+'</button>'; }).join('') : '')+
+    '</div>'+
+    (body? '<div class="tw" style="max-height:520px"><table class="ot-mt">'+otTableHead(true)+'<tbody>'+body+'</tbody></table></div>'
+      : '<div class="cb"><p class="hint">Nothing to show for '+MONTHS_EN[m]+'.</p></div>')+'</div>';
+}
+function otRulesHTML(){
+  return '<details class="card ot-rules"'+(S.otRulesOpen?' open':'')+' id="otRules"><summary><b>How fixed OT is counted</b> <span class="hint">— the rules, in plain words</span></summary><div class="cb"><ol>'+
+    '<li><b>Every matching weekday is one session.</b> A doctor set for Monday 5–9 PM gets one session every Monday of the month (inside the months / year you gave the entry).</li>'+
+    '<li><b>It has its own column.</b> Fixed OT shows in the <b>Fixed OT</b> column on the Doctors page. It is <u>not</u> added to Sessions, Opened or Total.</li>'+
+    '<li><b>A clash waits for you.</b> If the OT time overlaps the doctor\'s master-schedule clinic that day, the OT is held back until you say what he worked: <b>Master schedule</b> → the OT is not counted · <b>OT fixed session</b> or <b>Both</b> → the OT is counted. The clinic session always stays in Sessions.</li>'+
+    '<li><b>Holidays, leave and leaving</b> do not stop it here: OT on a public holiday, on a day he closed the clinic, or after his last day is still counted on this page.</li>'+
+    '<li><b>Paid extra is stricter.</b> The OT from the master file\'s OT sheet is paid on Paid extra: a day already paid in the log is not paid twice, and a closure that day takes its hours off.</li>'+
+    '<li><b>Finance report</b> takes Fixed sessions from Paid extra first, and from this page when Paid extra has none.</li>'+
+    '</ol></div></details>';
+}
+/* ---- Pedia months saved as versions ----
+   One version per Pedia month, dated the 1st: the master as it stands, with
+   each matched Pedia doctor's line replaced by that month's Pedia week. */
+function pdVersionLines(m){
+  var I=S.pediaInfo, rows=I&&I.rows&&I.rows[m]; if(!rows||!rows.length) return null;
+  var by={}; rows.forEach(function(r){ by[r.key]=r; });
+  var base=mvLines(), out=[], put={};
+  base.forEach(function(l){
+    var k=nz(l.i)+'|'+nz(l.s)+'|'+nameKey(l.n), r=by[k];
+    if(!r){ out.push(l); return; }
+    if(put[k]) return;                       /* one line carries the month's week */
+    put[k]=1;
+    var c=JSON.parse(JSON.stringify(l));
+    c.c=r.spans.map(function(day){ return day.map(function(sp){ return [sp.f,sp.t,sp.fill||'']; }); });
+    c.pd=m; out.push(c);
+  });
+  return out;
+}
+function pdVersionState(){
+  var I=S.pediaInfo, y=+S.settings.year, out={}; if(!I) return out;
+  var have=(S.mv&&S.mv.years&&S.mv.years[y])||[], trash=mvTrash();
+  var ck=mvSig()+'|'+(S.pediaStamp||'')+'|'+JSON.stringify(I.months)+'|'+y, C=S._pdvs;
+  if(!C||C.k!==ck){ C=S._pdvs={k:ck,m:{}};
+    I.months.forEach(function(m){ var l=pdVersionLines(m); if(l) C.m[m]={lines:l,h:mvHash(JSON.stringify(l))}; }); }
+  I.months.forEach(function(m){
+    var cm=C.m[m]; if(!cm) return;
+    var lines=cm.lines, eff=y+'-'+String(m+1).padStart(2,'0')+'-01', h=cm.h;
+    var hit=have.filter(function(v){ var n=mvNote(v); return !trash[v.id]&&n.src==='pedia'&&mvEff(v)===eff&&n.h===h; })[0];
+    out[m]={eff:eff,h:h,lines:lines,saved:!!hit}; });
+  return out;
+}
+function pdSaveVersions(){
+  if(!Srv.on){ toast('Sign in to the portal to save versions'); return; }
+  var y=+S.settings.year;
+  mvLoad(y,true).then(function(){
+    var st=pdVersionState(), todo=Object.keys(st).map(Number).filter(function(m){ return !st[m].saved; }).sort(function(a,b){ return a-b; });
+    if(!todo.length){ toast('Every Pedia month is already saved as a version'); return; }
+    S.pdSaving=true; renderMaster();
+    var p=Promise.resolve(), n=0;
+    todo.forEach(function(m){ p=p.then(function(){
+      return mvSave(st[m].lines,st[m].eff,'pedia',(S.files.m||'master')+' · Pedia Format',false,{h:st[m].h}).then(function(){ n++; }); }); });
+    p.then(function(){ S.pdSaving=false; toast('Saved '+n+' Pedia month'+(n===1?'':'s')+' as versions ('+todo.map(function(m){ return MONTHS_EN[m].slice(0,3); }).join(', ')+')'); renderMaster(); })
+     .catch(function(e){ S.pdSaving=false; renderMaster(); alert('Could not save the Pedia versions.\n\n'+(e&&e.message||e)); });
+  });
+}
 /* ---- the Pedia month, shown wherever a month is chosen ---- */
 function pdMonthRows(y,m){
   var I=S.pediaInfo; if(!I||!pediaOn()||+y!==+S.settings.year||m===null||m===undefined) return null;
@@ -6308,7 +6507,36 @@ function pdNote(rows,y,m){
 function pdWeekOf(t,y,m){
   var by=pdMonthRows(y,m), p=by&&by[t.key];
   if(p) return {spans:pdSpans(p),src:'pedia'};
+  /* a saved version in force at the end of that month */
+  if(m!==null&&m!==undefined&&Srv.on){
+    if(!(S.mv&&S.mv.years&&S.mv.years[y])){ mvLoad(y).then(function(){ if(S.dw) renderDrawer(); }); }
+    var v=mvAsOf(y,m);
+    if(v){
+      var b=S.mvBody&&S.mvBody[v.id];
+      if(!b){ mvBody(v.id).then(function(){ if(S.dw) renderDrawer(); }); }
+      else {
+        var sp=[[],[],[],[],[],[],[]], hit=false;
+        (b.lines||[]).forEach(function(l){ if(nz(l.i)+'|'+nz(l.s)+'|'+nameKey(l.n)!==t.key) return; hit=true;
+          for(var d=0;d<7;d++) ((l.c||[])[d]||[]).forEach(function(x){ if(colorCounts(x[2]||'none')) sp[d].push({f:x[0]===null?17*60:x[0],t:x[1]===null?21*60:x[1],fill:x[2]||''}); }); });
+        if(hit) return {spans:sp,src:'version',v:v};
+      }
+    }
+  }
   return {spans:(t.spans||[[],[],[],[],[],[],[]]),src:'main'};
+}
+/* why a J1 Pedia doctor is not on that month's Pedia week */
+function pdWhyNot(t,y,m){
+  var I=S.pediaInfo; if(!I||m===null||m===undefined) return '';
+  if(I.months.indexOf(m)<0) return '';
+  if(!pediaIsJ1(t.site)) return '';
+  var inSheet=(S.pedia&&S.pedia.blocks||[]).filter(function(b){ return b.m===m; })[0];
+  var names=inSheet? inSheet.rows.map(function(r){ return r.name; }) : [];
+  var mine=nameKey(nz(t.name).replace(/\(.*?\)/g,'').replace(/^dr\.?\s*/i,''));
+  var listed=names.some(function(n){ return nameKey(nz(n).replace(/\(.*?\)/g,'').replace(/^dr\.?\s*/i,''))===mine; });
+  if(!listed&&!/pedia|paed/i.test(nz(t.spec)+' '+nz(t.dept))) return '';
+  if(!pediaOn()) return 'The Pedia Format sheet has a week for '+MONTHS_EN[m]+', but the <b>Pedia switch</b> on the Master schedule page is <b>off</b>, so this month is not counted from it. Switch it on to count the Pedia week.';
+  if(!listed) return 'This doctor is not in the <b>'+MONTHS_EN[m]+'</b> block of the Pedia Format sheet, so the main sheet is used.';
+  return 'The '+MONTHS_EN[m]+' Pedia week names this doctor, but it was matched to another J1 line with the same name. Check for a duplicate line on the main sheet.';
 }
 function pdWeekHTML(t,y,m){
   var W=pdWeekOf(t,y,m), H=num(S.settings.hrs)||4, n=0, hrs=0;
@@ -6322,11 +6550,16 @@ function pdWeekHTML(t,y,m){
       return mgCol(mgChip(inB,b,'',DPG_DAYN[d]+' '+DPG_BLK[b].n+': '+(inB.length? inB.map(function(sp){ return mstFmt(sp.f)+'–'+mstFmt(sp.t); }).join(', ') : 'off')),
         labs||(list.some(function(sp){ return !mstIsStd(sp); })?'&nbsp;':'')); }).join('');
     return '<div class="pdw-d'+(list.length?' on':'')+'"><b>'+dn+'</b><div>'+chips+'</div></div>'; }).join('');
+  var vn=W.v? mvNote(W.v) : null, why=(W.src!=='pedia')? pdWhyNot(t,y,m) : '';
   return dpgStyle()+'<div class="card pdw"><h3>'+esc(label)+
-      (W.src==='pedia'? ' <span class="pd-tag">Pedia Format · '+MONTHS_EN[m].slice(0,3)+'</span>' : ' <span class="tag">main sheet</span>')+
+      (W.src==='pedia'? ' <span class="pd-tag">Pedia Format · '+MONTHS_EN[m].slice(0,3)+'</span>'
+        : W.src==='version'? ' <span class="pd-tag" style="background:#EEF2FF;border-color:#C7D2FE;color:#3730A3">version from '+esc(verFmtIso(mvEff(W.v)))+(vn&&vn.src==='pedia'?' · Pedia Format':'')+'</span>'
+        : ' <span class="tag">main sheet</span>')+
       ' <span class="tag">'+fmt(n,0)+' a week · '+fmt(hrs)+' h</span></h3>'+
     '<div class="cb dpg"><div class="pdw-g">'+cells+'</div>'+
+    (why? '<div class="note w" style="margin-top:10px">'+why+'</div>' : '')+
     (W.src==='pedia'? '<p class="hint" style="margin-top:8px">This month this doctor works the week in the <b>Pedia Format</b> sheet, and the sessions above are counted from it.</p>'
+      : W.src==='version'? '<p class="hint" style="margin-top:8px">The master version in force at the end of '+MONTHS_EN[m]+'.</p>'
       : (m===null||m===undefined? '<p class="hint" style="margin-top:8px">Choose a month to see the schedule for that month.</p>' : ''))+
     '</div></div>';
 }
@@ -6489,10 +6722,9 @@ function renderDrawer(){
       '<button class="btn sm" id="dwAllYear">Show the whole year instead</button></div>')+
     '</div>';
 
-  if(t.fromMaster){
-    var nowD=new Date(), wm=(dm!==null)? dm : (nowD.getFullYear()===year? nowD.getMonth() : null);
-    h+=pdWeekHTML(t,year,wm);
-  }
+  var nowD=new Date(), wm=(dm!==null)? dm : (nowD.getFullYear()===year? nowD.getMonth() : null);
+  if(t.fromMaster) h+=pdWeekHTML(t,year,wm);
+  h+=otDrawerHTML(t,year,wm);
   if(t.hybrid){
     var rawC=0; for(var hm=0;hm<12;hm++) rawC+=(t.m[hm].cRaw!==undefined? t.m[hm].cRaw : t.m[hm].c);
     var over=Math.max(0,rawC-t.allowUsed);
@@ -10389,7 +10621,7 @@ function otMonthFor(t,year,m,rows){
       out.clashes.push({key:t.key,name:t.name,site:t.site,year:year,month:m,day:day,
         roster:per,ot:n,pick:pick,otTime:hit.a,rosterTime:hit.b});
       if(pick==='fixed'||pick==='both'){ out.total+=n; out.days[day]=(out.days[day]||0)+n; }
-      else out.held+=n;
+      else if(pick!=='master') out.held+=n;     /* "master schedule" is a decision, not a wait */
     }else{
       out.total+=n; out.days[day]=(out.days[day]||0)+n;
     }
@@ -10678,6 +10910,7 @@ function renderOT(){
          '<button type="button" class="dchip" data-otdel="'+i+'">remove</button></div></td></tr>';
   });
   h+='</tbody></table></div>';
+  h+=otMonthCheckHTML()+otRulesHTML();
   h+='<p class="hint" style="margin-top:10px">Fixed OT shows on the Doctors page in its own <b>Fixed OT</b> column and is paid on Paid extra. '+
      'Where it falls on a rostered clinic at the same hours, you choose which it was.</p>';
   h+=otFormHTML()+'</div>';
@@ -10685,6 +10918,16 @@ function renderOT(){
 }
 
 function wireOT(){
+  var oms=el('otMonthSel'); if(oms) oms.onchange=function(){ S.otMonth=+this.value; renderOT(); };
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-ot [data-otfl]'),function(b){
+    b.onclick=function(){ S.otFl=b.getAttribute('data-otfl'); renderOT(); }; });
+  var orl=el('otRules'); if(orl) orl.ontoggle=function(){ S.otRulesOpen=orl.open; };
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-ot [data-otallm]'),function(b){
+    b.onclick=function(){ var pick=b.getAttribute('data-otallm'), y=+S.settings.year, nd=new Date();
+      var m=(S.otMonth!==undefined)? S.otMonth : (nd.getFullYear()===y? nd.getMonth() : 0);
+      S.settings.otClash=S.settings.otClash||{};
+      S.result.rows.forEach(function(t){ otMonthRows(t,y,m).forEach(function(r){ if(r.clash&&!r.pick) S.settings.otClash[r.id]=pick; }); });
+      saveConfig(); refresh(); toast('Every waiting clash set to '+OT_PICK[pick]); }; });
   var q=el('otQ'); if(q) q.oninput=function(){ S.otf=S.otf||{}; S.otf.q=this.value; renderOT(); };
   var add=el('otAdd');
   if(add) add.onclick=function(){
