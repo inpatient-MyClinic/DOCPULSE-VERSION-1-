@@ -744,6 +744,25 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .fin-mo{color:#64748B;font-size:11px}.fin-id{font-variant-numeric:tabular-nums;color:#334155}.fin-nm{font-weight:600;color:#15202E;white-space:normal!important;min-width:140px}
 .fin-site{display:inline-block;min-width:28px;text-align:center;font-weight:800;font-size:11.5px;border-radius:6px;padding:2px 6px;color:#0F172A}
 .fin-st{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px}.fin-st.ft{background:#C6E0F4;color:#1E3A5F}.fin-st.pt{background:#FFE699;color:#6B4E00}.fin-st.h{background:#E9D5FF;color:#5B21B6}.fin-st.o{background:#E7E6E6;color:#334155}
+.nt{border-radius:18px!important;overflow:hidden;box-shadow:0 0 0 2px #93C5FD55}
+.nt-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(135deg,#EFF6FF,#F0FDFA)}
+.nt-ic{width:38px;height:38px;border-radius:11px;background:#fff;display:grid;place-items:center;font-size:19px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.nt-tt{flex:1;display:flex;flex-direction:column;gap:2px}.nt-tt b{font-size:15.5px;color:#1E3A8A}.nt-tt span{font-size:12.5px;color:#334155}
+.nt-bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:10px 18px;border-bottom:1px solid #F1F5F9}
+.nt-list{max-height:70vh;overflow:auto;padding:10px 18px 14px;display:flex;flex-direction:column;gap:9px}.nt-list>*{flex-shrink:0}
+.nt-row{border:1px solid #E6E9EF;border-radius:13px;padding:10px 13px;background:#fff}.nt-row.ok{background:#F8FFFC;border-color:#A7F3D0}.nt-row.skip,.nt-row.old{background:#F8FAFC;opacity:.75}.nt-row.changed{border-color:#FCD34D}
+.nt-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.nt-nm{flex:1;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.nt-nm b{font-size:14px}
+.nt-btns{display:flex;gap:6px;align-items:center}
+.nt-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}.nt-chip.y{background:#CCFBF1;color:#0F766E}.nt-chip.n{background:#E2E8F0;color:#475569}.nt-chip.w{background:#FEF3C7;color:#B45309}
+.nt-note{font-size:12.5px;color:#475569;margin:6px 0 4px;line-height:1.45}.nt-note mark{background:#FEF08A;color:#713F12;border-radius:4px;padding:0 3px;font-weight:700}
+.nt-ev{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px}
+.nt-ev select,.nt-ev input{font:inherit;font-size:12.5px;padding:4px 8px;border:1px solid #CBD5E1;border-radius:8px;background:#fff}.nt-ev select:disabled,.nt-ev input:disabled{background:#F1F5F9;color:#334155}
+.nt-to{font-size:12px;color:#64748B}.nt-eff{font-size:12.5px;color:#0F172A}.nt-soft{color:#64748B}
+.nt-why{flex-basis:100%;font-size:12px;color:#92400E;background:#FFFBEB;border-radius:8px;padding:5px 9px}
+.mv-nd{display:block;font-size:10px;font-weight:700;color:#1D4ED8;margin-top:1px}
+.mv-nts{border:1px solid #DBEAFE;background:#F8FBFF;border-radius:12px;padding:9px 12px;margin:8px 0}.mv-ntsh{font-size:12.5px;font-weight:700;color:#1E3A8A;margin-bottom:6px}
+.mv-ntr{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}.mv-ntd{width:52px;font-weight:800;color:#334155}
+.mv-ntk{font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:#E0E7FF;color:#3730A3}.mv-ntk.start{background:#CCFBF1;color:#0F766E}.mv-ntk.stop{background:#FFE4E6;color:#BE123C}.mv-ntk.temp{background:#FEF3C7;color:#92400E}
 .hyb-m{display:inline-flex;align-items:center;gap:2px;font-size:11px;padding:2px 5px;max-width:100%;box-sizing:border-box;border-radius:999px;background:#F5F3FF;border:1px solid #DDD6FE;color:#5B21B6;white-space:nowrap}
 .hyb-m b{font-size:10px}.hyb-m button{font:inherit;font-weight:700;width:18px;height:18px;padding:0;border-radius:50%;border:0;background:#fff;color:#5B21B6;cursor:pointer;line-height:1}
 .hyb-m button:hover{background:#EDE9FE}.hyb-m input{width:30px;font:inherit;font-weight:700;text-align:center;border:1px solid #DDD6FE;border-radius:6px;padding:1px 2px;background:#fff}
@@ -2061,6 +2080,7 @@ function compute(){
 
   indexByBase();
   try{ pediaBuild(order.map(function(k){ return byKey[k]; })); }catch(e){ S.pediaRecs=null; S.pediaStamp=''; }
+  try{ ntApply(order.map(function(k){ return byKey[k]; })); }catch(e){ S.ntStamp=''; }
 
   /* monthly buckets */
   function blank(){ var a=[]; for(var m=0;m<12;m++) a.push({s:0,c:0,o:0}); return a; }
@@ -2365,7 +2385,7 @@ function srvPushSettings(){
        were each saved to nothing. The names below are the ones the app uses. */
     ['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -2396,18 +2416,60 @@ function loadConfig(){ return Store.get('scc:config').then(function(c){
 /* Replacing innerHTML destroys the field being typed into, which threw focus
    back to the top of the page after every keystroke. Remember what had focus,
    where the caret sat and how far things were scrolled, and restore it. */
+/* Every box that scrolls keeps its place through a redraw — not only the ones
+   with an id. Each scrolled element is remembered by its id, or by its tag,
+   class and position among its kind, and put back after the new HTML lands.
+   Without this a list inside a card (the change list, a table) jumped to the
+   top on every click. */
+function scrollKey(n){ return n.id? '#'+n.id : n.tagName+'.'+(typeof n.className==='string'? n.className.replace(/\s+(on|open|done|flag|picked|sel|act)\b/g,'') : ''); }
+function scrollSnap(root){
+  var out={list:[],self:null}; if(!root) return out;
+  if(root.scrollTop||root.scrollLeft) out.self={t:root.scrollTop,l:root.scrollLeft};
+  var all=root.querySelectorAll('*'), cnt={};
+  for(var i=0;i<all.length;i++){ var n=all[i];
+    if(!(n.scrollTop||n.scrollLeft)) { if(n.id||n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1){ var k0=scrollKey(n); cnt[k0]=(cnt[k0]||0)+1; } continue; }
+    var k=scrollKey(n); cnt[k]=(cnt[k]||0)+1; out.list.push({k:k,n:cnt[k],t:n.scrollTop,l:n.scrollLeft}); }
+  return out;
+}
+function scrollRestore(root,snap){
+  if(!root||!snap) return;
+  if(snap.self){ root.scrollTop=snap.self.t; root.scrollLeft=snap.self.l; }
+  if(!snap.list.length) return;
+  var want={}; snap.list.forEach(function(x){ (want[x.k]=want[x.k]||{})[x.n]=x; });
+  var all=root.querySelectorAll('*'), cnt={};
+  for(var i=0;i<all.length;i++){ var n=all[i];
+    if(!(n.id||n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1)) continue;
+    var k=scrollKey(n); if(!want[k]) continue;
+    cnt[k]=(cnt[k]||0)+1; var x=want[k][cnt[k]]; if(!x) continue;
+    n.scrollTop=x.t; n.scrollLeft=x.l; }
+}
+/* replace a box's HTML without moving anything the reader was looking at */
+function keepPlace(root,fn){
+  var body=document.querySelector('.body'), bt=body?body.scrollTop:0;
+  var snap=scrollSnap(root);
+  var act=document.activeElement, actId=act&&act.id, selS=null, selE=null;
+  try{ if(act&&act.selectionStart!==undefined){ selS=act.selectionStart; selE=act.selectionEnd; } }catch(e){}
+  fn();
+  scrollRestore(root,snap);
+  if(body) body.scrollTop=bt;
+  if(actId&&root&&root.contains(el(actId)||null)){
+    var again=el(actId);
+    if(again&&again!==document.activeElement&&again.focus){
+      try{ again.focus({preventScroll:true}); }catch(e){ again.focus(); }
+      try{ if(selS!==null&&again.setSelectionRange) again.setSelectionRange(selS,selE); }catch(e){}
+    }
+  }
+}
 function paint(id,html,after){
   var body=document.querySelector('.body');
   var scroll=body?body.scrollTop:0;
   var act=document.activeElement, actId=act&&act.id, selS=null, selE=null;
   try{ if(act&&act.selectionStart!==undefined){ selS=act.selectionStart; selE=act.selectionEnd; } }catch(e){}
-  var scrolls={};
-  Array.prototype.forEach.call(document.querySelectorAll('#'+id+' [id]'),function(n){
-    if(n.scrollTop) scrolls[n.id]=n.scrollTop; });
-  el(id).innerHTML=html;
+  var root=el(id), snap=scrollSnap(root);
+  root.innerHTML=html;
   if(after) after();
+  scrollRestore(root,snap);
   if(body) body.scrollTop=scroll;
-  Object.keys(scrolls).forEach(function(k){ var n=el(k); if(n) n.scrollTop=scrolls[k]; });
   if(actId){
     var again=el(actId);
     if(again&&again.focus){
@@ -3236,7 +3298,8 @@ function mgeHTML(){
 }
 function mgeRefresh(){
   var box=el('mgeDays'); if(!box) return;
-  box.innerHTML=mgeDaysHTML();
+  var bx=el('mgeBox')||box;
+  keepPlace(bx,function(){ box.innerHTML=mgeDaysHTML(); });
   var tt=el('mgeTot'); if(tt) tt.innerHTML=mgeTotals();
 }
 function mgeWire(){
@@ -3424,11 +3487,15 @@ function mvCardHTML(){
       var l=byM[i], last=l[0];
       return '<button type="button" class="mv-m'+(l.length?' has':'')+(sm===i?' on':'')+(S.mvPrev&&S.mvPrev.y===y&&S.mvPrev.m===i?' mv-look':'')+'" data-mvm="'+i+'" title="Click to see the master as it was in '+mn+'">'+
         '<span class="mv-mn">'+mn.slice(0,3)+'</span><b>'+(l.length||'·')+'</b>'+
+        (function(){ var nd=ntInMonth(y,i).length; return nd? '<span class="mv-nd">+'+nd+' date'+(nd===1?'':'s')+'</span>' : ''; })()+
         '<span class="mv-ml">'+((S.mvPrev&&S.mvPrev.y===y&&S.mvPrev.m===i)? '👁 viewing' : last? 'last '+(+mvEff(last).slice(8,10))+' '+mn.slice(0,3) : 'no version')+'</span>'+
         '<i class="mv-dots">'+l.slice(0,6).map(function(){ return '<em></em>'; }).join('')+'</i></button>'; }).join('')+'</div>';
     if(sm!==null){
       var l=byM[sm];
       h+='<div class="mv-list"><div class="mv-lh">'+MONTHS_EN[sm]+' '+y+' · '+l.length+' version'+(l.length===1?'':'s')+'</div>';
+      var nds=ntInMonth(y,sm);
+      if(nds.length) h+='<div class="mv-nts"><div class="mv-ntsh">📅 Dates from the notes · '+MONTHS_EN[sm]+' '+y+'</div>'+nds.map(function(x){
+        return '<div class="mv-ntr"><span class="mv-ntd">'+x.d+' '+MONTHS_EN[sm].slice(0,3)+'</span><b>'+esc(x.t.name)+'</b>'+finSiteTag(x.t.site)+'<span class="mv-ntk '+x.kind+'">'+esc(x.lab)+'</span></div>'; }).join('')+'</div>';
       if(!l.length) h+='<div class="hint" style="padding:8px 0 4px">No version for this month yet. Use <b>Save version</b> or <b>Upload a master</b> with a date in '+MONTHS_EN[sm]+'.</div>';
       l.forEach(function(v,i){
         var n=mvNote(v), e=mvEff(v), t=new Date(v.saved_at), parts=String(n.s||'').split(' ').filter(Boolean);
@@ -3712,7 +3779,7 @@ function renderMaster(){
   var h='';
   if(S.pendingDiff) h+=sdPanelHTML(S.pendingDiff);
   else h+=sdKeptHTML();
-  h+=mvCardHTML()+pdCardHTML()+prevNote;
+  h+=ntCardHTML()+mvCardHTML()+pdCardHTML()+prevNote;
   h+='<div class="card"><h3>Master schedule <span class="tag">'+fmt(rows.length,0)+' doctors</span>'+
     '<span class="tag">'+fmt(totSlots,0)+' sessions a week</span>'+
     '<span class="tag">'+fmt(totHours,0)+' hours a week</span>'+
@@ -4164,6 +4231,7 @@ function wireMaster(){
   mgeWire();
   mvWire();
   pdWire();
+  ntWire();
   /* view switches, the colour key and the day board's date controls */
   function on(id,fn){ var n=el(id); if(n) n.onclick=fn; }
   on('mvWeek',function(){ S.mView='week'; renderMaster(); });
@@ -4614,7 +4682,7 @@ function nameKey(n){ return low(n).replace(/[^a-z0-9\u0600-\u06FF]/g,''); }
    anything unclear is reported in Health rather than guessed at. */
 /* ---- constants these screens were built on ---- */
 var DOC_BUCKETS=['dayOff','whole','altPick','altAnchor','mstAlt','schedFrom','lineSpan',
-                 'hybAllow','leftDocs','mstEdit','removed','noteSkip','otClash',
+                 'hybAllow','leftDocs','mstEdit','removed','noteSkip','otClash','otRule','sdDec','sdPrev','noteDec',
                  'rtmSched','rtmRemoved'];
 /* Which shared settings are lists and which are keyed objects. Read when the
    server's copy arrives, so a wrong shape is dropped instead of thrown. */
@@ -4701,6 +4769,7 @@ function liveOn(t,ms){
   /* a joined or left date recorded in the portal, which the master file may
      not carry at all */
   var w=schedWindow(t);
+  if(t.ntWin){ if(t.ntWin.from!==null&&ms<t.ntWin.from) return false; if(t.ntWin.to!==null&&ms>t.ntWin.to) return false; }
   if(w.from!==null&&ms<w.from) return false;
   if(w.to!==null&&ms>w.to) return false;
   if(t.last&&ms>Date.UTC(t.last.y,t.last.m,t.last.d)) return false;
@@ -5726,7 +5795,9 @@ function finRender(){
   if(!host){ host=document.createElement('div'); host.id='finHost'; document.body.appendChild(host); }
   if(!S.fin){ host.innerHTML=''; return; }
   var sy=el('finBox')? el('finBox').scrollTop : 0, act=document.activeElement&&document.activeElement.id;
+  var fsnap=scrollSnap(host);
   host.innerHTML=dpgStyle()+finHTML();
+  scrollRestore(host,fsnap);
   var bx=el('finBox'); if(bx) bx.scrollTop=sy;
   if(act==='finQ'||act==='msQ'){ var qi=el(act); if(qi){ qi.focus(); try{ qi.setSelectionRange(qi.value.length,qi.value.length); }catch(e){} } }
   function close(){ S.fin=null; finRender(); }
@@ -6059,11 +6130,17 @@ if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
     var n;
+    if((n=t.closest('[data-otrule]'))){ var rr=n.getAttribute('data-otrule'), ri=rr.lastIndexOf('|');
+      S.settings.otRule=S.settings.otRule||{};
+      var sid=rr.slice(0,ri), rp=rr.slice(ri+1);
+      if(S.settings.otRule[sid]===rp) delete S.settings.otRule[sid]; else S.settings.otRule[sid]=rp;
+      saveConfig(); refresh(); drawerRefresh(); return; }
+    if((n=t.closest('#otDwDays'))){ S.otDwDays=!S.otDwDays; drawerRefresh(); return; }
     if((n=t.closest('[data-otpk]'))){ var raw=n.getAttribute('data-otpk'), ix=raw.lastIndexOf('|');
       S.settings.otClash=S.settings.otClash||{};
       var id=raw.slice(0,ix), pk=raw.slice(ix+1);
       if(S.settings.otClash[id]===pk) delete S.settings.otClash[id]; else S.settings.otClash[id]=pk;
-      saveConfig(); refresh(); if(S.dw) renderDrawer(); if(S.page==='ot') renderOT(); return; }
+      saveConfig(); refresh(); drawerRefresh(); return; }
     if((n=t.closest('[data-msonly]'))){ e.preventDefault(); e.stopPropagation();
       var x=msSplit(n.getAttribute('data-msonly')), o=msObj(x.sc); o[x.k+'M']={}; o[x.k+'M'][x.v]=1;
       if(x.k!=='day'&&x.k!=='sub') o[x.k]=''; S.msOpen=null; S.msQ=''; msRender(x.sc,x.k); return; }
@@ -6172,7 +6249,7 @@ function sdInfo(c){
   return {cat:cat,flag:flag};
 }
 function sdPanelHTML(D){
-  var st=S.settled||{}, fl=S.sdF||'all';
+  var st=sdLoad(D), fl=S.sdF||'all';
   var info={}, cnt={all:D.changed.length,fewer:0,more:0,time:0,col:0,flag:0};
   D.changed.forEach(function(c){ var i=info[c.key]=sdInfo(c); cnt[i.cat]=(cnt[i.cat]||0)+1; if(i.flag) cnt.flag++; });
   var done=D.changed.filter(function(c){ return st[c.key]; }).length, tot=D.changed.length;
@@ -6253,56 +6330,68 @@ function sdKeptWire(){
 function sdKeepOne(c){
   var t=(S.result&&S.result.rows||[]).filter(function(x){ return x.key===c.key; })[0];
   var key=t? t.key : c.key, days={};
-  S.sdPrev=S.sdPrev||{};
-  if(!(key in S.sdPrev)) S.sdPrev[key]=(S.settings.mstEdit&&S.settings.mstEdit[key])||null;
+  S.settings.sdPrev=S.settings.sdPrev||{};
+  if(!(key in S.settings.sdPrev)) S.settings.sdPrev[key]=(S.settings.mstEdit&&S.settings.mstEdit[key])||null;
   MST_DAYS.forEach(function(nm,d){
     days[nm]=((c.old&&c.old.raw&&c.old.raw[d])||[]).map(function(x){
       return {f:x.f===null?17*60:x.f,t:x.t===null?21*60:x.t,fill:x.fill||''}; }); });
   S.settings.mstEdit=S.settings.mstEdit||{};
   S.settings.mstEdit[key]={days:days};
 }
+/* Decisions are saved (settings.sdDec), tied to exactly what changed for that
+   doctor: a refresh keeps them, and a different file asks again. */
+function sdHash(c){ return mvHash(JSON.stringify(c.bits||[])); }
+function sdLoad(D){ var dec=S.settings.sdDec||{}, st={};
+  ((D&&D.changed)||[]).forEach(function(c){ var x=dec[c.key]; if(x&&x.h===sdHash(c)) st[c.key]=x.d; });
+  S.settled=st; return st; }
+function sdPut(c,v){ S.settings.sdDec=S.settings.sdDec||{};
+  if(v) S.settings.sdDec[c.key]={h:sdHash(c),d:v,at:(new Date()).toISOString(),by:schedWho()}; else delete S.settings.sdDec[c.key];
+  S.settled=S.settled||{}; if(v) S.settled[c.key]=v; else delete S.settled[c.key];
+  saveConfig(); }
 /* put back whatever the doctor had before Keep old was pressed */
 function sdUnkeep(k){
-  var prev=S.sdPrev&&(k in S.sdPrev)? S.sdPrev[k] : null;
+  var P=S.settings.sdPrev||{}, prev=(k in P)? P[k] : null;
   S.settings.mstEdit=S.settings.mstEdit||{};
   if(prev) S.settings.mstEdit[k]=prev; else delete S.settings.mstEdit[k];
-  if(S.sdPrev) delete S.sdPrev[k];
+  delete P[k];
 }
 function sdFinish(){
   var D=S.pendingDiff; if(!D) return false;
-  var st=S.settled||{};
+  var st=sdLoad(D);
   if(D.changed.some(function(c){ return !st[c.key]; })) return false;
   S.settings.sdKept=S.settings.sdKept||{};
   D.changed.forEach(function(c){ if(st[c.key]==='keep') S.settings.sdKept[c.key]={n:c.name,s:c.site,at:(new Date()).toISOString()}; });
-  saveSchedule(); S.pendingDiff=null; S.settled={}; S.sdPrev={};
+  D.changed.forEach(function(c){ if(S.settings.sdDec) delete S.settings.sdDec[c.key]; if(S.settings.sdPrev) delete S.settings.sdPrev[c.key]; });
+  saveSchedule(); S.pendingDiff=null; S.settled={};
   toast('All decided — the new file is saved as your schedule');
   return true;
 }
 function sdWire(){
   sdKeptWire();
   var D=S.pendingDiff; if(!D) return;
+  sdLoad(D);
   function byKey(k){ return D.changed.filter(function(c){ return c.key===k; })[0]; }
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdf]'),function(b){
     b.onclick=function(){ S.sdF=b.getAttribute('data-sdf'); renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdnew]'),function(b){
-    b.onclick=function(){ var k=b.getAttribute('data-sdnew'); S.settled=S.settled||{};
-      var was=S.settled[k]; S.settled[k]='new';
+    b.onclick=function(){ var k=b.getAttribute('data-sdnew'), c=byKey(k); if(!c) return;
+      var was=(S.settled||{})[k]; sdPut(c,'new');
       if(was==='keep'){ sdUnkeep(k); refresh(); } else renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdkeep]'),function(b){
     b.onclick=function(){ var c=byKey(b.getAttribute('data-sdkeep')); if(!c) return;
-      S.settled=S.settled||{}; if(S.settled[c.key]==='keep') return;
-      sdKeepOne(c); S.settled[c.key]='keep'; refresh(); }; });
+      if((S.settled||{})[c.key]==='keep') return;
+      sdKeepOne(c); sdPut(c,'keep'); refresh(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdundo]'),function(b){
-    b.onclick=function(){ var k=b.getAttribute('data-sdundo'), was=(S.settled||{})[k];
-      delete S.settled[k];
+    b.onclick=function(){ var k=b.getAttribute('data-sdundo'), c=byKey(k), was=(S.settled||{})[k];
+      if(c) sdPut(c,null);
       if(was==='keep'){ sdUnkeep(k); refresh(); } else renderMaster(); }; });
   var sa=el('sdAccept');
-  if(sa) sa.onclick=function(){ S.settled=S.settled||{};
-    D.changed.forEach(function(c){ if(!S.settled[c.key]) S.settled[c.key]='new'; });
+  if(sa) sa.onclick=function(){ sdLoad(D);
+    D.changed.forEach(function(c){ if(!S.settled[c.key]) sdPut(c,'new'); });
     renderMaster(); };
   var sk=el('sdKeep');
-  if(sk) sk.onclick=function(){ S.settled=S.settled||{};
-    D.changed.forEach(function(c){ if(!S.settled[c.key]){ sdKeepOne(c); S.settled[c.key]='keep'; } });
+  if(sk) sk.onclick=function(){ sdLoad(D);
+    D.changed.forEach(function(c){ if(!S.settled[c.key]){ sdKeepOne(c); sdPut(c,'keep'); } });
     refresh(); };
   var sv=el('sdSave');
   if(sv) sv.onclick=function(){ if(sdFinish()) refresh(); };
@@ -6369,7 +6458,7 @@ function otMonthRows(t,y,m){
     else if(clash&&x.pick==='master'){ st='Not counted (it was the clinic)'; cls='n'; }
     else if(clash){ st='Counted as fixed OT'; cls='y'; }
     else { st='Counted as fixed OT'; cls='y'; }
-    return {day:x.day,wd:x.wd,ot:x.ot,roster:x.roster,open:x.open,pick:x.pick,clash:clash,st:st,cls:cls,id:t.key+'|'+y+'-'+m+'-'+x.day};
+    return {day:x.day,wd:x.wd,ot:x.ot,roster:x.roster,open:x.open,pick:x.pick,pickFrom:x.pickFrom,clash:clash,st:st,cls:cls,id:t.key+'|'+y+'-'+m+'-'+x.day,slot:otSlotId(t.key,x.wd,x.ot)};
   });
 }
 function otPickBtns(r){
@@ -6387,21 +6476,51 @@ function otDoctorTableHTML(t,y,m,showName){
       '<td>'+(r.roster? '<span class="ot-cl">clinic '+esc(otTime(r.roster))+'</span>' : '<span class="hint">no clinic then</span>')+'</td>'+
       '<td>'+(r.open? '<span class="ot-op">'+esc(nz(r.open.sub)||'Open')+'</span>' : '<span class="hint">—</span>')+'</td>'+
       '<td>'+otPickBtns(r)+'</td>'+
-      '<td><span class="ot-st '+r.cls+'">'+esc(r.st)+'</span></td></tr>'; }).join('');
+      '<td><span class="ot-st '+r.cls+'">'+esc(r.st)+'</span>'+(r.clash&&r.pick? '<div class="dpg-sub">'+(r.pickFrom==='day'? 'set for this day only' : 'from the doctor\'s choice')+'</div>' : '')+'</td></tr>'; }).join('');
 }
 function otTableHead(showName){
   return '<thead><tr>'+(showName?'<th>Doctor</th>':'')+'<th>Day</th><th>OT time</th><th>Master schedule that time</th><th>Request in the log</th><th>What did he work?</th><th>Result</th></tr></thead>';
+}
+
+/* ---- the doctor view: one row per doctor and OT slot, for the whole month ---- */
+function otSlotRows(t,y,m){
+  var by={}, out=[];
+  otMonthRows(t,y,m).forEach(function(r){
+    var k=r.slot; var g=by[k]||(by[k]={slot:k,t:t,wd:r.wd,ot:r.ot,roster:r.roster,days:[],clash:0,waiting:0,counted:0,notc:0,dayOv:0});
+    if(!by[k].roster&&r.roster) by[k].roster=r.roster;
+    g.days.push(r.day); if(r.clash) g.clash++; if(r.cls==='w') g.waiting++; else if(r.cls==='y') g.counted++; else g.notc++;
+    if(r.clash&&r.pickFrom==='day') g.dayOv++;
+    if(!by[k].__in){ by[k].__in=1; out.push(by[k]); } });
+  return out;
+}
+function otRuleBtns(g){
+  if(!g.clash) return '<span class="hint">no clash with his clinic</span>';
+  var cur=(S.settings.otRule||{})[g.slot]||'';
+  return '<div class="ot-pk">'+['master','fixed','both'].map(function(k){
+    return '<button type="button" class="'+(cur===k?'on':'')+'" data-otrule="'+esc(g.slot)+'|'+k+'">'+OT_PICK[k]+'</button>'; }).join('')+'</div>';
+}
+function otSlotTableHTML(list,y,m,showName){
+  if(!list.length) return '';
+  return '<table class="ot-mt"><thead><tr>'+(showName?'<th>Doctor</th>':'')+'<th>OT slot</th><th>Days in '+MONTHS_EN[m].slice(0,3)+'</th><th>Master schedule that time</th><th>What did he work? <span class="hint">(all days)</span></th><th>Result this month</th></tr></thead><tbody>'+
+    list.map(function(g){ var t=g.t;
+      var res=(g.waiting? '<span class="ot-st w">'+g.waiting+' waiting</span> ' : '')+(g.counted? '<span class="ot-st y">'+g.counted+' counted</span> ' : '')+(g.notc? '<span class="ot-st n">'+g.notc+' not counted</span>' : '');
+      return '<tr>'+(showName? '<td><b>'+esc(t.name)+'</b><div class="dpg-sub">'+esc(t.site)+' · '+esc(t.id)+'</div></td>' : '')+
+        '<td><b>'+DPG_DAYN[g.wd]+'</b> <span class="ot-tm">'+esc(otTime(g.ot))+'</span></td>'+
+        '<td>'+g.days.length+' day'+(g.days.length===1?'':'s')+'<div class="dpg-sub">'+g.days.join(', ')+'</div></td>'+
+        '<td>'+(g.roster? '<span class="ot-cl">clinic '+esc(otTime(g.roster))+'</span>' : '<span class="hint">no clinic then</span>')+'</td>'+
+        '<td>'+otRuleBtns(g)+(g.dayOv? '<div class="dpg-sub">'+g.dayOv+' day'+(g.dayOv===1?'':'s')+' set separately in Day by day</div>' : '')+'</td>'+
+        '<td>'+res+'</td></tr>'; }).join('')+'</tbody></table>';
 }
 /* the doctor card: this doctor's fixed OT for the month on view */
 function otDrawerHTML(t,y,m){
   if(!otList().some(function(o){ return otKeyOf(o)===t.key; })) return '';
   if(m===null||m===undefined) return '<div class="card"><h3>Fixed OT sessions</h3><div class="cb"><p class="hint">Choose a month to see this doctor\'s fixed OT day by day.</p></div></div>';
-  var P=otMonthFor(t,y,m,S.result.rows), body=otDoctorTableHTML(t,y,m,false);
+  var P=otMonthFor(t,y,m,S.result.rows), days=!!S.otDwDays, body=days? otDoctorTableHTML(t,y,m,false) : '', slots=otSlotTableHTML(otSlotRows(t,y,m),y,m,false);
   return '<div class="card"><h3>Fixed OT sessions · '+MONTHS_EN[m]+' '+y+
     ' <span class="tag">'+fmt(P.total)+' counted</span>'+(P.held? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(P.held)+' waiting</span>' : '')+'</h3>'+
-    (body? '<div class="tw"><table class="ot-mt">'+otTableHead(false)+'<tbody>'+body+'</tbody></table></div>'
-      : '<div class="cb"><p class="hint">No fixed OT this month.</p></div>')+
-    '<div class="cb" style="padding-top:6px"><span class="hint">Set these here or on the <b>OT fixed session</b> page — it is the same choice.</span></div></div>';
+    (slots? '<div class="tw">'+slots+'</div>' : '<div class="cb"><p class="hint">No fixed OT this month.</p></div>')+
+    (slots? '<div class="cb" style="padding-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn sm" id="otDwDays">'+(days?'Hide the days':'Show day by day')+'</button><span class="hint">One choice covers every day of that slot. Set a single day only if it was different. Same choice as on the <b>OT fixed session</b> page.</span></div>' : '')+
+    (body? '<div class="tw"><table class="ot-mt">'+otTableHead(false)+'<tbody>'+body+'</tbody></table></div>' : '')+'</div>';
 }
 /* the OT page: every OT doctor's month, with the clash choices */
 function otMonthCheckHTML(){
@@ -6410,18 +6529,23 @@ function otMonthCheckHTML(){
   var keys={}; otList().forEach(function(o){ var k=otKeyOf(o); if(k) keys[k]=1; });
   var docs=S.result.rows.filter(function(t){ return keys[t.key]; }).sort(function(a,b){ return low(a.name)<low(b.name)?-1:1; });
   var waiting=0, counted=0, body='', fl=S.otFl||'';
+  var view=S.otView||'doc', slots=[];
   docs.forEach(function(t){ var P=otMonthFor(t,y,m,S.result.rows); waiting+=P.held; counted+=P.total;
+    if(view==='doc'){ otSlotRows(t,y,m).forEach(function(g){ if(fl==='wait'&&!g.waiting) return; if(fl==='clash'&&!g.clash) return; slots.push(g); }); return; }
     if(fl==='wait'&&!(P.held>0)) return;
     if(fl==='clash'&&!otMonthRows(t,y,m).some(function(r){ return r.clash; })) return;
     body+=otDoctorTableHTML(t,y,m,true); });
-  return '<div class="card ot-chk"><h3>Month check · day by day'+
+  if(view==='doc') body=otSlotTableHTML(slots,y,m,true);
+  return '<div class="card ot-chk"><h3>Month check · '+(view==='doc'? 'by doctor' : 'day by day')+
       ' <span class="tag">'+fmt(counted)+' counted</span>'+(waiting? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(waiting)+' waiting for you</span>' : '')+'</h3>'+
     '<div class="cb" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
       '<select id="otMonthSel">'+MONTHS_EN.map(function(mn,i){ return '<option value="'+i+'"'+(i===m?' selected':'')+'>'+mn+' '+y+'</option>'; }).join('')+'</select>'+
-      [['','All days'],['clash','Clashes only'],['wait','Waiting only']].map(function(x){ return '<button type="button" class="db2-fc'+(fl===x[0]?' on':'')+'" data-otfl="'+x[0]+'">'+x[1]+'</button>'; }).join('')+
+      '<div class="seg2" role="group">'+[['doc','By doctor (all days)'],['day','Day by day']].map(function(x){ return '<button type="button" data-otview="'+x[0]+'" aria-pressed="'+(view===x[0])+'" style="font-size:12px;padding:5px 11px">'+x[1]+'</button>'; }).join('')+'</div>'+
+      [['','All'],['clash','Clashes only'],['wait','Waiting only']].map(function(x){ return '<button type="button" class="db2-fc'+(fl===x[0]?' on':'')+'" data-otfl="'+x[0]+'">'+x[1]+'</button>'; }).join('')+
       (waiting? '<div style="flex:1"></div><span class="hint">Set all waiting:</span>'+['master','fixed','both'].map(function(k){ return '<button type="button" class="btn sm" data-otallm="'+k+'">'+OT_PICK[k]+'</button>'; }).join('') : '')+
     '</div>'+
-    (body? '<div class="tw" style="max-height:520px"><table class="ot-mt">'+otTableHead(true)+'<tbody>'+body+'</tbody></table></div>'
+    (body&&view==='doc'? '<div class="tw" style="max-height:520px">'+body+'</div>'
+      : body? '<div class="tw" style="max-height:520px"><table class="ot-mt">'+otTableHead(true)+'<tbody>'+body+'</tbody></table></div>'
       : '<div class="cb"><p class="hint">Nothing to show for '+MONTHS_EN[m]+'.</p></div>')+'</div>';
 }
 function otRulesHTML(){
@@ -6479,6 +6603,297 @@ function pdSaveVersions(){
      .catch(function(e){ S.pdSaving=false; renderMaster(); alert('Could not save the Pedia versions.\n\n'+(e&&e.message||e)); });
   });
 }
+/* ---- reading dates out of a doctor's note ----
+   Returns {kind, from, to, phrase, sure, why, all:[segments]}. kind is one of
+   start · stop · change · temp · none. Dates are 'YYYY-MM-DD'. */
+var NT_MON={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function ntIso(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+function ntLastDay(y,m){ return new Date(Date.UTC(y,m+1,0)).getUTCDate(); }
+/* every date-looking phrase in a piece of text, in order */
+function ntDates(txt,Y){
+  var s=' '+String(txt||'').replace(/ /g,' ')+' ', out=[], M='(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?';
+  var used=[];
+  function take(re,fn){ var m; re.lastIndex=0; while((m=re.exec(s))){ var a=m.index,b=a+m[0].length;
+    if(used.some(function(u){ return a<u[1]&&b>u[0]; })) continue;
+    var d=fn(m); if(!d) continue; used.push([a,b]); d.at=a-1+(m[0].length-m[0].replace(/^\s+/,'').length); d.text=m[0].trim(); out.push(d); } }
+  /* 11/4/2026 — day first, the way the sheet writes it */
+  take(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g,function(m){ var d=+m[1],mo=+m[2]-1,y=+m[3]; if(mo<0||mo>11||d<1||d>31) return null; return {y:y,m:mo,d:d,yr:true,day:true}; });
+  /* 6 of April 2026 · 26 AUGUST · 16th July, 2026 */
+  take(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:of\\s+)?'+M+'(?:\\s*[,.]?\\s*\\(?(\\d{4})\\)?)?','gi'),function(m){
+    var d=+m[1], mo=NT_MON[m[2].toLowerCase()]; if(d<1||d>31) return null;
+    return {y:m[3]?+m[3]:Y,m:mo,d:d,yr:!!m[3],day:true}; });
+  /* July 16th 2026 · Sep 15 / 2025 · Jan 31 , 2026 · OCT  1 (2026) */
+  take(new RegExp('\\b'+M+'\\s*(\\d{1,2})(?:st|nd|rd|th)?\\b(?!\\s*(?:-|to)\\s*\\d)(?:\\s*[,/.]?\\s*\\(?(\\d{4})\\)?)?','gi'),function(m){
+    var d=+m[2], mo=NT_MON[m[1].toLowerCase()]; if(d<1||d>31) return null;
+    if(/^\d{4}$/.test(m[2])) return null;
+    return {y:m[3]?+m[3]:Y,m:mo,d:d,yr:!!m[3],day:true}; });
+  /* February 2026 · May 2026 — a month, no day */
+  take(new RegExp('\\b'+M+'\\s*,?\\s*\\(?(\\d{4})\\)?','gi'),function(m){ return {y:+m[2],m:NT_MON[m[1].toLowerCase()],d:1,yr:true,day:false}; });
+  /* a bare month: "Sept Schedule", "Start Feb", "by April" */
+  take(new RegExp('\\b'+M+'(?![a-z])','gi'),function(m){ var w=m[0].toLowerCase(); if(/^(may)$/.test(w)&&!/\b(may)\b\s*(\d|20)/i.test(s.slice(m.index,m.index+12))) {}
+    return {y:Y,m:NT_MON[m[1].toLowerCase()],d:1,yr:false,day:false}; });
+  out.sort(function(a,b){ return a.at-b.at; });
+  return out;
+}
+function ntKindOf(seg){
+  var t=seg.toLowerCase();
+  if(/\bbf\b|breast ?feed|parallel clinic|coverage only|coverages|\bpf\b|blockages/.test(t)) return 'none';
+  if(/alternate/.test(t)&&!/start|effect|\bfrom\b/.test(t)) return 'none';
+  if(/last\s*(working\s*)?day|last clinic|\bleft\b|resign|terminat|leaving|end of service|\bexit\b|\bstopp?ed\b/.test(t)) return 'stop';
+  if(/on leave until|resume|postpon/.test(t)) return 'resume';
+  if((/\bonly\b|temporar|for \d+\s*months|\btill\b/.test(t)||/\buntil\b/.test(t))&&!/until further notice/.test(t)) return 'temp';
+  if(/new\s*joiner|\bjoin|jouin|\bback\b|re-?opened|opened starting|\badded\b/.test(t)) return 'start';
+  if(/\bef+e|chang|remov|\bmove|switch|swtich|replac|additional|addtonal|extra|\bclos|\bopen|instead|new schedule|upda|uptae|permanent|\bno alternate/.test(t)) return 'change';
+  if(/start|begin|\bfrom\b|onwards/.test(t)) return 'start?';
+  return 'none';
+}
+/* the reading of a whole note: up to one start, one change, one last day and
+   one temporary stretch — the ones that set today's schedule */
+function ntRead(note,Y){
+  var raw=String(note||'').replace(/ /g,' ').trim();
+  if(!raw) return null;
+  var segs=raw.split(/\s*\|+\s*|\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+  var found=[], lastYear=null;
+  segs.forEach(function(sg,i){
+    var k=ntKindOf(sg), ds=ntDates(sg,Y);
+    /* a date with no year takes the last year written before it in the note */
+    var yrs=[], re=/\b(19|20)\d\d\b/g, m; while((m=re.exec(sg))) yrs.push({at:m.index,y:+m[0]});
+    ds.forEach(function(d){
+      if(d.yr) { lastYear=d.y; return; }
+      var before=yrs.filter(function(x){ return x.at<d.at; }), own=yrs.filter(function(x){ return x.at>d.at; });
+      var yy=before.length? before[before.length-1].y : (lastYear!==null? lastYear : (own.length? own[0].y : null));
+      if(yy!==null){ d.y=yy; d.yrFrom='note'; }
+    });
+    yrs.forEach(function(x){ lastYear=x.y; });
+    /* two dates joined by a dash, "to", "till" or "until": a from–to stretch */
+    if(ds.length>=2){ var between=sg.slice(ds[0].at+ds[0].text.length,ds[1].at);
+      if(/^\s*[)\]]?\s*(-|–|to|till|until)\s*$/i.test(between)&&k!=='none') k='temp'; }
+    found.push({i:i,seg:sg,kind:k,dates:ds}); });
+  function iso(x,end){ return ntIso(x.y,x.m,end&&!x.day? ntLastDay(x.y,x.m) : x.d); }
+  function latest(kinds){ var c=found.filter(function(f){ return kinds.indexOf(f.kind)>=0&&f.dates.length; });
+    if(!c.length) return null;
+    c.sort(function(a,b){ var x=a.dates[a.dates.length-1], y=b.dates[b.dates.length-1]; return iso(x)<iso(y)? -1 : 1; });
+    return c[c.length-1]; }
+  function flag(ev,used,f){
+    if(used.some(function(x){ return !x.yr; })){ ev.sure=false;
+      var yf=used.filter(function(x){ return !x.yr&&x.yrFrom==='note'; }).length;
+      ev.why.push(yf? 'no year on that date — taken from the note' : 'no year written — '+Y+' assumed'); }
+    if(used.some(function(x){ return !x.day; })&&ev.kind!=='temp'){ ev.sure=false; ev.why.push('no day written — the 1st assumed'); }
+    ev.phrase=used.map(function(x){ return x.text; }); ev.seg=f.seg; }
+  var ev=[];
+  var st=latest(['start','resume','start?']);
+  if(st){ var d=st.dates[st.dates.length-1], e={kind:'start',from:'',to:'',sure:true,why:[]};
+    if(st.kind==='resume'&&/until/i.test(st.seg)&&!d.day){ var nx=new Date(Date.UTC(d.y,d.m+1,1)); e.from=ntIso(nx.getUTCFullYear(),nx.getUTCMonth(),1); e.why.push('back the month after the leave'); }
+    else e.from=iso(d,false);
+    if(st.kind==='start?'){ e.sure=false; e.why.push('"starting" can mean a new doctor or a new schedule'); }
+    if(st.kind==='resume'&&/postpon/i.test(st.seg)){ e.sure=false; e.why.push('"postponed" — check what it means'); }
+    flag(e,[d],st); ev.push(e); }
+  var ch=latest(['change']);
+  if(ch){ var d2=ch.dates[ch.dates.length-1], e2={kind:'change',from:iso(d2,false),to:'',sure:true,why:[]}; flag(e2,[d2],ch);
+    if(!(ev.length&&ev[0].from&&e2.from<=ev[0].from)) ev.push(e2); }
+  var tp=latest(['temp']);
+  if(tp){ var a1=tp.dates[0], a2=tp.dates[tp.dates.length-1], e3={kind:'temp',from:iso(a1,false),to:'',sure:true,why:[]};
+    if(tp.dates.length>=2) e3.to=iso(a2,true); else e3.to=a1.day? '' : iso(a1,true);
+    if(!e3.to){ e3.kind='change'; } else if(e3.to<e3.from){ e3.sure=false; e3.why.push('the end is before the start'); }
+    flag(e3,tp.dates.length>=2? [a1,a2] : [a1],tp);
+    if(!(e3.kind==='change'&&ev.some(function(x){ return x.kind==='change'; }))) ev.push(e3); }
+  var sp=latest(['stop']);
+  if(sp){ var d4=sp.dates[sp.dates.length-1], e4={kind:'stop',from:'',to:iso(d4,true),sure:true,why:[]}; flag(e4,[d4],sp); ev.push(e4); }
+  else { var und=found.filter(function(f){ return f.kind==='stop'; })[0];
+    if(und) ev.push({kind:'stop',from:'',to:'',sure:false,why:['says the doctor left, but gives no date — add the last day'],phrase:[],seg:und.seg}); }
+  return {note:raw,events:ev,segs:found};
+}
+
+/* ---- dates in the doctors' notes: the review, the decisions, the effect ----
+   A confirmed date is a shared decision (settings.noteDec), applied in every
+   counting mode: Starts → nothing before; Last day → nothing after; Temporary →
+   only that stretch (or the previous schedule outside it); Schedule change →
+   before that day, the schedule of the version in force then, when one has it. */
+var NT_LAB={start:'Starts on',stop:'Last day',change:'New schedule from',temp:'Only from',ignore:'Ignore'};
+function ntMs(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(nz(iso)); return m? Date.UTC(+m[1],+m[2]-1,+m[3]) : null; }
+function ntFmt(iso){ var ms=ntMs(iso); if(ms===null) return '—'; var d=new Date(ms); return d.getUTCDate()+' '+MONTHS_EN[d.getUTCMonth()].slice(0,3)+' '+d.getUTCFullYear(); }
+function ntSig(t){ return mvHash((t.notes||[]).join(' | ')); }
+/* the earliest request in the log for each doctor — a doctor with requests
+   before a "starting" date was already working, so it is a schedule change */
+function ntFirstLog(){
+  var out={}; ((S.capacity&&S.capacity.rows)||[]).forEach(function(r){ if(!r.date) return;
+    var k=nz(r.id)+'|'+nz(r.site), ms=Date.UTC(r.date.y,r.date.m,r.date.d); if(out[k]===undefined||ms<out[k]) out[k]=ms; });
+  return out;
+}
+function ntItems(){
+  if(!S.result) return [];
+  var Y=+S.settings.year, ck=Y+'|'+S.result.rows.length+'|'+JSON.stringify(S.result.rows.map(function(t){ return t.fromMaster? (t.notes||[]).join('|') : ''; })).length;
+  if(S._ntc&&S._ntc.k===ck&&S._ntc.res===S.result) return S._ntc.list;
+  var first=ntFirstLog(), y0=Date.UTC(Y,0,1), list=[];
+  S.result.rows.forEach(function(t){
+    if(!t.fromMaster) return;
+    var note=(t.notes||[]).join(' | '); if(!nz(note)) return;
+    var r=ntRead(note,Y); if(!r) return;
+    var ev=r.events.map(function(e){ var c={kind:e.kind,from:e.from,to:e.to,sure:e.sure,why:e.why.slice(),phrase:e.phrase||[],seg:e.seg,out:'none'};
+      if(c.kind==='temp') c.out=/chang|temporar|switch|swtich/i.test(e.seg||'')? 'prev' : 'none';
+      /* a "start" for a doctor already in the log before that date is a change */
+      var fk=t.base||(nz(t.id)+'|'+nz(t.site));
+      if(c.kind==='start'&&!c.sure&&c.from&&first[fk]!==undefined&&first[fk]<ntMs(c.from)){
+        c.kind='change'; c.why.push('there are requests in the log for this doctor from '+ntFmt(new Date(first[fk]).toISOString().slice(0,10))+', so this is a new schedule, not a new doctor'); }
+      return c; });
+    var phr=[]; r.events.forEach(function(e){ (e.phrase||[]).forEach(function(p){ phr.push(p); }); });
+    /* dates wholly before the year change nothing in it */
+    ev.forEach(function(c){ c.old=((c.kind==='start'||c.kind==='change')&&c.from&&ntMs(c.from)<y0)||(c.kind==='temp'&&c.to&&ntMs(c.to)<y0); });
+    list.push({t:t,key:t.key,note:note,ev:ev,phrases:phr,sig:ntSig(t)});
+  });
+  S._ntc={k:ck,res:S.result,list:list};
+  return list;
+}
+function ntDec(key){ return (S.settings.noteDec||{})[key]||null; }
+/* the version in force the day before ms, and this doctor's week in it */
+function ntOldPat(key,ms){
+  if(!Srv.on||!S.mv) return null;
+  var trash=mvTrash(), best=null, day=new Date(ms-86400000).toISOString().slice(0,10);
+  Object.keys(S.mv.years||{}).forEach(function(yy){ (S.mv.years[yy]||[]).forEach(function(v){
+    if(trash[v.id]) return; var e=mvEff(v); if(e>day) return;
+    if(!best||e>mvEff(best)||(e===mvEff(best)&&v.id>best.id)) best=v; }); });
+  if(!best) return null;
+  var b=S.mvBody&&S.mvBody[best.id];
+  if(!b){ S.ntReq=S.ntReq||{}; if(!S.ntReq[best.id]){ S.ntReq[best.id]=1; mvBody(best.id).then(function(){ refresh(); }); } return null; }
+  var P=mvPattern(b.lines)[key]; if(!P) return {v:best,pat:{n:[0,0,0,0,0,0,0],h:[0,0,0,0,0,0,0]},none:true};
+  return {v:best,pat:P};
+}
+function ntApply(rows){
+  var D=S.settings.noteDec||{}, stamp=[];
+  if(Srv.on&&Object.keys(D).length){ var Y=+S.settings.year; [Y-1,Y].forEach(function(yy){ if(!(S.mv&&S.mv.years&&S.mv.years[yy])){ S.ntReqY=S.ntReqY||{}; if(!S.ntReqY[yy]){ S.ntReqY[yy]=1; mvLoad(yy).then(function(){ refresh(); }); } } }); }
+  rows.forEach(function(t){
+    t.ntWin=null; t.ntOld=null;
+    var d=D[t.key]; if(!d||d.st!=='ok') return;
+    var w={from:null,to:null}, old=[];
+    (d.ev||[]).forEach(function(e){
+      var f=ntMs(e.from), to=ntMs(e.to);
+      if(e.kind==='start'&&f!==null) w.from=(w.from===null)? f : Math.max(w.from,f);
+      else if(e.kind==='stop'&&to!==null) w.to=(w.to===null)? to : Math.min(w.to,to);
+      else if(e.kind==='temp'&&f!==null&&to!==null){
+        if(e.out==='prev'){ var op=ntOldPat(t.key,f); if(op&&!op.none){ old.push({a:-8.64e15,b:f-1,pat:op.pat,v:op.v.id}); old.push({a:to+86400000,b:8.64e15,pat:op.pat,v:op.v.id}); } }
+        else { w.from=(w.from===null)? f : Math.max(w.from,f); w.to=(w.to===null)? to : Math.min(w.to,to); } }
+      else if(e.kind==='change'&&f!==null){ var oc=ntOldPat(t.key,f); if(oc) old.push({a:-8.64e15,b:f-1,pat:oc.pat,v:oc.v.id}); }
+    });
+    if(w.from!==null||w.to!==null) t.ntWin=w;
+    if(old.length) t.ntOld=old;
+    stamp.push(t.key+':'+JSON.stringify(w)+':'+old.map(function(o){ return o.v+'@'+o.a+'-'+o.b; }).join(','));
+  });
+  S.ntStamp=mvHash(stamp.join('|'));
+}
+
+/* ---- the review card ---- */
+function ntState(it){ var d=ntDec(it.key);
+  if(d&&d.sig===it.sig) return d.st==='skip'? 'skip' : 'ok';
+  if(d&&d.sig!==it.sig) return 'changed';
+  if(it.ev.length&&it.ev.every(function(e){ return e.old; })) return 'old';
+  return 'todo'; }
+function ntEvOf(it){ var d=ntDec(it.key); if(d&&(ntState(it)==='ok'||ntState(it)==='skip')) return d.ev;
+  S.ntDraft=S.ntDraft||{}; return S.ntDraft[it.key]||it.ev; }
+function ntEffect(it,e){
+  if(e.kind==='ignore') return 'Ignored — nothing changes.';
+  if(e.kind==='start') return e.from? 'Not counted before <b>'+ntFmt(e.from)+'</b>.' : 'Add the first day.';
+  if(e.kind==='stop') return e.to? 'Not counted after <b>'+ntFmt(e.to)+'</b>.' : '<b>Add the last day</b> — the note gives none.';
+  if(e.kind==='temp'){
+    if(!e.from||!e.to) return 'Add both dates.';
+    if(e.out==='prev'){ var o=ntOldPat(it.key,ntMs(e.from));
+      return '<b>'+ntFmt(e.from)+' – '+ntFmt(e.to)+'</b>: this schedule. Outside it: '+(o&&!o.none? 'the schedule in the version of '+esc(verFmtIso(mvEff(o.v)))+' ('+fmt(o.pat.n.reduce(function(a,b){return a+b;},0),0)+' a week).' : 'no earlier schedule is saved, so it counts as now.'); }
+    return 'Counted only <b>'+ntFmt(e.from)+' – '+ntFmt(e.to)+'</b>.'; }
+  if(e.kind==='change'){ if(!e.from) return 'Add the date.';
+    var oc=ntOldPat(it.key,ntMs(e.from));
+    if(oc&&!oc.none) return 'From <b>'+ntFmt(e.from)+'</b>: this schedule ('+fmt((it.t.week||[]).reduce(function(a,b){return a+b;},0),0)+' a week). Before it: the schedule in the version of '+esc(verFmtIso(mvEff(oc.v)))+' ('+fmt(oc.pat.n.reduce(function(a,b){return a+b;},0),0)+' a week).';
+    if(oc&&oc.none) return 'From <b>'+ntFmt(e.from)+'</b>: this schedule. He is not in the version before it, so nothing is counted before.';
+    return 'From <b>'+ntFmt(e.from)+'</b>: this schedule. <span class="nt-soft">No earlier schedule is saved as a version, so before this day it counts as now.</span>'; }
+  return '';
+}
+function ntMark(note,phr){
+  var h=esc(note);
+  (phr||[]).slice().sort(function(a,b){ return b.length-a.length; }).forEach(function(p){ var ep=esc(p); if(ep&&h.indexOf(ep)>=0) h=h.split(ep).join('<mark>'+ep+'</mark>'); });
+  return h; }
+function ntCardHTML(){
+  if(!S.result) return '';
+  var all=ntItems().filter(function(it){ return it.ev.length; });
+  if(!all.length) return '';
+  var cnt={todo:0,check:0,ok:0,skip:0,old:0,changed:0};
+  all.forEach(function(it){ var st=ntState(it); cnt[st]=(cnt[st]||0)+1; if((st==='todo'||st==='changed')&&ntEvOf(it).some(function(e){ return !e.sure; })) cnt.check++; });
+  var todo=cnt.todo+cnt.changed;
+  var fl=S.ntF||(todo? 'todo' : 'ok');
+  var clear=all.filter(function(it){ var st=ntState(it); return (st==='todo')&&ntEvOf(it).every(function(e){ return e.sure&&!e.old&&(e.from||e.to); }); }).length;
+  var open=S.ntOpen!==undefined? S.ntOpen : !!todo; S._ntOpenNow=open;
+  var h='<div class="card nt" id="ntCard"><div class="nt-top"><div class="nt-ic">📅</div><div class="nt-tt"><b>Dates in the doctors\' notes</b>'+
+      '<span>'+(todo? '<b>'+todo+'</b> to confirm — check the date and what it means, then confirm. Confirmed dates count for everyone, in every month.'
+        : '✓ Every note with a date is reviewed — '+cnt.ok+' confirmed, '+cnt.skip+' skipped.')+'</span></div>'+
+      '<button type="button" class="btn sm" id="ntToggle">'+(open? 'Hide' : 'Show')+'</button></div>';
+  if(!open) return h+'</div>';
+  var F=[['todo','To confirm',todo],['check','⚠ Check',cnt.check],['ok','✓ Confirmed',cnt.ok],['skip','Skipped',cnt.skip],['old','Before '+S.settings.year,cnt.old],['all','All',all.length]];
+  h+='<div class="nt-bar">'+F.map(function(x){ if(x[0]!=='todo'&&x[0]!=='all'&&!x[2]) return '';
+      return '<button type="button" class="db2-fc'+(fl===x[0]?' on':'')+(x[0]==='check'?' warn':'')+'" data-ntfl="'+x[0]+'">'+x[1]+' <b>'+x[2]+'</b></button>'; }).join('')+
+    '<div style="flex:1"></div>'+(clear? '<button type="button" class="sd-btn pri" id="ntAll">Confirm all clear ones ('+clear+')</button>' : '')+'</div>';
+  var list=all.filter(function(it){ var st=ntState(it);
+    if(fl==='all') return true; if(fl==='todo') return st==='todo'||st==='changed';
+    if(fl==='check') return (st==='todo'||st==='changed')&&ntEvOf(it).some(function(e){ return !e.sure; });
+    return st===fl; });
+  list.sort(function(a,b){ return low(a.t.name)<low(b.t.name)? -1 : 1; });
+  h+='<div class="nt-list">'+(list.length? '' : '<div class="sd-empty">Nothing here.</div>');
+  list.forEach(function(it){
+    var st=ntState(it), ev=ntEvOf(it), lock=(st==='ok'||st==='skip'), k=esc(it.key);
+    h+='<div class="nt-row '+st+'"><div class="nt-hd"><div class="nt-nm"><b>'+esc(it.t.name)+'</b> '+finSiteTag(it.t.site)+' '+finStTag(it.t)+
+        (st==='changed'? ' <span class="nt-chip w">note changed — check again</span>' : st==='ok'? ' <span class="nt-chip y">✓ confirmed</span>' : st==='skip'? ' <span class="nt-chip n">skipped</span>' : st==='old'? ' <span class="nt-chip n">before '+S.settings.year+'</span>' : '')+'</div>'+
+      '<div class="nt-btns">'+(lock? '<button type="button" class="sd-undo" data-ntundo="'+k+'">↺ Undo</button>'
+        : '<button type="button" class="sd-btn ghost sm" data-ntskip="'+k+'">Skip</button><button type="button" class="sd-btn pri sm" data-ntok="'+k+'">✓ Confirm</button>')+'</div></div>'+
+      '<div class="nt-note">“'+ntMark(it.note,it.phrases)+'”</div>';
+    ev.forEach(function(e,i){
+      var id=k+'|'+i, dis=lock? ' disabled' : '';
+      h+='<div class="nt-ev"><select data-ntk="'+id+'"'+dis+'>'+['start','stop','change','temp','ignore'].map(function(x){ return '<option value="'+x+'"'+(e.kind===x?' selected':'')+'>'+NT_LAB[x]+'</option>'; }).join('')+'</select>'+
+        (e.kind==='stop'? '<input type="date" data-ntt="'+id+'" value="'+esc(e.to||'')+'"'+dis+'>'
+          : e.kind==='ignore'? '' : '<input type="date" data-ntf="'+id+'" value="'+esc(e.from||'')+'"'+dis+'>')+
+        (e.kind==='temp'? '<span class="nt-to">to</span><input type="date" data-ntt="'+id+'" value="'+esc(e.to||'')+'"'+dis+'>'+
+          '<select data-ntout="'+id+'"'+dis+'><option value="none"'+(e.out!=='prev'?' selected':'')+'>outside: no clinic</option><option value="prev"'+(e.out==='prev'?' selected':'')+'>outside: previous schedule</option></select>' : '')+
+        '<span class="nt-eff">'+ntEffect(it,e)+'</span>'+
+        ((e.why||[]).length&&!lock? '<div class="nt-why">⚠ '+esc(e.why.join(' · '))+'</div>' : '')+'</div>';
+    });
+    h+='</div>';
+  });
+  return h+'</div></div>';
+}
+function ntSaveDec(it,ev,st){
+  S.settings.noteDec=S.settings.noteDec||{};
+  S.settings.noteDec[it.key]={sig:it.sig,st:st,at:(new Date()).toISOString(),by:schedWho(),
+    ev:ev.filter(function(e){ return e.kind!=='ignore'; }).map(function(e){ return {kind:e.kind,from:e.from||'',to:e.to||'',out:e.out||'none'}; })};
+}
+function ntWire(){
+  var root=el('ntCard'); if(!root) return;
+  function item(k){ return ntItems().filter(function(it){ return it.key===k; })[0]; }
+  function draft(k){ var it=item(k); S.ntDraft=S.ntDraft||{}; if(!S.ntDraft[k]) S.ntDraft[k]=JSON.parse(JSON.stringify(it.ev)); return S.ntDraft[k]; }
+  function q(sel){ return Array.prototype.slice.call(root.querySelectorAll(sel)); }
+  var tg=el('ntToggle'); if(tg) tg.onclick=function(){ S.ntOpen=!S._ntOpenNow; renderMaster(); };
+  q('[data-ntfl]').forEach(function(b){ b.onclick=function(){ S.ntF=b.getAttribute('data-ntfl'); renderMaster(); }; });
+  q('[data-ntk]').forEach(function(x){ x.onchange=function(){ var p=x.getAttribute('data-ntk').split('|'), i=+p.pop(), k=p.join('|'), e=draft(k)[i];
+    e.kind=x.value; if(e.kind==='stop'&&!e.to) e.to=e.from; if(e.kind!=='stop'&&!e.from) e.from=e.to; if(e.kind!=='temp'&&e.kind!=='stop') e.to=''; e.sure=true; e.why=[]; renderMaster(); }; });
+  q('[data-ntf]').forEach(function(x){ x.onchange=function(){ var p=x.getAttribute('data-ntf').split('|'), i=+p.pop(), k=p.join('|'); var e=draft(k)[i]; e.from=x.value; e.why=[]; e.sure=true; renderMaster(); }; });
+  q('[data-ntt]').forEach(function(x){ x.onchange=function(){ var p=x.getAttribute('data-ntt').split('|'), i=+p.pop(), k=p.join('|'); var e=draft(k)[i]; e.to=x.value; e.why=[]; e.sure=true; renderMaster(); }; });
+  q('[data-ntout]').forEach(function(x){ x.onchange=function(){ var p=x.getAttribute('data-ntout').split('|'), i=+p.pop(), k=p.join('|'); draft(k)[i].out=x.value; renderMaster(); }; });
+  q('[data-ntok]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-ntok'), it=item(k), ev=ntEvOf(it);
+    var bad=ev.filter(function(e){ return e.kind!=='ignore'&&((e.kind==='stop'&&!e.to)||(e.kind!=='stop'&&!e.from)||(e.kind==='temp'&&!e.to)); });
+    if(bad.length){ toast('Add the missing date first'); return; }
+    ntSaveDec(it,ev,'ok'); if(S.ntDraft) delete S.ntDraft[k]; refresh();
+    toast('Saved for everyone — '+it.t.name+': '+ev.filter(function(e){ return e.kind!=='ignore'; }).map(function(e){ return NT_LAB[e.kind]+' '+ntFmt(e.kind==='stop'? e.to : e.from); }).join(', ')); }; });
+  q('[data-ntskip]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-ntskip'), it=item(k); ntSaveDec(it,[],'skip'); if(S.ntDraft) delete S.ntDraft[k]; refresh(); }; });
+  q('[data-ntundo]').forEach(function(b){ b.onclick=function(){ var k=b.getAttribute('data-ntundo'); if(S.settings.noteDec) delete S.settings.noteDec[k]; refresh(); }; });
+  var all=el('ntAll'); if(all) all.onclick=function(){ var n=0;
+    ntItems().forEach(function(it){ if(ntState(it)!=='todo') return; var ev=ntEvOf(it);
+      if(!ev.length||!ev.every(function(e){ return e.sure&&!e.old&&(e.from||e.to); })) return; ntSaveDec(it,ev,'ok'); n++; });
+    refresh(); toast('Confirmed '+n+' clear date'+(n===1?'':'s')+' — saved for everyone'); };
+}
+/* the confirmed dates that fall in one month, for the Versions card */
+function ntInMonth(y,m){
+  var out=[], D=S.settings.noteDec||{}, rows=S.result? S.result.rows : [], by={};
+  rows.forEach(function(t){ by[t.key]=t; });
+  Object.keys(D).forEach(function(k){ var d=D[k]; if(d.st!=='ok') return; var t=by[k]; if(!t) return;
+    (d.ev||[]).forEach(function(e){ [[e.kind==='stop'? '' : e.from,e.kind==='temp'? 'Only from' : NT_LAB[e.kind]],[e.kind==='stop'||e.kind==='temp'? e.to : '',e.kind==='temp'? 'Only until' : NT_LAB[e.kind]]].forEach(function(x){
+      var ms=ntMs(x[0]); if(ms===null) return; var dd=new Date(ms); if(dd.getUTCFullYear()!==y||dd.getUTCMonth()!==m) return;
+      out.push({d:dd.getUTCDate(),iso:x[0],t:t,lab:x[1],kind:e.kind}); }); }); });
+  return out.sort(function(a,b){ return a.d-b.d||(low(a.t.name)<low(b.t.name)?-1:1); });
+}
 /* ---- the Pedia month, shown wherever a month is chosen ---- */
 function pdMonthRows(y,m){
   var I=S.pediaInfo; if(!I||!pediaOn()||+y!==+S.settings.year||m===null||m===undefined) return null;
@@ -6509,11 +6924,11 @@ function pdWeekOf(t,y,m){
   if(p) return {spans:pdSpans(p),src:'pedia'};
   /* a saved version in force at the end of that month */
   if(m!==null&&m!==undefined&&Srv.on){
-    if(!(S.mv&&S.mv.years&&S.mv.years[y])){ mvLoad(y).then(function(){ if(S.dw) renderDrawer(); }); }
+    if(!(S.mv&&S.mv.years&&S.mv.years[y])){ mvLoad(y).then(drawerRefresh); }
     var v=mvAsOf(y,m);
     if(v){
       var b=S.mvBody&&S.mvBody[v.id];
-      if(!b){ mvBody(v.id).then(function(){ if(S.dw) renderDrawer(); }); }
+      if(!b){ mvBody(v.id).then(drawerRefresh); }
       else {
         var sp=[[],[],[],[],[],[],[]], hit=false;
         (b.lines||[]).forEach(function(l){ if(nz(l.i)+'|'+nz(l.s)+'|'+nameKey(l.n)!==t.key) return; hit=true;
@@ -6968,7 +7383,8 @@ function renderDrawer(){
   }
   h+='</div></div>';
 
-  el('drawer').innerHTML=h;
+  var dwEl=el('drawer'), dwOpen=dwEl.classList.contains('on');
+  if(dwOpen) keepPlace(dwEl,function(){ dwEl.innerHTML=h; }); else dwEl.innerHTML=h;
   el('drawer').classList.add('on'); el('scrim').classList.add('on');
   el('dwX').onclick=closeDrawer;
   Array.prototype.forEach.call(document.querySelectorAll('#dwMonths [data-m]'),function(b){
@@ -7005,7 +7421,10 @@ function renderDrawer(){
   });
 }
 
-function closeDrawer(){ el('drawer').classList.remove('on'); el('scrim').classList.remove('on'); }
+function closeDrawer(){ el('drawer').classList.remove('on'); el('scrim').classList.remove('on'); S.dw=null; }
+/* redraw the doctor card only while it is actually open — a background update
+   must never pop it back up over the page */
+function drawerRefresh(){ if(S.dw&&el('drawer')&&el('drawer').classList.contains('on')) renderDrawer(); }
 
 /* -------------------------------------------------------- dashboard page
    One question, answered top to bottom: of the sessions we planned, how many did
@@ -8658,6 +9077,8 @@ function schedWeekOn(t,ms,withPedia){
   /* the Pedia Format month block, where there is one, is this doctor's week */
   /* counting only: the master grids, the export and the Data-tab comparison
      show the master as written */
+  if(withPedia&&t.ntOld) t.ntOld.forEach(function(o){ if(ms<o.a||ms>o.b) return;
+    for(var od=0;od<7;od++){ base.n[od]=o.pat.n[od]; base.h[od]=o.pat.h[od]; } });
   var pr=withPedia&&S.pediaRecs&&S.pediaRecs[schedKey(t)];
   if(pr) pr.forEach(function(r){
     var from=schedYMD(r.from), to=schedYMD(r.to);
@@ -8683,7 +9104,7 @@ function schedWeekOn(t,ms,withPedia){
    per-doctor memo cannot serve a stale week */
 function schedStamp(){
   var st=SchedStore.load();
-  return [schedSrc(),schedChOn()?1:0,st.rows.length,S.settings.hrs,S.dayFilter,schedSrc()==='versions'?S.mvStamp:'',S.pediaStamp||''].join('~');
+  return [schedSrc(),schedChOn()?1:0,st.rows.length,S.settings.hrs,S.dayFilter,schedSrc()==='versions'?S.mvStamp:'',S.pediaStamp||'',S.ntStamp||''].join('~');
 }
 function schedPlanMap(t,year,m){
   var c=t._planMap||(t._planMap={}), stamp=schedStamp(), k=year+'|'+m;
@@ -9610,7 +10031,7 @@ function dpgHTML(){
 }
 function dpgRender(){
   var w=el('dpgWrap'); if(!w) return;
-  w.innerHTML=dpgHTML();
+  keepPlace(w,function(){ w.innerHTML=dpgHTML(); });
   dpgWire();
 }
 function dpgSet(key,d,b,slot){
@@ -10603,6 +11024,13 @@ function otForMonth(key,year,month,rows){
   });
   return {days:days,times:times,total:total,entries:entries};
 }
+function otSlotId(key,wd,a){ return key+'|'+wd+'|'+(a&&a.f!==null&&a.f!==undefined? a.f+'-'+a.t : 'x'); }
+function otPickFor(key,year,m,day,wd,a){
+  var d=(S.settings.otClash||{})[key+'|'+year+'-'+m+'-'+day];
+  if(d) return {pick:d,from:'day'};
+  var r=(S.settings.otRule||{})[otSlotId(key,wd,a)];
+  return r? {pick:r,from:'rule'} : {pick:'',from:''};
+}
 function otMonthFor(t,year,m,rows){
   var out={total:0,held:0,days:{},clashes:[]};
   var ot=otForMonth(t.key,year,m,rows);
@@ -10616,7 +11044,7 @@ function otMonthFor(t,year,m,rows){
     var mine=(ot.times[d]||[]), rost=(t.spans&&t.spans[wd])||[];
     var hit=null;
     mine.forEach(function(a){ rost.forEach(function(b){ if(!hit&&otOverlap(a,b)) hit={a:a,b:b}; }); });
-    var pick=(S.settings.otClash||{})[t.key+'|'+year+'-'+m+'-'+day]||'';
+    var pick=hit? otPickFor(t.key,year,m,day,wd,hit.a).pick : '';
     if(per>0&&hit){
       out.clashes.push({key:t.key,name:t.name,site:t.site,year:year,month:m,day:day,
         roster:per,ot:n,pick:pick,otTime:hit.a,rosterTime:hit.b});
@@ -10735,7 +11163,7 @@ function otDetail(t,year,m){
       var canc=(t.otCancelRows||[]).filter(function(r){
         return r.date&&r.date.y===year&&r.date.m===m&&r.date.d===day; })[0]||null;
       out.push({day:day,wd:wd,ot:a,roster:hitR,open:hitO,cancel:canc,
-        pick:(S.settings.otClash||{})[t.key+'|'+year+'-'+m+'-'+day]||''});
+        pick:otPickFor(t.key,year,m,day,wd,a).pick, pickFrom:otPickFor(t.key,year,m,day,wd,a).from});
     });
   });
   out.sort(function(x,y){ return x.day-y.day; });
@@ -10919,14 +11347,16 @@ function renderOT(){
 
 function wireOT(){
   var oms=el('otMonthSel'); if(oms) oms.onchange=function(){ S.otMonth=+this.value; renderOT(); };
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-ot [data-otview]'),function(b){
+    b.onclick=function(){ S.otView=b.getAttribute('data-otview'); renderOT(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-ot [data-otfl]'),function(b){
     b.onclick=function(){ S.otFl=b.getAttribute('data-otfl'); renderOT(); }; });
   var orl=el('otRules'); if(orl) orl.ontoggle=function(){ S.otRulesOpen=orl.open; };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-ot [data-otallm]'),function(b){
     b.onclick=function(){ var pick=b.getAttribute('data-otallm'), y=+S.settings.year, nd=new Date();
       var m=(S.otMonth!==undefined)? S.otMonth : (nd.getFullYear()===y? nd.getMonth() : 0);
-      S.settings.otClash=S.settings.otClash||{};
-      S.result.rows.forEach(function(t){ otMonthRows(t,y,m).forEach(function(r){ if(r.clash&&!r.pick) S.settings.otClash[r.id]=pick; }); });
+      S.settings.otRule=S.settings.otRule||{};
+      S.result.rows.forEach(function(t){ otMonthRows(t,y,m).forEach(function(r){ if(r.clash&&!r.pick) S.settings.otRule[r.slot]=pick; }); });
       saveConfig(); refresh(); toast('Every waiting clash set to '+OT_PICK[pick]); }; });
   var q=el('otQ'); if(q) q.oninput=function(){ S.otf=S.otf||{}; S.otf.q=this.value; renderOT(); };
   var add=el('otAdd');
@@ -14427,7 +14857,9 @@ function renderRtm(){
   try{ if(act&&act.selectionStart!==undefined){ selS=act.selectionStart; selE=act.selectionEnd; } }catch(e){}
   var listBox=el('rtListBox'), listScroll=listBox?listBox.scrollTop:0;
 
-  el('pg-rtm').innerHTML=rtArrange(h);
+  var rtRoot=el('pg-rtm'), rtSnap=scrollSnap(rtRoot);
+  rtRoot.innerHTML=rtArrange(h);
+  scrollRestore(rtRoot,rtSnap);
   wireRtm();
   var adv=el('rtAdv'); if(adv) adv.ontoggle=function(){ S.rtAdv=adv.open; };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm .rt-step'),function(a){
