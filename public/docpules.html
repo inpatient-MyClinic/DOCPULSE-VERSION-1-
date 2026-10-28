@@ -783,6 +783,8 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .pd-ic.sm{width:26px;height:26px;border-radius:8px;font-size:13px;flex:none}
 .pdw-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 div.dpg{min-width:0;width:auto}
+.hru-al{display:flex;align-items:center;gap:7px;font-size:12px;color:#475569;white-space:nowrap;cursor:pointer}
+.hru-al small{color:#94A3B8}.hru-al .ru-sw[disabled]{opacity:.35;cursor:not-allowed}
 .wt td,.wt th{padding:7px 3px}.wt-ch{display:flex;justify-content:center;gap:3px;flex-wrap:wrap}
 .pdw-d{border:1px solid #EEF1F6;border-radius:10px;padding:7px 4px;text-align:center;background:#FBFCFE}.pdw-d.on{background:#fff;border-color:#DCE3ED}
 .pdw-d>b{display:block;font-size:11.5px;color:#475569;margin-bottom:5px}
@@ -2122,11 +2124,14 @@ function compute(){
     r._key=k; r._inc=false; r._used=false; r._w=0; r._why='';
     if(!rule||rule.include!=='Y'){ r._why='reason set to Skip'; return; }
     /* staff-type gate */
-    var f=nz(rule.filter).toUpperCase()||'ALL', pass;
-    if(f==='ALL'||f==='') pass=true;
-    else if(f==='H') pass=isHybrid(r.id,r.site);
-    else pass=(nz(r.empStatus).toUpperCase()===f);
-    if(!pass){ r._why='rule is '+f+' only, this row is '+(nz(r.empStatus)||'untagged'); return; }
+    /* several staff types can be picked at once (FT and PT, say): a row passes
+       when it matches any of them — "FT,PT" used to match nobody. An H doctor
+       can be left out of a reason on its own (H doctor rules). */
+    var f=nz(rule.filter).toUpperCase()||'ALL', pass, ftys=ruleTypes(rule), hyb=isHybrid(r.id,r.site);
+    if(rule.noH&&hyb) pass=false;
+    else if(!ftys.length) pass=true;
+    else pass=ftys.some(function(x){ return x==='H'? hyb : nz(r.empStatus).toUpperCase()===x; });
+    if(!pass){ r._why=(rule.noH&&hyb)? 'reason is not counted for H doctors' : 'rule is '+ftys.join(' / ')+' only, this row is '+(nz(r.empStatus)||'untagged'); return; }
     r._inc=true;
     ruleHit[k]=(ruleHit[k]||0)+1;
     if(!r.date){ r._why='no date'; return; }
@@ -2204,8 +2209,9 @@ function compute(){
     if(!t.fromMaster) stats.unmatchedRows[kk]=(stats.unmatchedRows[kk]||0)+1;
     t.m[r.date.m][side]+=w; r._used=true;
     t.reqN=(t.reqN||0)+1; (t.reqM=t.reqM||{})[r.date.m]=(t.reqM[r.date.m]||0)+1;
-    /* an H doctor's allowance is spent by Annual Leave closures only */
-    if(side==='c'&&/annual\s*leave/i.test(nz(r.sub)+' '+nz(r.main))) t.m[r.date.m].cAL=(t.m[r.date.m].cAL||0)+w;
+    /* an H doctor's allowance is spent by the reasons picked under H doctor
+       rules (Annual Leave unless changed) */
+    if(side==='c'&&hUsesAllow(r.main,r.sub)) t.m[r.date.m].cAL=(t.m[r.date.m].cAL||0)+w;
 
     var ra=reasonAgg[k]||(reasonAgg[k]={main:r.main,sub:r.sub,c:0,o:0,n:0});
     ra[side]+=w; ra.n++;
@@ -2402,7 +2408,7 @@ var SRVT=null;
    the server already holds in its own table). */
 var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule','hAllow',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -2834,9 +2840,9 @@ function mstWeeklyFromSpans(spans,week){
 function hybChip(t){
   if(!t.hybrid) return '';
   var left=t.allowLeft, counted=t.yc||0;
-  return '<span class="hyb" title="'+esc('Allowed '+fmt(t.allow)+' sessions of Annual Leave a year. Only Annual Leave closures use it. '+
+  return '<span class="hyb" title="'+esc('Allowed '+fmt(t.allow)+' sessions a year. Only closures for the reasons under Settings → Rules → H doctor rules use it (Annual Leave unless changed). '+
       fmt(t.allowUsed)+' used, '+fmt(left)+' left'+
-      (counted>0.0001? '. '+fmt(counted)+' closed sessions count against him (other reasons, or Annual Leave beyond the allowance).':'.'))+'">'+
+      (counted>0.0001? '. '+fmt(counted)+' closed sessions count against him (other reasons, or beyond the allowance).':'.'))+'">'+
     '<b>H</b>'+
     '<button class="hb" data-hyb="'+esc(t.key)+'|-" title="one fewer">−</button>'+
     '<span class="hn">'+fmt(t.allow)+'</span>'+
@@ -4008,7 +4014,7 @@ function renderMaster(){
         '<button type="button" class="dpg-p mg-act '+(hasLeft(t)?'off':'active')+'" data-mact="'+esc(t.key)+'" title="Click to mark as '+(hasLeft(t)?'active':'inactive (left)')+'">'+(hasLeft(t)?'Inactive':'Active')+'</button>'+
         '<button type="button" class="dpg-p mg-pp" data-mwhole="'+esc(t.key)+'" title="'+esc(t.whole? 'Counted by the session, however long it runs — click to count by the hour'
                                : 'Counted by the hour — click to count whole sessions')+'">'+(t.whole?'Per session':'Per hour')+'</button>'+
-        (t.hybrid? '<span class="hyb-m" title="H doctor: Annual Leave sessions allowed a year. Only Annual Leave closures use it — '+esc(fmt(t.allowUsed))+' used, '+esc(fmt(t.allowLeft))+' left.">'+
+        (t.hybrid? '<span class="hyb-m" title="H doctor: sessions allowed a year. Only closures for the reasons under Settings → Rules → H doctor rules use it — '+esc(fmt(t.allowUsed))+' used, '+esc(fmt(t.allowLeft))+' left.">'+
             '<b>AL</b><button type="button" data-mhyb="'+esc(t.key)+'|-" aria-label="one fewer">−</button>'+
             '<input type="number" min="0" step="1" data-mhybv="'+esc(t.key)+'" value="'+esc(String(t.allow))+'" aria-label="sessions allowed a year">'+
             '<button type="button" data-mhyb="'+esc(t.key)+'|+" aria-label="one more">+</button>'+
@@ -4275,7 +4281,7 @@ function wireMaster(){
     inp.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation(); };
     inp.onkeydown=function(e){ if(e.key==='Enter') inp.blur(); };
     inp.onchange=function(){ var v=num(inp.value); setHybAllowance(inp.getAttribute('data-mhybv'),(v===null||v<0)? 0 : v);
-      toast('Annual Leave allowance saved'); }; });
+      toast('H allowance saved'); }; });
   var mss=el('mfSaveSched');
   if(mss) mss.onclick=function(){
     var n=saveSchedule();
@@ -4759,7 +4765,7 @@ var SET_LIST={mvYears:1,holidays:1,colorNames:1,paidVals:1,paidValsSet:1,paidR:1
               ot:1,rtmAdded:1,accepted:1};
 var SET_MAP={};
 DOC_BUCKETS.forEach(function(k){ SET_MAP[k]=1; });
-['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash'].forEach(
+['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow'].forEach(
   function(k){ SET_MAP[k]=1; });
 var MST_BLK=['Morning','Afternoon','Evening'];
 var MST_BLOCKS=[[0,1,2],[0,1,2],[0,1,2],[0,1,2],[0,1,2],[2],[1,2]];
@@ -5295,7 +5301,7 @@ function renderValidation(){
      '<th class="n">Expected</th>'+
      '<th class="n">Claimed sessions</th>'+
      '<th class="n">Claimed hours</th>'+
-     (isH? '<th class="n" title="Annual Leave sessions allowed a year">AL allowed</th><th class="n" title="Annual Leave closures taken from the allowance">AL used</th><th class="n">Left</th>':'')+
+     (isH? '<th class="n" title="H allowance: sessions allowed a year">Allowed</th><th class="n" title="Closures taken from the allowance (reasons set under H doctor rules)">Used</th><th class="n">Left</th>':'')+
      '</tr></thead><tbody>';
   var TS={s:0,e:0,a:0,x:0,cs:0,ch:0,fr:0,ot:0};
   V.rows.forEach(function(r){
@@ -7234,9 +7240,9 @@ function renderDrawer(){
     var rawC=0; for(var hm=0;hm<12;hm++) rawC+=(t.m[hm].cRaw!==undefined? t.m[hm].cRaw : t.m[hm].c);
     var over=Math.max(0,rawC-t.allowUsed);
     h+='<div class="card"><h3>Hybrid allowance <span class="tag">'+esc(t.status||'H')+'</span></h3><div class="cb">'+
-       '<p class="hint" style="margin-bottom:11px">A hybrid doctor may take this many sessions of <b>Annual Leave</b> in the year '+
-       'without it counting. Only closures filed as Annual Leave use the allowance, in date order. Every other closure, '+
-       'and Annual Leave beyond the allowance, reduces the total.</p>'+
+       '<p class="hint" style="margin-bottom:11px">A hybrid doctor may close this many sessions in the year without it counting. '+
+       'Only closures for the reasons set under <b>Settings → Rules → H doctor rules</b> use the allowance (Annual Leave unless changed), in date order. '+
+       'Every other closure, and anything beyond the allowance, reduces the total.</p>'+
        '<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end">'+
          '<div><label class="hint" style="font-weight:700;display:block;margin-bottom:3px">Sessions allowed a year</label>'+
            '<input type="number" min="0" step="0.25" id="dwAllow" value="'+esc(String(t.allow))+'" '+
@@ -7244,7 +7250,7 @@ function renderDrawer(){
            'font-family:var(--mono);text-align:end;font-size:14px;font-weight:700"></div>'+
          '<div><div class="hint" style="font-weight:700">Closed in the year</div>'+
            '<div style="font-size:19px;font-weight:800">'+fmt(rawC)+'</div></div>'+
-         '<div><div class="hint" style="font-weight:700">of which Annual Leave</div>'+
+         '<div><div class="hint" style="font-weight:700">of which use the allowance</div>'+
            '<div style="font-size:19px;font-weight:800">'+fmt(t.yAL||0)+'</div></div>'+
          '<div><div class="hint" style="font-weight:700">Used from the allowance</div>'+
            '<div style="font-size:19px;font-weight:800;color:var(--teal)">'+fmt(t.allowUsed)+'</div></div>'+
@@ -15675,6 +15681,94 @@ function rptBuild(){
    Reason types and live counts on the tabs. It stays inside Settings here
    rather than returning to the sidebar, because folding the three dangerous
    screens behind one door was a deliberate choice. */
+/* An H doctor's allowance is spent by the reasons ticked under H doctor rules.
+   Nothing ticked or unticked there yet: Annual Leave, as it always was. */
+function hAllowDefault(main,sub){ return /annual\s*leave/i.test(nz(sub)+' '+nz(main)); }
+function hUsesAllow(main,sub){
+  var o=(S.settings.hAllow||{})[ruleKey(main,sub)];
+  if(o===true||o===false) return o;
+  return hAllowDefault(main,sub);
+}
+/* is this reason counted for H doctors under the counting rules */
+function hCounted(rule){
+  if(!rule||rule.include!=='Y'||rule.noH) return false;
+  var ty=ruleTypes(rule); return !ty.length||ty.indexOf('H')>=0;
+}
+function hSetCounted(rule,on){
+  if(!rule) return;
+  var ty=ruleTypes(rule);
+  if(on){
+    delete rule.noH;
+    if(rule.include!=='Y'){ rule.include='Y'; rule.filter='H'; return; }
+    if(ty.length&&ty.indexOf('H')<0){ ty.push('H'); rule.filter=ty.join(','); }
+    return;
+  }
+  if(rule.include!=='Y') return;
+  ty=ty.filter(function(x){ return x!=='H'; });
+  if(ruleTypes(rule).length&&!ty.length){ rule.include='N'; rule.filter='ALL'; delete rule.noH; return; }
+  rule.filter=ty.length? ty.join(',') : 'ALL';
+  rule.noH=true;
+}
+/* Settings → Rules → H doctor rules: the counting rules seen from an H
+   doctor's side. Per reason: is it counted for H doctors (the same switch as
+   the H button above), and does a closure for it come out of the yearly
+   allowance instead of the total. */
+function hRulesCard(keys,sideOf){
+  var R=S.result, hRows={}, hDocs={}, nH=0, hIds={};
+  (R? R.rows : []).forEach(function(t){ if(t.hybrid) hIds[nz(t.id)+'|'+nz(t.site)]=1; });
+  ((S.capacity&&S.capacity.rows)||[]).forEach(function(r){
+    if(!hIds[nz(r.id)+'|'+nz(r.site)]) return;
+    var k=ruleKey(r.main,r.sub); hRows[k]=(hRows[k]||0)+1; });
+  (R? R.rows : []).forEach(function(t){ if(t.hybrid&&!hDocs[t.key]){ hDocs[t.key]=1; nH++; } });
+  var F=S.hruF||'', Q=low(S.hruQ||''), nAllow=0, nCount=0;
+  keys.forEach(function(k){ var r=S.rules[k]; if(hUsesAllow(r.main,r.sub)) nAllow++; if(hCounted(r)) nCount++; });
+  var list=keys.filter(function(k){
+    var r=S.rules[k], al=hUsesAllow(r.main,r.sub), on=hCounted(r);
+    if(F==='h'&&!hRows[k]) return false;
+    if(F==='al'&&!al) return false;
+    if(F==='on'&&!on) return false; if(F==='off'&&on) return false;
+    if(F==='c'&&sideOf(k)!=='c') return false;
+    if(Q&&low(r.main+' '+r.sub).indexOf(Q)<0) return false;
+    return true; });
+  var used=0, left=0, allow=0;
+  (R? R.rows : []).forEach(function(t){ if(!t.hybrid) return; used+=t.allowUsed||0; left+=t.allowLeft||0; allow+=t.allow||0; });
+  var h='<div class="card ru" id="hRules"><div class="ru-hd"><div><h3 style="margin:0">H doctor rules</h3>'+
+    '<p class="hint" style="margin:4px 0 0">How each reason works for <b>hybrid (H) doctors</b>. '+
+    '<b>Counted for H</b> is the same switch as the H button in Counting rules. '+
+    '<b>Uses the allowance</b>: a closure for that reason comes out of the doctor\'s yearly allowance first, '+
+    'and only what is beyond it reduces the total. Annual Leave is on unless you change it.</p></div>'+
+    '<div class="ru-kpi"><div><b>'+nH+'</b><span>H doctors</span></div>'+
+      '<div><b>'+nAllow+'</b><span>reason'+(nAllow===1?' uses':'s use')+' the allowance</span></div>'+
+      '<div><b>'+fmt(used)+'</b><span>of '+fmt(allow)+' allowance used</span></div></div></div>'+
+    '<div class="ru-f"><input type="search" id="hruQ" placeholder="Search a reason" value="'+esc(S.hruQ||'')+'">'+
+      [['','All'],['h','H doctors have rows'],['al','Uses the allowance'],['on','Counted for H'],['off','Not counted for H'],['c','Closes sessions']]
+       .map(function(o){ return '<button type="button" class="db2-fc'+(F===o[0]?' on':'')+'" data-hruf="'+o[0]+'">'+o[1]+'</button>'; }).join('')+
+      (S.settings.hAllow&&Object.keys(S.settings.hAllow).length? '<button type="button" class="dchip" id="hruReset" title="Back to: Annual Leave only">Annual Leave only again</button>' : '')+
+    '</div>';
+  if(!list.length) h+='<div class="hc-none" style="margin:14px">No reason matches.</div>';
+  var groups={}, order=[];
+  list.forEach(function(k){ var g=S.rules[k].main||'(blank)'; if(!groups[g]){ groups[g]=[]; order.push(g); } groups[g].push(k); });
+  order.sort().forEach(function(g){
+    h+='<div class="ru-g"><div class="ru-gh">'+esc(g)+' <span>'+groups[g].length+'</span></div>';
+    groups[g].forEach(function(k){
+      var r=S.rules[k], on=hCounted(r), al=hUsesAllow(r.main,r.sub), sd=sideOf(k), n=hRows[k]||0;
+      var set=(S.settings.hAllow||{})[ruleKey(r.main,r.sub)]; set=(set===true||set===false);
+      h+='<div class="ru-r'+(on?' on':'')+'">'+
+        '<button type="button" class="ru-sw'+(on?' on':'')+'" data-hcnt="'+esc(k)+'" role="switch" aria-checked="'+on+'" title="'+(on?'Counted for H doctors — click to ignore for them':'Not counted for H doctors — click to count')+'"><i></i></button>'+
+        '<div class="ru-nm"><div class="ru-t">'+esc(r.sub||'(blank)')+
+          (sd? '<span class="ru-side '+sd+'">'+(sd==='o'?'opens sessions':'closes sessions')+'</span>' : '')+
+          (al? '<span class="ru-tag info">uses the allowance</span>' : '')+'</div>'+
+          '<div class="ru-s">'+(!on? 'Not counted for H doctors — their rows change nothing'
+              : al? 'Counted for H doctors · a closure comes out of the allowance first'
+              : 'Counted for H doctors · a closure reduces the total')+'</div></div>'+
+        '<label class="hru-al" title="'+(on? 'Take closures for this reason from the H allowance first' : 'Count this reason for H doctors first')+'">'+
+          '<button type="button" class="ru-sw'+(al?' on':'')+'" data-hal="'+esc(k)+'" role="switch" aria-checked="'+al+'"'+(on?'':' disabled')+'><i></i></button>'+
+          '<span>Uses the allowance'+(set? '' : ' <small>(default)</small>')+'</span></label>'+
+        '<div class="ru-cap" title="'+fmt(n,0)+' rows for H doctors in the capacity log"><div class="ru-n"><b>'+fmt(n,0)+'</b> H rows</div></div>'+
+        '</div>'; });
+    h+='</div>'; });
+  return h+'</div>';
+}
 function ruleTypes(rule){
   var raw=nz(rule&&rule.filter).toUpperCase();
   if(!raw||raw==='ALL') return [];
@@ -15753,6 +15847,7 @@ function renderRules(){
     if(low(r.status)==='open') a.o++; else a.c++; });
   function sideOf(k){ var a=side[k]; if(!a) return ''; return a.o>a.c? 'o' : 'c'; }
   function who(r){ var on=ruleTypes(r);
+    if(r.noH) return (on.length? on.map(function(x){ return ({FT:'full-timers',PT:'part-timers',LOCUM:'locums'})[x]||x; }).join(' and ') : 'everyone')+', not H doctors';
     if(!on.length) return 'everyone';
     var nm={FT:'full-timers',PT:'part-timers',H:'hybrid doctors',LOCUM:'locums'};
     return on.map(function(x){ return nm[x]||x; }).join(' and ')+' only'; }
@@ -15803,7 +15898,7 @@ function renderRules(){
             (ch? '<span class="ru-tag info" title="'+esc(ch)+'">not the recommended</span>' : '')+'</div>'+
           '<div class="ru-s">'+(on? 'Counted for <b>'+esc(who(r))+'</b>' : 'Ignored — these rows change nothing')+'</div></div>'+
         '<div class="ru-st">'+
-          '<button class="rt'+(types.length?'':' on')+'" data-rtype="'+esc(k)+'|ALL">All</button>'+
+          '<button class="rt'+(types.length||r.noH?'':' on')+'" data-rtype="'+esc(k)+'|ALL">All</button>'+
           ['FT','PT','H','LOCUM'].map(function(o){
             return '<button class="rt'+(types.indexOf(o)>=0?' on':'')+'" data-rtype="'+esc(k)+'|'+o+'">'+(o==='LOCUM'?'Locum':o)+'</button>'; }).join('')+
         '</div>'+
@@ -15813,6 +15908,7 @@ function renderRules(){
         '</div>'; });
     h+='</div>'; });
   h+='</div>';
+  h+=hRulesCard(keys,sideOf);
   var CI=R?R.colorIdx:{};
   var cks=Object.keys(CI).sort(function(a,b){ return CI[b].n-CI[a].n; });
   var mf={};
@@ -15898,15 +15994,29 @@ function renderRules(){
     b.onclick=function(){
       var raw=b.getAttribute('data-rtype'), i=raw.lastIndexOf('|');
       var k=raw.slice(0,i), ty=raw.slice(i+1), rule=S.rules[k]; if(!rule) return;
-      if(ty==='ALL'){ rule.filter='ALL'; refresh(); return; }
+      if(ty==='ALL'){ rule.filter='ALL'; delete rule.noH; refresh(); return; }
       var on=ruleTypes(rule), at=on.indexOf(ty);
-      if(at>=0) on.splice(at,1); else on.push(ty);
+      if(at>=0) on.splice(at,1); else { on.push(ty); if(ty==='H') delete rule.noH; }
       rule.filter=on.length? on.join(',') : 'ALL';
       refresh(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-rtog]'),function(b){
     b.onclick=function(){ var r=S.rules[b.getAttribute('data-rtog')]; if(!r) return;
       r.include=(r.include==='Y')?'N':'Y'; refresh();
       toast((r.sub||r.main)+(r.include==='Y'?' is now counted':' is now ignored')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hcnt]'),function(b){
+    b.onclick=function(){ var r=S.rules[b.getAttribute('data-hcnt')]; if(!r) return;
+      var on=!hCounted(r); hSetCounted(r,on); refresh();
+      toast((r.sub||r.main)+(on?' is now counted for H doctors':' is no longer counted for H doctors')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hal]'),function(b){
+    b.onclick=function(){ var r=S.rules[b.getAttribute('data-hal')]; if(!r||b.disabled) return;
+      var k=ruleKey(r.main,r.sub), on=!hUsesAllow(r.main,r.sub);
+      S.settings.hAllow=S.settings.hAllow||{};
+      if(on===hAllowDefault(r.main,r.sub)) delete S.settings.hAllow[k]; else S.settings.hAllow[k]=on;
+      refresh(); toast((r.sub||r.main)+(on?' now uses the H allowance':' no longer uses the H allowance')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hruf]'),function(b){
+    b.onclick=function(){ S.hruF=b.getAttribute('data-hruf'); renderRules(); }; });
+  var hrq=el('hruQ'); if(hrq) hrq.oninput=function(){ S.hruQ=this.value; renderRules(); };
+  var hrr=el('hruReset'); if(hrr) hrr.onclick=function(){ S.settings.hAllow={}; refresh(); toast('Only Annual Leave uses the H allowance again'); };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-ruf]'),function(b){
     b.onclick=function(){ S.ruF=b.getAttribute('data-ruf'); renderRules(); }; });
   var ruq=el('ruQ'); if(ruq) ruq.oninput=function(){ S.ruQ=this.value; renderRules(); };
