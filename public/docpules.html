@@ -782,6 +782,8 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .pd-note{display:flex;gap:10px;align-items:center;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:#FDF2F8;border:1px solid #FBCFE8;font-size:13px;color:#831843}
 .pd-ic.sm{width:26px;height:26px;border-radius:8px;font-size:13px;flex:none}
 .pdw-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+div.dpg{min-width:0;width:auto}
+.wt td,.wt th{padding:7px 3px}.wt-ch{display:flex;justify-content:center;gap:3px;flex-wrap:wrap}
 .pdw-d{border:1px solid #EEF1F6;border-radius:10px;padding:7px 4px;text-align:center;background:#FBFCFE}.pdw-d.on{background:#fff;border-color:#DCE3ED}
 .pdw-d>b{display:block;font-size:11.5px;color:#475569;margin-bottom:5px}
 @media (max-width:700px){.pdw-g{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -5673,7 +5675,7 @@ function finBuild(m){
   function row(id,site,t){
     var k=nz(id)+'|'+nz(site).toUpperCase();
     if(!by[k]){ by[k]={key:k,id:nz(id),site:nz(site).toUpperCase(),t:t||null,name:t?t.name:'',status:t?(t.status||''):'',
-      ex:0,nat:0,eid:0,fix:0,fixManual:0}; order.push(k); }
+      ex:0,nat:0,eid:0,fix:0,sheetFix:0}; order.push(k); }
     if(t&&!by[k].t){ by[k].t=t; by[k].name=t.name; by[k].status=t.status||''; }
     return by[k]; }
   /* extra and fixed sessions, as Paid extra pays them, per branch */
@@ -5687,11 +5689,14 @@ function finBuild(m){
     var all=(p.m[m]&&p.m[m].s)||0, ot=(p.otM[m]&&p.otM[m].s)||0;
     if(!(all>0)) return;
     var r=row(p.id||('~'+p.name),site,t); if(!r.name) r.name=p.name; if(!r.status) r.status=p.status||'';
-    r.ex+=Math.max(0,all-ot); r.fix+=ot; });
-  /* fixed OT entered on the OT page, for a doctor with none in the workbook that month */
+    r.ex+=Math.max(0,all-ot); r.sheetFix+=ot; });
+  /* Fixed sessions are the OT Fixed the Doctors page counts (the OT fixed
+     page), so Session − Close + Open + Fixed is the Total on every row. The
+     master file's OT sheet used to win here, and it reads a 1 PM–9 PM Saturday
+     as one session instead of two. */
   R.rows.forEach(function(t){
     var v=(t.m&&t.m[m]&&t.m[m].ot)||0; if(!(v>0)) return;
-    var r=row(t.id,t.site,t); if(!(r.fix>0)) r.fixManual+=v; });
+    var r=row(t.id,t.site,t); r.fix+=v; });
   /* sessions rostered on a named holiday */
   var hols=holList().filter(function(h){ return +h.d.slice(0,4)===y&&+h.d.slice(5,7)-1===m; });
   var unnamed=hols.filter(function(h){ return !holCat(h.n); });
@@ -5699,7 +5704,7 @@ function finBuild(m){
     hols.forEach(function(h){ var c=holCat(h.n); if(!c) return;
       var v=bkPlanOn(t,y,m,+h.d.slice(8,10)); if(!(v>0)) return;
       var r=row(t.id,t.site,t); r[c]+=v; }); });
-  var out=order.map(function(k){ var r=by[k]; r.fix+=r.fixManual;
+  var out=order.map(function(k){ var r=by[k];
     /* the month as the Doctors page counts it: planned, closed, opened, net */
     var mm=r.t&&r.t.m&&r.t.m[m];
     r.ses=mm? mm.s||0 : 0; r.cl=mm? mm.c||0 : 0; r.op=mm? mm.o||0 : 0; r.tot=mm? (mm.t!==undefined? mm.t : r.ses-r.cl+r.op) : 0;
@@ -5709,7 +5714,9 @@ function finBuild(m){
     return r; })
     .filter(function(r){ return r.ex>0||r.nat>0||r.eid>0||r.fix>0; })
     .sort(function(a,b){ return a.site<b.site? -1 : a.site>b.site? 1 : (low(a.name)<low(b.name)? -1 : 1); });
-  return {y:y,m:m,rows:out,hols:hols,unnamed:unnamed,month:MONTHS_EN[m].slice(0,3)+' ( '+y+')'};
+  /* on the OT sheet of the master file but not on the OT fixed page: said, not counted */
+  var sheetOnly=order.map(function(k){ return by[k]; }).filter(function(r){ return r.sheetFix>0&&!(r.fix>0); });
+  return {y:y,m:m,rows:out,hols:hols,unnamed:unnamed,sheetOnly:sheetOnly,month:MONTHS_EN[m].slice(0,3)+' ( '+y+')'};
 }
 var FIN_COLS=['Month','Site','EMP Status','EMP ID','Doctor','Session','Close','Open','Extra sessions','National Day','Eid','Fixed sessions','Total'];
 var FIN_NUM=['ses','cl','op','ex','nat','eid','fix','tot'];
@@ -5851,6 +5858,9 @@ function finHTML(){
       '<div><b>'+fmt(sum(rows,'eid'))+'</b><span>on Eid · '+eidN+' day'+(eidN===1?'':'s')+'</span></div>'+
       '<div><b>'+fmt(sum(rows,'fix'))+'</b><span>fixed sessions</span></div>'+
       '<div><b>'+rows.length+'</b><span>doctors</span></div></div>'+
+    ((F.sheetOnly&&F.sheetOnly.length)? '<div class="fin-warn"><b>'+F.sheetOnly.length+' doctor'+(F.sheetOnly.length===1?' has':'s have')+
+      ' fixed sessions in the master file\'s OT sheet but none on the OT fixed page</b>, so they are not in Fixed: '+
+      esc(F.sheetOnly.map(function(r){ return (r.name||r.id)+' ('+r.site+')'; }).join(', '))+'. Add them on the <b>OT fixed</b> page to count them.</div>' : '')+
     (F.unnamed.length? '<div class="fin-warn">'+F.unnamed.length+' holiday date'+(F.unnamed.length===1?' has':'s have')+' no name this month ('+
       esc(F.unnamed.map(function(h){ return verFmtIso(h.d); }).join(', '))+') — name '+(F.unnamed.length===1?'it':'them')+' in <b>Settings → Rules → Public holidays</b> to count '+(F.unnamed.length===1?'it':'them')+' here.</div>' : '')+
     '<div class="fin-g">'+tbl('FT')+tbl('PT')+tbl('Other')+'</div>'+
@@ -7197,15 +7207,15 @@ function renderDrawer(){
   var vF=span? (span.ot||0) : (t.yot||0), vH=(dm===null)? (t.yotHeld||0) : ((t.otHeldM||[])[dm]||0),
       hasOT=(t.yot||0)>0||(t.yotHeld||0)>0;
   var scope=(dm===null)? ('all of '+year) : (M[dm]+' '+year);
-  h+='<div class="rail" style="grid-template-columns:repeat(4,1fr)">'+
+  h+='<div class="rail" style="grid-template-columns:repeat(7,minmax(0,1fr))">'+
     '<div class="st"><div class="k">'+esc(T('sessions'))+'</div><div class="v">'+fmt(vS,0)+'</div>'+
       '<div class="d">'+esc(scope)+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('closed'))+'</div><div class="v" style="color:var(--loss)">'+fmt(vC)+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('opened'))+'</div><div class="v" style="color:var(--gain)">'+fmt(vO)+'</div></div>'+
-    (hasOT? '<div class="st"><div class="k">OT Fixed</div><div class="v" style="color:var(--teal)">'+fmt(vF)+'</div>'+
-      '<div class="d">extra sessions'+(vH>0.001? ' · <span style="color:var(--warn)">'+fmt(vH)+' waiting for a choice</span>' : '')+'</div></div>' : '')+
+    '<div class="st"><div class="k">OT Fixed</div><div class="v" style="color:var(--teal)">'+fmt(vF)+'</div>'+
+      '<div class="d">'+(hasOT? 'extra sessions' : 'no fixed OT')+(vH>0.001? ' · <span style="color:var(--warn)">'+fmt(vH)+' waiting for a choice</span>' : '')+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('net'))+'</div><div class="v" style="color:var(--purple)">'+fmt(vT)+'</div>'+
-      '<div class="d">sessions − closed + opened'+(hasOT? ' + OT fixed' : '')+'</div></div>'+
+      '<div class="d">sessions − closed + opened + OT fixed</div></div>'+
     '<div class="st"><div class="k">Expected</div><div class="v">'+fmt(vE)+'</div>'+
       '<div class="d">roster plus anything opened · '+fmt(hoursOf(vE),0)+' h</div></div>'+
     '<div class="st"><div class="k">Not replaced</div>'+
@@ -7255,6 +7265,7 @@ function renderDrawer(){
   h+='<div class="card"><h3>Month by month <span class="tag">click a month</span></h3>'+
      '<div class="tw" style="max-height:none"><table><thead><tr>'+
      '<th>Month</th><th class="n">Sessions</th><th class="n">Closed</th><th class="n">Opened</th>'+
+     '<th class="n">OT Fixed</th>'+
      '<th class="n">Expected</th><th class="n">Total</th><th class="n">Not replaced</th>'+
      '<th class="n">Requests</th></tr></thead><tbody>';
   for(var m=0;m<12;m++)
@@ -7262,6 +7273,8 @@ function renderDrawer(){
       '<td class="n">'+fmt(t.m[m].s)+'</td>'+
       '<td class="n"'+(t.m[m].c?' style="color:var(--loss)"':'')+'>'+(t.m[m].c?fmt(t.m[m].c):'·')+'</td>'+
       '<td class="n"'+(t.m[m].o?' style="color:var(--gain)"':'')+'>'+(t.m[m].o?fmt(t.m[m].o):'·')+'</td>'+
+      '<td class="n"'+(t.m[m].ot?' style="color:var(--teal);font-weight:650"':'')+'>'+(t.m[m].ot?fmt(t.m[m].ot):'·')+
+        (((t.otHeldM||[])[m]||0)>0.001? '<div class="mt" style="color:var(--warn)">'+fmt(t.otHeldM[m])+' waiting</div>' : '')+'</td>'+
       '<td class="n">'+fmt(expectedIn(t.m[m]))+'</td>'+
       '<td class="n"><b>'+fmt(t.m[m].t)+'</b></td>'+
       '<td class="n"'+(owedIn(t.m[m])>0.001?' style="color:var(--loss);font-weight:700"':'')+'>'+
@@ -7272,6 +7285,7 @@ function renderDrawer(){
      '<td class="n">'+fmt(t.ys)+'</td>'+
      '<td class="n">'+fmt(t.yc)+'</td>'+
      '<td class="n">'+fmt(t.yo)+'</td>'+
+     '<td class="n">'+fmt(t.yot||0)+'</td>'+
      '<td class="n">'+fmt(t.ys+t.yo)+'</td>'+
      '<td class="n">'+fmt(t.yt)+'</td>'+
      '<td class="n"'+(owedYear(t)>0.001?' style="color:var(--loss)"':'')+'>'+
@@ -7301,34 +7315,32 @@ function renderDrawer(){
   h+='<div class="card"><h3>'+(pdHere!==null? 'Main sheet template' : 'Weekly template')+
      (pdHere!==null? ' <span class="tag" style="background:#FCE7F3;color:#9D174D">not used in '+MONTHS_EN[pdHere]+' — Pedia Format applies</span>' : '')+
      (dsel!==null? '<span class="tag" style="background:var(--ok-bg);color:var(--teal)">'+
-       wk[dsel]+' only</span>':'<span class="tag">click a day</span>')+'</h3><div class="cb">'+
-     '<table style="width:100%"><thead><tr>'+
+       wk[dsel]+' only</span>':'<span class="tag">click a day</span>')+'</h3>'+dpgStyle()+'<div class="cb dpg">'+
+     '<table class="wt" style="width:100%;table-layout:fixed"><thead><tr>'+
      wk.map(function(d,i){
-       return '<th class="n dcol'+(dsel===i?' on':'')+'" data-dwd="'+i+'" style="cursor:pointer">'+d+'</th>'; }).join('')+
+       return '<th class="dcol'+(dsel===i?' on':'')+'" data-dwd="'+i+'" style="cursor:pointer;text-align:center">'+d+'</th>'; }).join('')+
      '</tr></thead><tbody><tr>'+
      t.week.map(function(v,d){
        var mark=' class="n dcol'+(dsel===d?' on':'')+'" data-dwd="'+d+'" style="cursor:pointer';
-       if(!v) return '<td'+mark+';color:var(--faint)">·</td>';
+       if(!v) return '<td'+mark+';color:var(--faint);text-align:center">·</td>';
        var sq=wcol[d].map(function(hx){
          var nm=hx==='none'?'':colorName(hx);
          return '<i style="background:'+(hx==='none'?'var(--line-s)':'#'+hx)+'" title="'+
                 esc(hx==='none'?'no colour':('#'+hx+(nm?' · '+nm:'')))+'"></i>'; }).join('');
-       var spanTxt=merged[d].map(function(sp){
-         var hx=nz(sp.fill).toUpperCase();
-         return '<div style="display:flex;gap:5px;align-items:center;justify-content:flex-end">'+
-           '<i style="width:9px;height:12px;border-radius:2px;border:1px solid rgba(0,0,0,.15);'+
-           'display:inline-block;background:'+(hx?'#'+esc(hx):'var(--line-s)')+'" title="'+
-           esc(hx? (colorName(hx)||('#'+hx)) : 'no colour')+'"></i><span>'+
-           hhmm(sp.f)+'–'+hhmm(sp.t)+(sp.n>1?' ×'+sp.n:'')+'</span></div>'; }).join('');
-       var hrs=merged[d].reduce(function(n,sp){ return n+(sp.t-sp.f)/60*sp.n; },0);
+       /* the same AM / AF / PM chips the Master schedule page draws, with any
+          time that is not the standard block written under its chip */
+       var list=merged[d];
+       var chips=mgBlocks(list,d).map(function(b){
+         var inB=list.filter(function(sp){ return mgSegs([sp],b).length; });
+         var labs=inB.filter(function(sp){ return !mstIsStd(sp)&&mgFirstBlock(sp)===b; }).map(function(sp){ return esc(mstCellHrs(sp)); }).join('<br>');
+         return mgCol(mgChip(inB,b,'',DPG_DAYN[d]+' '+DPG_BLK[b].n+': '+(inB.length? inB.map(function(sp){ return hhmm(sp.f)+'–'+hhmm(sp.t); }).join(', ') : 'off')),
+           labs||(list.some(function(sp){ return !mstIsStd(sp); })?'&nbsp;':'')); }).join('');
+       var hrs=list.reduce(function(n,sp){ return n+(sp.t-sp.f)/60*sp.n; },0);
        var isAlt=!!((t.altSpec||[])[d]);
-       /* the squares used to sit on their own row; each session carries its own
-          colour now, so a second row of them would just repeat the information */
-       return '<td'+mark+';vertical-align:top">'+v+
-         (spanTxt? '<div class="mt" style="margin-top:5px;white-space:nowrap;color:var(--teal);font-weight:700">'+
-            spanTxt+'</div><div class="mt">'+fmt(hrs)+' h'+
-            (isAlt? '<div style="color:var(--purple);font-weight:700">'+esc(altLabel((t.altSpec||[])[d]))+'</div>':'')+'</div>'
-          : (sq?'<div class="wk" style="margin-top:4px">'+sq+'</div>':''))+
+       return '<td'+mark+';vertical-align:top;text-align:center">'+
+         '<div class="wt-ch">'+(chips||sq)+'</div>'+
+         '<div class="mt" style="margin-top:4px">'+fmt(v)+' · '+fmt(hrs)+' h'+
+           (isAlt? '<div style="color:var(--purple);font-weight:700">'+esc(altLabel((t.altSpec||[])[d]))+'</div>':'')+'</div>'+
          '</td>';
      }).join('')+
      '</tr></tbody></table>'+
@@ -7337,9 +7349,8 @@ function renderDrawer(){
        'day.</b> <button class="dchip" id="dwDayClear">show every day</button><br>':'')+
      t.week.reduce(function(a,b){return a+b;},0)+
      ' slots a week, '+fmt(totalH)+' hours in total. Click a day to count that day alone. '+
-     'Each slot is one session, with its own colour; the times come from the block it sits in, '+
-     'adjusted by anything in brackets in the cell.'+
-     (S.legend&&S.legend.length?' Squares carry the colour from the master sheet — hover to read the legend.':'')+
+     'Drawn like the Master schedule: AM, AF and PM, with any time that is not the standard block written under it. '+
+     'Hover a block for its exact hours.'+
      '</p>'+
      ((t.notes&&t.notes.length)? '<p style="margin-top:10px;color:var(--loss);font-weight:700;font-size:12.5px">'+
         'Note: '+esc(t.notes.join('   ·   '))+'</p>':'')+
@@ -7351,7 +7362,7 @@ function renderDrawer(){
   h+='<div class="card"><h3>Entries to check'+(bad.length?' <span class="tag" style="background:var(--err-bg);color:var(--err)">'+
      bad.length+'</span>':'')+'</h3>';
   if(!bad.length){
-    h+='<div class="empty" style="padding:22px">Nothing looks off in '+esc(lab)+'.</div>';
+    h+='<div class="empty" style="padding:22px">Nothing looks off in '+esc(scope)+'.</div>';
   }else{
     h+='<div class="cb" style="padding-bottom:8px"><p class="hint">Checked against the vocabulary on your '+
        (S.valid?'<b>'+esc(S.valid.sheet)+'</b> sheet':'built-in list')+
@@ -16677,7 +16688,7 @@ if(typeof module!=='undefined'&&module.exports)
     readFiltered:readFiltered,zipList:zipList,rtReadRules:rtReadRules,rtAutoMap:rtAutoMap,
     listSheets:listSheets,mb:mb,renderRtm:renderRtm,rtVisible:rtVisible,rtRebuild:rtRebuild,
     rtAddDoctor:rtAddDoctor,rtRemoveDoctor:rtRemoveDoctor,rtHHMM:rtHHMM,rtFromHHMM:rtFromHHMM,rtHasSchedule:rtHasSchedule,rptAutoMap:rptAutoMap,rptTime:rptTime,rptSrc:rptSrc,rptCell:rptCell,rptResourceMatches:rptResourceMatches,rtToks:rtToks,rtHasSchedule:rtHasSchedule,rtSetDay:rtSetDay,rtDayOn:rtDayOn,rtIdent:rtIdent,rtMigrateKeys:rtMigrateKeys,rtApplyPreset:rtApplyPreset,rtOnList:rtOnList,rtSaveDoctor:rtSaveDoctor,rtUnsaveDoctor:rtUnsaveDoctor,rtSync:rtSync,rtDayWindow:rtDayWindow,rtScheduleText:rtScheduleText,rtWeeklyHours:rtWeeklyHours,rptMinutes:rptMinutes,rptBuild:rptBuild,rtText:rtText,rtExport:rtExport,rtPivot:rtPivot,rtPvValues:rtPvValues,RPT_OUT:RPT_OUT,RPT_AX:RPT_AX,rtCfgAll:function(){return RT.cfg;},
-    bkRows:bkRows,bkDayCells:bkDayCells,schedPlanMap:schedPlanMap,SchedStore:SchedStore,schedWeekOn:schedWeekOn,schedWindow:schedWindow,schedKey:schedKey,schedFor:schedFor,schedChOn:schedChOn,schedSrc:schedSrc,liveOn:liveOn,Srv:Srv,srvBoot:srvBoot,renderUsers:renderUsers,usLoad:usLoad,renderOT:renderOT,otList:otList,rtFunnel:rtFunnel,rtResolveName:rtResolveName,rtAliasMap:rtAliasMap,rtSyncFromMaster:rtSyncFromMaster,otForMonth:otForMonth,buildValidation:buildValidation,valBuild:valBuild,matchQ:matchQ,typeOf:typeOf,renderSched:renderSched,schedExport:schedExport,schedAddFromForm:schedAddFromForm,schedApplySrc:schedApplySrc,bkDayIndex:bkDayIndex,bkHolIndex:bkHolIndex,bkHolClosed:bkHolClosed,bkPlanOn:bkPlanOn,bkHolDates:bkHolDates,exportBrkPDT:exportBrkPDT,exportBrk:exportBrk,renderBrk:renderBrk,xlBuild:xlBuild,xlCol:xlCol,dgDays:dgDays,refresh:refresh};
+    finBuild:finBuild,bkRows:bkRows,bkDayCells:bkDayCells,schedPlanMap:schedPlanMap,SchedStore:SchedStore,schedWeekOn:schedWeekOn,schedWindow:schedWindow,schedKey:schedKey,schedFor:schedFor,schedChOn:schedChOn,schedSrc:schedSrc,liveOn:liveOn,Srv:Srv,srvBoot:srvBoot,renderUsers:renderUsers,usLoad:usLoad,renderOT:renderOT,otList:otList,rtFunnel:rtFunnel,rtResolveName:rtResolveName,rtAliasMap:rtAliasMap,rtSyncFromMaster:rtSyncFromMaster,otForMonth:otForMonth,buildValidation:buildValidation,valBuild:valBuild,matchQ:matchQ,typeOf:typeOf,renderSched:renderSched,schedExport:schedExport,schedAddFromForm:schedAddFromForm,schedApplySrc:schedApplySrc,bkDayIndex:bkDayIndex,bkHolIndex:bkHolIndex,bkHolClosed:bkHolClosed,bkPlanOn:bkPlanOn,bkHolDates:bkHolDates,exportBrkPDT:exportBrkPDT,exportBrk:exportBrk,renderBrk:renderBrk,xlBuild:xlBuild,xlCol:xlCol,dgDays:dgDays,refresh:refresh};
 })();
 </script>
 </body>
