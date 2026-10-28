@@ -58,6 +58,15 @@ app.use((req, res, next) => {
 app.use(A.attach);
 
 const api = express.Router();
+api.get('/live', A.requireUser, (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const since = +req.query.since || 0;
+  if (!since) return res.json({ rev: LIVE.rev });
+  const first = LIVE.log.length ? LIVE.log[0].rev : LIVE.rev + 1;
+  /* a number from before this server started, or older than the log keeps */
+  if (since > LIVE.rev || since < first - 1) return res.json({ rev: LIVE.rev, reset: true });
+  res.json({ rev: LIVE.rev, events: LIVE.log.filter((e) => e.rev > since) });
+});
 const ok = (res, body) => res.json(body === undefined ? { ok: true } : body);
 function guard(fn) {                       /* one place to turn a throw into 400 */
   return (req, res) => {
@@ -69,6 +78,22 @@ function guard(fn) {                       /* one place to turn a throw into 400
   };
 }
 const who = (req) => (req.user ? (req.user.name || req.user.email) : '');
+
+/* ---------------------------------------------------------------------- live
+   Every write bumps a counter and leaves a short note of what changed. Each
+   open portal asks every few seconds "anything since N?" and pulls only what
+   moved, so a change made by one person shows for everyone without a reload.
+   The counter starts from the clock, so after a restart every portal sees a
+   jump it cannot account for and simply pulls everything once. */
+const LIVE = { rev: Date.now(), log: [] };
+function bump(kind, req, extra) {
+  LIVE.rev += 1;
+  LIVE.log.push(Object.assign({
+    rev: LIVE.rev, kind, at: Date.now(), by: who(req),
+    cid: String(req.get('X-DP-Client') || '').slice(0, 40)
+  }, extra || {}));
+  if (LIVE.log.length > 500) LIVE.log.splice(0, LIVE.log.length - 500);
+}
 
 /* What the sign-in page needs to know before anybody has signed in: whether an
    account exists at all, and if not, why not. It says nothing about any real
@@ -170,13 +195,14 @@ api.post('/changes', A.requireUser, A.canWrite, guard((req, res) => {
       (out.duplicate ? dup : added).push(out.id);
     });
   })();
-  if (added.length) Audit.add(who(req), req.clientIp, 'change.add', added.join(','));
+  if (added.length) { Audit.add(who(req), req.clientIp, 'change.add', added.join(',')); bump('changes', req); }
   ok(res, { added: added.length, duplicates: dup.length, ids: added });
 }));
 
 api.post('/changes/:id/revoke', A.requireUser, A.canWrite, guard((req, res) => {
   const row = Changes.revoke(req.params.id, who(req));
   Audit.add(who(req), req.clientIp, 'change.revoke', req.params.id);
+  bump('changes', req);
   ok(res, { row: toPortal(row) });
 }));
 
@@ -214,6 +240,7 @@ api.put('/schedule', A.requireUser, A.canWrite, guard((req, res) => {
   if (!req.body.schedule) throw new Error('No schedule in that request.');
   const row = Schedules.save(year, req.body.schedule, who(req), req.body.note);
   Audit.add(who(req), req.clientIp, 'schedule.save', year + ' v' + row.id + ' (' + row.lines + ' lines)');
+  bump('schedule', req, { slot: year });
   ok(res, { version: row.id, savedAt: row.saved_at, lines: row.lines });
 }));
 
@@ -232,14 +259,34 @@ api.get('/settings', A.requireUser, guard((req, res) => ok(res, { settings: Sett
 /* PUT is the method; POST is accepted too, because a browser holding an older
    copy of the page sends POST, and a shared setting that silently fails to save
    is worse than a tidy route list. */
+/* A setting that is a list of entries (one per doctor, slot or day) can also
+   arrive as a patch: only the entries this person changed. The patch is laid
+   over what the database holds now, so two people changing different doctors
+   at the same moment both keep their change. */
+const isMap = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const saveSettings = guard((req, res) => {
-  const body = req.body && req.body.settings;
-  if (!body || typeof body !== 'object') throw new Error('No settings in that request.');
-  const keys = Object.keys(body);
-  if (keys.length > 100) throw new Error('Too many settings at once.');
-  DB.db.transaction(() => { keys.forEach((k) => Settings.put(k, body[k], who(req))); })();
-  Audit.add(who(req), req.clientIp, 'settings.put', keys.join(','));
-  ok(res, { saved: keys.length });
+  const body = (req.body && req.body.settings) || {};
+  const patch = (req.body && req.body.patch) || {};
+  if (typeof body !== 'object' || typeof patch !== 'object') throw new Error('No settings in that request.');
+  const keys = Object.keys(body), pkeys = Object.keys(patch);
+  if (!keys.length && !pkeys.length) throw new Error('No settings in that request.');
+  if (keys.length + pkeys.length > 100) throw new Error('Too many settings at once.');
+  const values = {};
+  DB.db.transaction(() => {
+    keys.forEach((k) => { Settings.put(k, body[k], who(req)); values[k] = body[k]; });
+    pkeys.forEach((k) => {
+      const p = patch[k] || {};
+      let cur = Settings.get(k);
+      if (!isMap(cur)) cur = {};
+      if (isMap(p.set)) Object.keys(p.set).forEach((sk) => { cur[sk] = p.set[sk]; });
+      if (Array.isArray(p.del)) p.del.forEach((sk) => { delete cur[sk]; });
+      Settings.put(k, cur, who(req)); values[k] = cur;
+    });
+  })();
+  const all = keys.concat(pkeys);
+  Audit.add(who(req), req.clientIp, 'settings.put', all.join(','));
+  bump('settings', req, { keys: all });
+  ok(res, { saved: all.length, values });
 });
 api.put('/settings', A.requireUser, A.canWrite, saveSettings);
 api.post('/settings', A.requireUser, A.canWrite, saveSettings);
@@ -287,6 +334,7 @@ api.post('/files/:kind', A.requireUser, A.canWrite, guard((req, res) => {
     buf: req.body, who: who(req)
   });
   Audit.add(who(req), req.clientIp, 'file.upload', req.params.kind + ' ' + row.name);
+  bump('files', req, { file: req.params.kind, name: row.name });
   ok(res, { file: { id: row.id, kind: row.kind, name: row.name, bytes: row.bytes, uploadedAt: row.uploaded_at } });
 }));
 
