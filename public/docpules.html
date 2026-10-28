@@ -2391,20 +2391,11 @@ function saveConfig(){
    workbook is how the numbers used to disagree. Pushed on a short delay so a
    slider or a text box does not send a request per keystroke. */
 var SRVT=null;
-function srvPushSettings(){
-  if(!Srv.on) return;
-  if(SRVT) clearTimeout(SRVT);
-  SRVT=setTimeout(function(){
-    SRVT=null;
-    var out={rules:S.rules};
-    /* Not shared, deliberately: schedCh (the records live in their own table),
-       and schedSave / schedSnap / schedWho (this browser's copy of the master
-       schedule the server already holds in its own table). */
-    /* Every key here is one that changes what somebody reads. Three used to be
-       spelt wrong — wholeSess, altDays and otEntries are not keys this app has
-       — so whole-session doctors, alternating clinics and the fixed OT setup
-       were each saved to nothing. The names below are the ones the app uses. */
-    ['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
+/* Every key here is one that changes what somebody reads, so it is shared.
+   Not shared, deliberately: schedCh (the records live in their own table), and
+   schedSave / schedSnap / schedWho (this browser's copy of the master schedule
+   the server already holds in its own table). */
+var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
      'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
@@ -2420,10 +2411,62 @@ function srvPushSettings(){
      'rtmAlias','rtmCode','rtmDiff','rtmSched','rtmSchedV','rtmAdded','rtmRemoved','rtmPresetV',
      /* renames, leavers and the per-line span, which must read the same for
         everyone or two people see two different rosters */
-     'mstRename','leftDocs','removed','lineSpan','noteSkip','schedFrom','mvTrash','mvSig','mvYears'].forEach(function(k){
-      if(S.settings[k]!==undefined) out[k]=S.settings[k];
+     'mstRename','leftDocs','removed','lineSpan','noteSkip','schedFrom','mvTrash','mvSig','mvYears'];
+/* What the server holds for each shared key, as of the last time we heard from
+   it. A save sends only the keys that differ from it, and a key made of
+   entries (per doctor, per slot, per day) sends only the entries that changed,
+   so two people working at once never overwrite each other's work. */
+var SRV_BASE={};
+function srvIsMap(v){ return !!v&&typeof v==='object'&&!Array.isArray(v); }
+function srvClone(v){ return v===undefined? undefined : JSON.parse(JSON.stringify(v)); }
+function srvShared(){ var o={rules:S.rules}; SRV_KEYS.forEach(function(k){ if(S.settings[k]!==undefined) o[k]=S.settings[k]; }); return o; }
+function srvSetBase(k,v){ SRV_BASE[k]={j:JSON.stringify(v),v:srvClone(v)}; }
+/* local edits since `base`, laid over `remote` */
+function srvMerge3(base,local,remote){
+  if(srvIsMap(local)&&srvIsMap(remote)){
+    var b=srvIsMap(base)? base : {}, out=srvClone(remote), seen={};
+    Object.keys(local).concat(Object.keys(b)).forEach(function(sk){
+      if(seen[sk]) return; seen[sk]=1;
+      if(JSON.stringify(local[sk])===JSON.stringify(b[sk])) return;
+      if(sk in local) out[sk]=srvClone(local[sk]); else delete out[sk];
     });
-    Srv.putSettings(out);
+    return out;
+  }
+  return JSON.stringify(local)!==JSON.stringify(base)? local : remote;
+}
+function srvPutLocal(k,v){ if(k==='rules') S.rules=v; else S.settings[k]=v; }
+function srvPushSettings(){
+  if(!Srv.on) return;
+  if(SRVT) clearTimeout(SRVT);
+  SRVT=setTimeout(function(){
+    SRVT=null;
+    var full=srvShared(), out={}, patch={}, sent={}, n=0;
+    Object.keys(full).forEach(function(k){
+      var js=JSON.stringify(full[k]), b=SRV_BASE[k];
+      if(b&&b.j===js) return;
+      if(b&&srvIsMap(b.v)&&srvIsMap(full[k])){
+        var set={}, del=[];
+        Object.keys(full[k]).forEach(function(sk){ if(JSON.stringify(full[k][sk])!==JSON.stringify(b.v[sk])) set[sk]=full[k][sk]; });
+        Object.keys(b.v).forEach(function(sk){ if(!(sk in full[k])) del.push(sk); });
+        patch[k]={set:set,del:del};
+      } else out[k]=full[k];
+      sent[k]=srvClone(full[k]); n++;
+    });
+    if(!n) return;
+    Srv.putSettings(out,patch).then(function(j){
+      if(!j||!j.values) return;
+      /* the server's value is now the base; anything typed since the save
+         stays on top of it and goes with the next one */
+      var again=false;
+      Object.keys(j.values).forEach(function(k){
+        var v=j.values[k], cur=(k==='rules')? S.rules : S.settings[k];
+        var m=srvMerge3(sent[k],cur,v);
+        srvSetBase(k,v);
+        if(JSON.stringify(m)!==JSON.stringify(cur)) srvPutLocal(k,m);
+        if(JSON.stringify(m)!==JSON.stringify(v)) again=true;
+      });
+      if(again) srvPushSettings();
+    });
   },900);
 }
 function loadConfig(){ return Store.get('scc:config').then(function(c){
@@ -8966,11 +9009,12 @@ var Srv={
      refused and the refusal was swallowed. Nothing told anyone, and the setting
      stayed in the one browser that made it. That is what the two lines below
      are for: a save that fails now says so. */
-  putSettings:function(obj){
+  putSettings:function(obj,patch){
     if(!Srv.on) return Promise.resolve();
+    var body={settings:obj||{}}; if(patch&&Object.keys(patch).length) body.patch=patch;
     return fetch('/api/settings',{method:'PUT',credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({settings:obj})})
+      body:JSON.stringify(body)})
       .then(function(r){
         return r.json().catch(function(){ return {}; }).then(function(j){
           if(!r.ok) throw new Error((j&&j.error)||('server said '+r.status));
@@ -16391,7 +16435,8 @@ function init(){
 if(typeof document!=='undefined'&&document.addEventListener)
   document.addEventListener('DOMContentLoaded',function(){
     loadConfig().then(srvBoot).catch(function(){ return srvBoot(); })
-      .then(init).catch(init);
+      .then(init).catch(init)
+      .then(function(){ try{ liveStart(); }catch(e){} });
   });
 /* Pull the year's records, the shared settings and the stored workbooks from
    the server before the first render, so the first screen is already right
@@ -16421,6 +16466,7 @@ function srvBoot(){
       });
       if(j.settings.rules&&typeof j.settings.rules==='object'&&!Array.isArray(j.settings.rules))
         S.rules=j.settings.rules;
+      Object.keys(j.settings).forEach(function(k){ srvSetBase(k,j.settings[k]); });
     }
     S.srvFiles=j.files||null;
     if(Srv.queue.length) Srv.flush();
@@ -16429,10 +16475,10 @@ function srvBoot(){
 }
 /* The workbooks the server already holds, so nobody has to find the files
    again. A fresh upload replaces them for everyone. */
-function srvLoadFiles(){
+function srvLoadFiles(kinds){
   if(!Srv.on||!S.srvFiles) return Promise.resolve();
   var jobs=[];
-  ['master','capacity'].forEach(function(kind){
+  (kinds||['master','capacity']).forEach(function(kind){
     if(!S.srvFiles[kind]) return;
     jobs.push(fetch('/api/files/latest/'+kind,{credentials:'same-origin'})
       .then(function(r){ if(!r.ok) throw new Error('could not fetch'); return r.arrayBuffer(); })
@@ -16456,6 +16502,155 @@ function srvLoadFiles(){
       .catch(function(e){ console.warn('could not load the stored '+kind+' workbook:',e.message); }));
   });
   return Promise.all(jobs).then(function(){ try{ compute(); }catch(e){} });
+}
+
+/* =================================================================== live
+   What one person changes shows for everyone within a few seconds, without a
+   reload. Each open portal asks the server "anything since N?" every few
+   seconds (less often while the tab is in the background) and pulls only what
+   moved: the shared settings, the schedule change records, the saved versions
+   and DocPules master, or a newly uploaded workbook. Its own saves are tagged
+   with this tab's id and skipped, so nobody is "updated" by their own click.
+   While someone is typing the redraw waits a moment, so a box never changes
+   under their fingers. */
+var DP_CID='t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+(function(){
+  if(typeof window==='undefined'||typeof window.fetch!=='function') return;
+  var f=window.fetch;
+  window.fetch=function(u,o){
+    try{
+      var m=((o&&o.method)||'GET').toUpperCase();
+      if(m!=='GET'&&typeof u==='string'&&u.charAt(0)==='/'){
+        o=Object.assign({},o);
+        if(typeof Headers!=='undefined'&&o.headers instanceof Headers){ if(!o.headers.has('X-DP-Client')) o.headers.set('X-DP-Client',DP_CID); }
+        else o.headers=Object.assign({'X-DP-Client':DP_CID},o.headers||{});
+      }
+    }catch(e){}
+    return f.apply(this,[u,o]);
+  };
+})();
+var LIVE={rev:0,timer:null,busy:false,on:false,lastKey:0,fails:0};
+var LIVE_FAST=4000, LIVE_SLOW=30000;
+function liveStart(){
+  if(!Srv.on||LIVE.on||typeof document==='undefined') return;
+  LIVE.on=true;
+  document.addEventListener('keydown',function(){ LIVE.lastKey=Date.now(); },true);
+  document.addEventListener('input',function(){ LIVE.lastKey=Date.now(); },true);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden) livePoll(); });
+  window.addEventListener('focus',function(){ livePoll(); });
+  fetch('/api/live',{credentials:'same-origin',cache:'no-store'})
+    .then(function(r){ return r.ok? r.json() : null; })
+    .then(function(j){ if(j&&j.rev) LIVE.rev=j.rev; })
+    .catch(function(){})
+    .then(liveNext);
+}
+function liveNext(){
+  if(LIVE.timer) clearTimeout(LIVE.timer);
+  var wait=(document.hidden? LIVE_SLOW : LIVE_FAST)*Math.min(4,1+LIVE.fails);
+  LIVE.timer=setTimeout(livePoll,wait);
+}
+function livePoll(){
+  if(!LIVE.on||LIVE.busy||!LIVE.rev) return;
+  LIVE.busy=true;
+  fetch('/api/live?since='+LIVE.rev,{credentials:'same-origin',cache:'no-store'})
+    .then(function(r){
+      if(r.status===401){ LIVE.on=false; return null; }
+      if(!r.ok) throw new Error('server said '+r.status);
+      return r.json();
+    })
+    .then(function(j){ LIVE.fails=0; if(j) return liveApply(j); })
+    .catch(function(){ LIVE.fails++; })
+    .then(function(){ LIVE.busy=false; if(LIVE.on) liveNext(); });
+}
+/* someone typed in the last moment: let them finish */
+function liveTyping(){
+  var a=document.activeElement, tag=a&&a.tagName;
+  return (tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(a&&a.isContentEditable))&&Date.now()-LIVE.lastKey<2500;
+}
+var LIVE_WHAT={settings:'settings',changes:'schedule changes',schedule:'master schedule',files:'workbook'};
+function liveApply(j){
+  if(j.reset){ LIVE.rev=j.rev; return livePull({settings:1,changes:1,schedule:{all:1},files:{master:1,capacity:1},reset:1},[]); }
+  var ev=(j.events||[]).filter(function(e){ return e.cid!==DP_CID; });
+  if(!ev.length){ LIVE.rev=j.rev; return; }
+  if(liveTyping()) return;                 /* same events again on the next tick */
+  LIVE.rev=j.rev;
+  var need={settings:0,changes:0,schedule:{},files:{}}, who={}, what={};
+  ev.forEach(function(e){
+    if(e.by) who[e.by]=1;
+    what[LIVE_WHAT[e.kind]||e.kind]=1;
+    if(e.kind==='settings') need.settings=1;
+    else if(e.kind==='changes') need.changes=1;
+    else if(e.kind==='schedule') need.schedule[e.slot]=1;
+    else if(e.kind==='files'&&e.file) need.files[e.file]=1;
+  });
+  return livePull(need,Object.keys(who),Object.keys(what));
+}
+function livePull(need,who,what){
+  var jobs=[], yearWas=S.settings.year, files=Object.keys(need.files||{});
+  if(need.settings) jobs.push(fetch('/api/settings',{credentials:'same-origin',cache:'no-store'})
+    .then(function(r){ return r.ok? r.json() : null; })
+    .then(function(j){ if(j&&j.settings) liveSettings(j.settings); }));
+  if(files.length) jobs.push(fetch('/api/files',{credentials:'same-origin',cache:'no-store'})
+    .then(function(r){ return r.ok? r.json() : null; })
+    .then(function(j){
+      if(!j) return;
+      S.srvFiles=S.srvFiles||{};
+      var load=files.filter(function(k){ var top=(j[k]||[])[0]; if(!top) return false;
+        var had=S.srvFiles[k]; S.srvFiles[k]=top; return need.reset? !(had&&had.id===top.id) : true; });
+      if(load.length) return srvLoadFiles(load);
+    }));
+  return Promise.all(jobs).then(function(){
+    var more=[], yr=S.settings.year;
+    if(need.changes||need.reset||yr!==yearWas) more.push(fetch('/api/changes?year='+encodeURIComponent(yr),{credentials:'same-origin',cache:'no-store'})
+      .then(function(r){ return r.ok? r.json() : null; })
+      .then(function(j){
+        if(!j||!j.rows) return;
+        /* records this tab has not managed to send yet stay in */
+        var have={}; j.rows.forEach(function(r){ have[r.id]=1; });
+        Srv.cache=j.rows.concat((Srv.queue||[]).filter(function(r){ return !have[r.id]; }));
+        Srv.year=yr;
+      }));
+    var sl=Object.keys(need.schedule||{}), all=need.schedule&&need.schedule.all;
+    var mvYears={};
+    sl.forEach(function(x){ x=+x; if(x>=70000&&x<80000) mvYears[x-70000]=1; });
+    if(all||yr!==yearWas){ mvYears[yr]=1; mvYears[yr-1]=1; }
+    Object.keys(mvYears).forEach(function(y){ more.push(mvLoad(+y,true)); });
+    if(all||yr!==yearWas||sl.some(function(x){ return +x===dpmY(yr); })) more.push(dpmLoad());
+    return Promise.all(more);
+  }).then(function(){
+    try{ otReparse(); }catch(e){}
+    try{ dpmApplySource(); }catch(e){}
+    liveRedraw();
+    if(who&&who.length) toast('↻ Updated by '+who.join(', ')+(what&&what.length? ' — '+what.join(', ') : ''));
+  }).catch(function(e){ console.warn('live update:',e&&e.message); });
+}
+/* the shared settings as the server now has them, with anything this tab has
+   changed and not yet saved kept on top */
+function liveSettings(remote){
+  var keys=SRV_KEYS.concat(['rules']), dirty=false;
+  keys.forEach(function(k){
+    if(!(k in remote)) return;
+    var v=remote[k];
+    if(v===null||v===undefined) return;
+    if(k==='rules'){ if(!srvIsMap(v)) return; }
+    else { if(SET_LIST[k]&&!Array.isArray(v)) return; if(SET_MAP[k]&&!srvIsMap(v)) return; }
+    var b=SRV_BASE[k], cur=(k==='rules')? S.rules : S.settings[k];
+    var m=b? srvMerge3(b.v,cur,v) : v;
+    srvSetBase(k,v);
+    if(JSON.stringify(m)!==JSON.stringify(cur)) srvPutLocal(k,m);
+    if(JSON.stringify(m)!==JSON.stringify(v)) dirty=true;
+  });
+  if(dirty) srvPushSettings();
+}
+/* recount and redraw what is on screen, without sending anything back */
+function liveRedraw(){
+  try{ compute(); }catch(e){ console.warn(e); }
+  try{ Store.set('scc:config',{settings:S.settings,rules:S.rules,lang:S.lang}); }catch(e){}
+  try{ syncControls(); }catch(e){}
+  renderNav();
+  var dw=el('drawer');
+  if(S.dw&&dw&&dw.classList.contains('on')){ S._behind=true; renderDrawer(); }
+  else renderPage();
 }
 
 /* expose pure functions for verification outside the browser */
