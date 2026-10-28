@@ -8,3 +8,8 @@ data/
 .env
 node_modules/
 npm-debug.log*
+
+# The test workbooks hold real staff names and schedules: kept out while the
+# repository is public. Test output is scratch.
+tests/fixtures/
+tests/.out/

@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node server/index.js",
     "adduser": "node server/adduser.js",
-    "backup": "node server/backup.js"
+    "backup": "node server/backup.js",
+    "test": "cd tests && node run.js"
   },
   "dependencies": {
     "express": "^5.1.0"
