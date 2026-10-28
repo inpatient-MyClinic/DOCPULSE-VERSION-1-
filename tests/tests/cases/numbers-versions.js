@@ -3,7 +3,8 @@
 const T=require('../lib/ctx');
 (async()=>{
   const fs=require('fs');
-  const {w,api,S}=await require('../lib/srv')(T.cookie); for(let i=0;i<120&&!(S.master&&S.master.mv);i++) await new Promise(r=>setTimeout(r,500));   /* versions arrive after boot */ console.log('  master:',S.master.sheet,'| cap rows',S.capacity&&S.capacity.rows.length);
+  const {w,api,S}=await require('../lib/srv')(T.cookie); for(let i=0;i<120&&!(S.master&&S.master.mv&&S.ot&&S.ot.rows&&S.result);i++) await new Promise(r=>setTimeout(r,500));   /* versions and the OT sheet arrive after boot */
+  await new Promise(r=>setTimeout(r,3000)); api.refresh(); console.log('  master:',S.master.sheet,'| cap rows',S.capacity&&S.capacity.rows.length);
   const r=n=>Math.round((n||0)*1e6)/1e6;
   const out={brk:{},compute:{},paid:{}};
   S.result.rows.forEach(t=>{ out.compute[t.key]={m:t.m.map(x=>[r(x.s),r(x.c),r(x.o),r(x.t)]),yt:r(t.yt)}; });

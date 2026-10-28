@@ -29,6 +29,7 @@ module.exports = [
   /* ---- fixed OT ---- */
   { name: 'ot-choice-counts' },
   { name: 'ot-fixed-total', golden: false },
+  { name: 'card-ot-template', golden: false },
   { name: 'ot-page-browser' },
   { name: 'ot-add-dialog' },
   { name: 'ot-add-focus' },
@@ -72,6 +73,7 @@ module.exports = [
   /* ---- finance, telemedicine, files ---- */
   { name: 'finance-holidays' },
   { name: 'finance-columns' },
+  { name: 'finance-fixed-matches', golden: false },
   { name: 'telemedicine' },
   { name: 'billing-big', golden: false, timeout: 300 },
   { name: 'upload-startup', golden: false },
