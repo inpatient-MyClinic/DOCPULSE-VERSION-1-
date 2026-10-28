@@ -2321,6 +2321,9 @@ function compute(){
       }
       t.otFixM[mf]=ov; t.otHeldM[mf]=hd; t.m[mf].ot=ov;
       t.yot+=ov; t.yotHeld+=hd;
+      /* OT Fixed is an extra session the doctor works on top of his clinic:
+         never part of the roster, always part of the Total */
+      t.m[mf].t+=ov; t.yt+=ov;
     }
   });
 
@@ -5918,12 +5921,11 @@ function renderSummary(){
      '<th class="n" data-s="ys">'+(msel===null?'Sess':esc(M[msel])+' sess')+'</th>'+
      '<th class="n" data-s="yc">Close</th>'+
      '<th class="n" data-s="yo">Open</th>'+
+     '<th class="n" title="Fixed OT sessions: extra sessions on top of the clinic, added to Total">OT Fixed</th>'+
      '<th class="n" title="The part of Sessions that falls on a Friday \u2014 already '+
        'inside Sessions, shown on its own so it can be seen">Fri</th>'+
      '<th class="n" title="Sessions lost to a public holiday \u2014 already inside '+
        'Close, shown on its own so it can be seen">Holiday</th>'+
-     '<th class="n" title="Fixed OT the OT page projects for the month. Reported '+
-       'beside the roster, not added to Open">Fixed OT</th>'+
      '<th class="n" data-s="exp">Expected</th>'+
      '<th class="n" data-s="yt">Total</th>'+
      '<th class="n" data-s="owed">Not replaced</th>'+
@@ -5944,18 +5946,18 @@ function renderSummary(){
         return '<td class="n"'+(q?'':' style="color:var(--faint)"')+'>'+(q?fmt(q):'·')+'</td>'; }).join('') : '')+
       '<td class="n">'+fmt(v.s)+'</td><td class="n">'+fmt(v.c)+'</td>'+
       '<td class="n">'+fmt(v.o)+'</td>'+
-      (function(){ var mm=selMonth(), n=(mm===null)? (t.yfri||0) : (t.m[mm].fri||0);
-        return '<td class="n"'+(n? ' style="color:var(--navy);font-weight:650"'
-          : ' style="color:var(--faint)"')+'>'+(n? fmt(n):'\u00b7')+'</td>'; })()+
-      (function(){ var mm=selMonth(), n=(mm===null)? (t.yhol||0) : (t.m[mm].hol||0);
-        return '<td class="n"'+(n? ' style="color:var(--warn);font-weight:650"'
-          : ' style="color:var(--faint)"')+'>'+(n? fmt(n):'\u00b7')+'</td>'; })()+
       (function(){ var mm=selMonth(), n=(mm===null)? (t.yot||0) : (t.m[mm].ot||0);
         var held=(mm===null)? (t.otHeldM||[]).reduce(function(a,b){ return a+(b||0); },0)
                             : ((t.otHeldM||[])[mm]||0);
         return '<td class="n"'+(n? ' style="color:var(--teal);font-weight:650"'
           : ' style="color:var(--faint)"')+'>'+(n? fmt(n):'\u00b7')+
           (held? '<div class="mt" style="color:var(--warn)">'+fmt(held)+' held</div>':'')+'</td>'; })()+
+      (function(){ var mm=selMonth(), n=(mm===null)? (t.yfri||0) : (t.m[mm].fri||0);
+        return '<td class="n"'+(n? ' style="color:var(--navy);font-weight:650"'
+          : ' style="color:var(--faint)"')+'>'+(n? fmt(n):'\u00b7')+'</td>'; })()+
+      (function(){ var mm=selMonth(), n=(mm===null)? (t.yhol||0) : (t.m[mm].hol||0);
+        return '<td class="n"'+(n? ' style="color:var(--warn);font-weight:650"'
+          : ' style="color:var(--faint)"')+'>'+(n? fmt(n):'\u00b7')+'</td>'; })()+
       '<td class="n">'+fmt(mvExpected(t))+'</td>'+
       '<td class="n"><b>'+fmt(v.t)+'</b></td>'+
       '<td class="n"'+(mvOwed(t)>0.001?' style="color:var(--loss);font-weight:700"':' style="color:var(--faint)"')+'>'+
@@ -5973,9 +5975,9 @@ function renderSummary(){
      '<td class="n">'+fmt(G.s)+'</td><td class="n">'+fmt(G.c)+'</td><td class="n">'+fmt(G.o)+'</td>'+
      (function(){ var mm=selMonth();
        function sum(f){ return rows.reduce(function(a,t){ return a+f(t); },0); }
-       return '<td class="n">'+fmt(sum(function(t){ return (mm===null)? (t.yfri||0) : (t.m[mm].fri||0); }))+'</td>'+
-              '<td class="n">'+fmt(sum(function(t){ return (mm===null)? (t.yhol||0) : (t.m[mm].hol||0); }))+'</td>'+
-              '<td class="n">'+fmt(sum(function(t){ return (mm===null)? (t.yot||0)  : (t.m[mm].ot||0);  }))+'</td>'; })()+
+       return '<td class="n">'+fmt(sum(function(t){ return (mm===null)? (t.yot||0)  : (t.m[mm].ot||0);  }))+'</td>'+
+              '<td class="n">'+fmt(sum(function(t){ return (mm===null)? (t.yfri||0) : (t.m[mm].fri||0); }))+'</td>'+
+              '<td class="n">'+fmt(sum(function(t){ return (mm===null)? (t.yhol||0) : (t.m[mm].hol||0); }))+'</td>'; })()+
      '<td class="n">'+fmt(G.ex)+'</td>'+
      '<td class="n">'+fmt(G.t)+'</td>'+
      '<td class="n"'+(G.ow>0.001?' style="color:var(--loss)"':'')+'>'+(G.ow>0.001?fmt(G.ow):'·')+'</td>'+
@@ -6621,7 +6623,7 @@ function otMonthCheckHTML(){
 function otRulesHTML(){
   return '<details class="card ot-rules"'+(S.otRulesOpen?' open':'')+' id="otRules"><summary><b>How fixed OT is counted</b> <span class="hint">— the rules, in plain words</span></summary><div class="cb"><ol>'+
     '<li><b>Every matching weekday is one session.</b> A doctor set for Monday 5–9 PM gets one session every Monday of the month (inside the months / year you gave the entry).</li>'+
-    '<li><b>It has its own column.</b> Fixed OT shows in the <b>Fixed OT</b> column on the Doctors page. It is <u>not</u> added to Sessions, Opened or Total.</li>'+
+    '<li><b>It is always an extra session.</b> Fixed OT is never part of the roster. It has its own <b>OT Fixed</b> column, right after Open, and it <b>is added to Total</b>: Total = Sessions − Close + Open + OT Fixed. The Finance report shows it under <b>Fixed sessions</b>.</li>'+
     '<li><b>A clash waits for you.</b> If the OT time overlaps the doctor\'s master-schedule clinic, you choose what he worked (for all days, or day by day):'+
       '<br><b>Master schedule</b> → count the clinic only; the OT is skipped.'+
       '<br><b>OT fixed session</b> → count the OT only; that clinic comes out of Sessions and Total.'+
@@ -7192,14 +7194,18 @@ function renderDrawer(){
   var dm=S.dw.month, span=(dm===null)? null : t.m[dm];
   var vS=span? span.s : t.ys, vC=span? span.c : t.yc, vO=span? span.o : t.yo,
       vT=span? span.t : t.yt, vE=vS+vO, vW=span? owedIn(span) : owedYear(t);
+  var vF=span? (span.ot||0) : (t.yot||0), vH=(dm===null)? (t.yotHeld||0) : ((t.otHeldM||[])[dm]||0),
+      hasOT=(t.yot||0)>0||(t.yotHeld||0)>0;
   var scope=(dm===null)? ('all of '+year) : (M[dm]+' '+year);
   h+='<div class="rail" style="grid-template-columns:repeat(4,1fr)">'+
     '<div class="st"><div class="k">'+esc(T('sessions'))+'</div><div class="v">'+fmt(vS,0)+'</div>'+
       '<div class="d">'+esc(scope)+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('closed'))+'</div><div class="v" style="color:var(--loss)">'+fmt(vC)+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('opened'))+'</div><div class="v" style="color:var(--gain)">'+fmt(vO)+'</div></div>'+
+    (hasOT? '<div class="st"><div class="k">OT Fixed</div><div class="v" style="color:var(--teal)">'+fmt(vF)+'</div>'+
+      '<div class="d">extra sessions'+(vH>0.001? ' · <span style="color:var(--warn)">'+fmt(vH)+' waiting for a choice</span>' : '')+'</div></div>' : '')+
     '<div class="st"><div class="k">'+esc(T('net'))+'</div><div class="v" style="color:var(--purple)">'+fmt(vT)+'</div>'+
-      '<div class="d">sessions − closed + opened</div></div>'+
+      '<div class="d">sessions − closed + opened'+(hasOT? ' + OT fixed' : '')+'</div></div>'+
     '<div class="st"><div class="k">Expected</div><div class="v">'+fmt(vE)+'</div>'+
       '<div class="d">roster plus anything opened · '+fmt(hoursOf(vE),0)+' h</div></div>'+
     '<div class="st"><div class="k">Not replaced</div>'+
@@ -16271,38 +16277,38 @@ function exportXlsx(){
   /* the export mirrors what is on screen, including the month filter */
   var head=['ID','Doctor','Department','Specialty','Type','Site','Master lines'];
   if(msel===null){
-    M.forEach(function(m){ head.push(m+' Sessions',m+' Close',m+' Open',m+' Total'); });
-    head.push('Year Sessions','Year Close','Year Open','Year Expected','Year Total',
+    M.forEach(function(m){ head.push(m+' Sessions',m+' Close',m+' Open',m+' OT Fixed',m+' Total'); });
+    head.push('Year Sessions','Year Close','Year Open','Year OT Fixed','Year Expected','Year Total',
               'Year Not replaced','Not replaced (hours)');
   }else{
-    head.push(M[msel]+' Sessions',M[msel]+' Close',M[msel]+' Open',M[msel]+' Expected',
+    head.push(M[msel]+' Sessions',M[msel]+' Close',M[msel]+' Open',M[msel]+' OT Fixed',M[msel]+' Expected',
               M[msel]+' Total',M[msel]+' Not replaced',M[msel]+' Not replaced (hours)','Year Total');
   }
   var aoa=[head];
   rows.forEach(function(t){
     var r=[t.id,t.name,t.dept,t.spec,(t.hybrid?'H':t.status),t.site,t.lines];
     if(msel===null){
-      for(var m=0;m<12;m++) r.push(rnd(t.m[m].s),rnd(t.m[m].c),rnd(t.m[m].o),rnd(t.m[m].t));
-      r.push(rnd(t.ys),rnd(t.yc),rnd(t.yo),rnd(t.ys+t.yo),rnd(t.yt),
+      for(var m=0;m<12;m++) r.push(rnd(t.m[m].s),rnd(t.m[m].c),rnd(t.m[m].o),rnd(t.m[m].ot||0),rnd(t.m[m].t));
+      r.push(rnd(t.ys),rnd(t.yc),rnd(t.yo),rnd(t.yot||0),rnd(t.ys+t.yo),rnd(t.yt),
              rnd(owedYear(t)),rnd(hoursOf(owedYear(t))));
     }else{
       var v=t.m[msel];
-      r.push(rnd(v.s),rnd(v.c),rnd(v.o),rnd(expectedIn(v)),rnd(v.t),
+      r.push(rnd(v.s),rnd(v.c),rnd(v.o),rnd(v.ot||0),rnd(expectedIn(v)),rnd(v.t),
              rnd(owedIn(v)),rnd(hoursOf(owedIn(v))),rnd(t.yt));
     }
     aoa.push(r);
   });
   var tr=['','TOTAL ('+rows.length+' doctors)','','','','',''];
   if(msel===null){
-    for(var m=0;m<12;m++){ var a1=0,b1=0,c1=0,d1=0;
-      rows.forEach(function(t){a1+=t.m[m].s;b1+=t.m[m].c;c1+=t.m[m].o;d1+=t.m[m].t;});
-      tr.push(rnd(a1),rnd(b1),rnd(c1),rnd(d1)); }
-    var Y={s:0,c:0,o:0,t:0}; rows.forEach(function(t){Y.s+=t.ys;Y.c+=t.yc;Y.o+=t.yo;Y.t+=t.yt;});
-    tr.push(rnd(Y.s),rnd(Y.c),rnd(Y.o),rnd(Y.t));
+    for(var m=0;m<12;m++){ var a1=0,b1=0,c1=0,f1=0,d1=0;
+      rows.forEach(function(t){a1+=t.m[m].s;b1+=t.m[m].c;c1+=t.m[m].o;f1+=(t.m[m].ot||0);d1+=t.m[m].t;});
+      tr.push(rnd(a1),rnd(b1),rnd(c1),rnd(f1),rnd(d1)); }
+    var Y={s:0,c:0,o:0,f:0,t:0}; rows.forEach(function(t){Y.s+=t.ys;Y.c+=t.yc;Y.o+=t.yo;Y.f+=(t.yot||0);Y.t+=t.yt;});
+    tr.push(rnd(Y.s),rnd(Y.c),rnd(Y.o),rnd(Y.f),'',rnd(Y.t));
   }else{
-    var Z={s:0,c:0,o:0,t:0,y:0};
-    rows.forEach(function(t){ var v=t.m[msel]; Z.s+=v.s;Z.c+=v.c;Z.o+=v.o;Z.t+=v.t;Z.y+=t.yt; });
-    tr.push(rnd(Z.s),rnd(Z.c),rnd(Z.o),rnd(Z.t),rnd(Z.y));
+    var Z={s:0,c:0,o:0,f:0,t:0,y:0};
+    rows.forEach(function(t){ var v=t.m[msel]; Z.s+=v.s;Z.c+=v.c;Z.o+=v.o;Z.f+=(v.ot||0);Z.t+=v.t;Z.y+=t.yt; });
+    tr.push(rnd(Z.s),rnd(Z.c),rnd(Z.o),rnd(Z.f),'',rnd(Z.t),'','',rnd(Z.y));
   }
   aoa.push(tr);
   var ws=XLSX.utils.aoa_to_sheet(aoa);
