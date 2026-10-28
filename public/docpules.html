@@ -774,6 +774,7 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .ot-pk{display:inline-flex;border:1px solid #CBD5E1;border-radius:999px;overflow:hidden}
 .ot-pk button{font:inherit;font-size:11.5px;font-weight:600;padding:4px 10px;border:0;background:#fff;color:#475569;cursor:pointer;white-space:nowrap}
 .ot-pk button+button{border-left:1px solid #CBD5E1}.ot-pk button:hover{background:#F1F5F9}.ot-pk button.on{background:#0F766E;color:#fff}
+.ot-pk.busy{cursor:progress;opacity:.75}.ot-pk.busy button{cursor:progress}
 .ot-st{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}.ot-st.y{background:#CCFBF1;color:#0F766E}.ot-st.w{background:#FEF3C7;color:#B45309}.ot-st.n{background:#F1F5F9;color:#64748B}
 .ot-rules summary{cursor:pointer;padding:14px 18px;list-style:none}.ot-rules ol{margin:0 0 4px 18px;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#334155}
 .ot-chk{margin-top:14px}
@@ -1175,10 +1176,14 @@ function num(v){ var n=typeof v==='number'?v:parseFloat(nz(v)); return isFinite(
    session is 0.125, and rounding that to 0.13 makes a column that no longer
    adds up. Only floating-point noise is removed — 19.374999999999996 is really
    19.375 — by rounding at the sixth decimal, well past anything the data holds. */
+/* toLocaleString builds a new formatter on every call, which is slow over a
+   few thousand cells; one formatter per setting gives the same text */
+var FMT_NF={};
+function fmtNF(lo,hi){ var k=lo+'|'+hi; return FMT_NF[k]||(FMT_NF[k]=new Intl.NumberFormat('en-US',{minimumFractionDigits:lo,maximumFractionDigits:hi})); }
 function fmt(n,d){ if(n===null||n===undefined||!isFinite(n)) return '—';
-  if(d!==undefined) return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+  if(d!==undefined) return (typeof n==='number')? fmtNF(d,d).format(n) : n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
   var r=Math.round(n*1e6)/1e6;
-  return r.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:6}); }
+  return fmtNF(0,6).format(r); }
 function esc(s){ return nz(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 /* the same escaping, minus the trim — for the value of an input the user is
    still typing into, where a trailing space has to survive the re-render */
@@ -1241,8 +1246,11 @@ function durWords(v){
   if(mm) return (+mm[1])/60;
   return null;
 }
+var WDC={};
 function weekdayCounts(year){
-  var out=[];
+  /* the same for every doctor — worked out once per year */
+  if(WDC[year]) return WDC[year];
+  var out=WDC[year]=[];
   for(var m=0;m<12;m++){
     var row=[0,0,0,0,0,0,0], last=new Date(Date.UTC(year,m+1,0)).getUTCDate();
     for(var d=1;d<=last;d++) row[new Date(Date.UTC(year,m,d)).getUTCDay()]++;
@@ -2297,6 +2305,19 @@ function compute(){
         /* a fixed OT session landing on a rostered clinic at the same hours is
            reported, not guessed at: you say which it was */
         (pj.clashes||[]).forEach(function(c){ t.otClashes.push(c); });
+        /* "OT fixed session" means he worked the OT instead of that clinic, so
+           the clinic leaves Sessions (and Total). A public holiday already
+           takes the whole clinic, so nothing more comes off that day. */
+        var holX=bkHolIndex(), sk={};
+        (pj.clashes||[]).forEach(function(c){
+          if(c.pick!=='fixed'||!(c.frac>0)||holX[mf+'-'+c.day]) return;
+          var sub=(pmf[c.day]||0)*c.frac; if(!(sub>0)) return;
+          sk[c.day]=c.frac;
+          t.m[mf].s-=sub; t.m[mf].t-=sub; t.ys-=sub; t.yt-=sub;
+          t.m[mf].otSkip=(t.m[mf].otSkip||0)+sub;
+          if(new Date(Date.UTC(year,mf,c.day)).getUTCDay()===5){ t.m[mf].fri-=sub; t.yfri-=sub; }
+        });
+        t.otSkip=t.otSkip||{}; t.otSkip[mf]=sk; t.otSkipY=year;
       }
       t.otFixM[mf]=ov; t.otHeldM[mf]=hd; t.m[mf].ot=ov;
       t.yot+=ov; t.yotHeld+=hd;
@@ -2426,9 +2447,8 @@ function scrollSnap(root){
   var out={list:[],self:null}; if(!root) return out;
   if(root.scrollTop||root.scrollLeft) out.self={t:root.scrollTop,l:root.scrollLeft};
   var all=root.querySelectorAll('*'), cnt={};
-  for(var i=0;i<all.length;i++){ var n=all[i];
-    if(!(n.scrollTop||n.scrollLeft)) { if(n.id||n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1){ var k0=scrollKey(n); cnt[k0]=(cnt[k0]||0)+1; } continue; }
-    var k=scrollKey(n); cnt[k]=(cnt[k]||0)+1; out.list.push({k:k,n:cnt[k],t:n.scrollTop,l:n.scrollLeft}); }
+  for(var i=0;i<all.length;i++){ var n=all[i], k=scrollKey(n); cnt[k]=(cnt[k]||0)+1;
+    if(n.scrollTop||n.scrollLeft) out.list.push({k:k,n:cnt[k],t:n.scrollTop,l:n.scrollLeft}); }
   return out;
 }
 function scrollRestore(root,snap){
@@ -2437,10 +2457,8 @@ function scrollRestore(root,snap){
   if(!snap.list.length) return;
   var want={}; snap.list.forEach(function(x){ (want[x.k]=want[x.k]||{})[x.n]=x; });
   var all=root.querySelectorAll('*'), cnt={};
-  for(var i=0;i<all.length;i++){ var n=all[i];
-    if(!(n.id||n.scrollHeight>n.clientHeight+1||n.scrollWidth>n.clientWidth+1)) continue;
-    var k=scrollKey(n); if(!want[k]) continue;
-    cnt[k]=(cnt[k]||0)+1; var x=want[k][cnt[k]]; if(!x) continue;
+  for(var i=0;i<all.length;i++){ var n=all[i], k=scrollKey(n);
+    cnt[k]=(cnt[k]||0)+1; if(!want[k]) continue; var x=want[k][cnt[k]]; if(!x) continue;
     n.scrollTop=x.t; n.scrollLeft=x.l; }
 }
 /* replace a box's HTML without moving anything the reader was looking at */
@@ -2503,12 +2521,12 @@ function renderNav(){
   if(document.body) document.body.classList.toggle('sbn',sbnOn());
   var badge={};
   if(S.result){
-    var iss=healthChecks().filter(function(c){return c.level!=='ok';}).length;
     badge.summary=S.result.rows.length;
     var ec=(S.result.flagged||[]).filter(function(r){
       return r._flags.some(function(f){return f.lvl==='err';}); }).length;
     if(ec) badge.settings=ec;
-    else if(iss) badge.settings=iss;
+    else { if(S.result._hcN===undefined) S.result._hcN=healthChecks().filter(function(c){return c.level!=='ok';}).length;
+      if(S.result._hcN) badge.settings=S.result._hcN; }
   }
 
   var pages=PAGES, lastG='';
@@ -3609,7 +3627,10 @@ function mvAlarm(){
   a.textContent=S.settings.mvSig? '⏰ Master changed — save a version' : '⏰ No version saved yet — save one';
 }
 if(typeof window!=='undefined') window.addEventListener('beforeunload',function(e){
-  try{ if(mvUnsaved()){ e.preventDefault(); e.returnValue='The master schedule has changes that are not saved as a version.'; return e.returnValue; } }catch(x){}
+  /* warn only when something is still on its way to the server — a settings
+     save waiting on its short delay, or a write not yet acknowledged. An
+     unsaved *version* is not lost on reload (the pill on the page says so). */
+  try{ if(SRVT||(Srv&&Srv.queue&&Srv.queue.length)){ e.preventDefault(); e.returnValue='Some changes are still being saved — wait a second.'; return e.returnValue; } }catch(x){}
 });
 /* ---- counting by version date ----
    With "Versions by date" chosen on the Data tab, each day is counted with the
@@ -4757,6 +4778,10 @@ function altLabel(sp){
    begins on the same day — so it is recorded once against the line and read
    here, where everything that asks "was this clinic running" already looks. */
 function schedWindow(t){
+  var st=schedStamp(); if(t._win&&t._win.s===st) return t._win.v;
+  var v=schedWindowRaw(t); t._win={s:st,v:v}; return v;
+}
+function schedWindowRaw(t){
   var out={from:null,to:null};
   if(!schedChOn()) return out;
   schedFor(schedKey(t)).forEach(function(r){
@@ -6134,13 +6159,13 @@ if(typeof document!=='undefined'){
       S.settings.otRule=S.settings.otRule||{};
       var sid=rr.slice(0,ri), rp=rr.slice(ri+1);
       if(S.settings.otRule[sid]===rp) delete S.settings.otRule[sid]; else S.settings.otRule[sid]=rp;
-      saveConfig(); refresh(); drawerRefresh(); return; }
+      refreshSoon(n); return; }   /* refresh saves, and redraws the open card */
     if((n=t.closest('#otDwDays'))){ S.otDwDays=!S.otDwDays; drawerRefresh(); return; }
     if((n=t.closest('[data-otpk]'))){ var raw=n.getAttribute('data-otpk'), ix=raw.lastIndexOf('|');
       S.settings.otClash=S.settings.otClash||{};
       var id=raw.slice(0,ix), pk=raw.slice(ix+1);
       if(S.settings.otClash[id]===pk) delete S.settings.otClash[id]; else S.settings.otClash[id]=pk;
-      saveConfig(); refresh(); drawerRefresh(); return; }
+      refreshSoon(n); return; }   /* refresh saves, and redraws the open card */
     if((n=t.closest('[data-msonly]'))){ e.preventDefault(); e.stopPropagation();
       var x=msSplit(n.getAttribute('data-msonly')), o=msObj(x.sc); o[x.k+'M']={}; o[x.k+'M'][x.v]=1;
       if(x.k!=='day'&&x.k!=='sub') o[x.k]=''; S.msOpen=null; S.msQ=''; msRender(x.sc,x.k); return; }
@@ -6450,13 +6475,15 @@ function pdWire(){
 
 /* ---- one doctor's fixed OT for a month, day by day, with the clash choice ---- */
 var OT_PICK={master:'Master schedule',fixed:'OT fixed session',both:'Both'};
+var OT_TIP={master:'Count the clinic only — skip the OT',fixed:'Count the OT only — the clinic comes out of Sessions',both:'Count the clinic and the OT'};
 function otMonthRows(t,y,m){
   var list=otDetail(t,y,m);
   return list.map(function(x){
     var clash=!!x.roster, st, cls;
     if(clash&&!x.pick){ st='Waiting — choose'; cls='w'; }
     else if(clash&&x.pick==='master'){ st='Not counted (it was the clinic)'; cls='n'; }
-    else if(clash){ st='Counted as fixed OT'; cls='y'; }
+    else if(clash&&x.pick==='fixed'){ st='Counted as fixed OT · clinic not counted'; cls='y'; }
+    else if(clash){ st='Counted as fixed OT · clinic counted too'; cls='y'; }
     else { st='Counted as fixed OT'; cls='y'; }
     return {day:x.day,wd:x.wd,ot:x.ot,roster:x.roster,open:x.open,pick:x.pick,pickFrom:x.pickFrom,clash:clash,st:st,cls:cls,id:t.key+'|'+y+'-'+m+'-'+x.day,slot:otSlotId(t.key,x.wd,x.ot)};
   });
@@ -6464,7 +6491,7 @@ function otMonthRows(t,y,m){
 function otPickBtns(r){
   if(!r.clash) return '<span class="hint">no clash</span>';
   return '<div class="ot-pk">'+['master','fixed','both'].map(function(k){
-    return '<button type="button" class="'+(r.pick===k?'on':'')+'" data-otpk="'+esc(r.id)+'|'+k+'">'+OT_PICK[k]+'</button>'; }).join('')+'</div>';
+    return '<button type="button" class="'+(r.pick===k?'on':'')+'" title="'+OT_TIP[k]+'" data-otpk="'+esc(r.id)+'|'+k+'">'+OT_PICK[k]+'</button>'; }).join('')+'</div>';
 }
 function otTime(a){ return a&&a.f!==null&&a.f!==undefined? mstFmt(a.f)+'–'+mstFmt(a.t) : '—'; }
 function otDoctorTableHTML(t,y,m,showName){
@@ -6497,7 +6524,7 @@ function otRuleBtns(g){
   if(!g.clash) return '<span class="hint">no clash with his clinic</span>';
   var cur=(S.settings.otRule||{})[g.slot]||'';
   return '<div class="ot-pk">'+['master','fixed','both'].map(function(k){
-    return '<button type="button" class="'+(cur===k?'on':'')+'" data-otrule="'+esc(g.slot)+'|'+k+'">'+OT_PICK[k]+'</button>'; }).join('')+'</div>';
+    return '<button type="button" class="'+(cur===k?'on':'')+'" title="'+OT_TIP[k]+'" data-otrule="'+esc(g.slot)+'|'+k+'">'+OT_PICK[k]+'</button>'; }).join('')+'</div>';
 }
 function otSlotTableHTML(list,y,m,showName){
   if(!list.length) return '';
@@ -6552,7 +6579,11 @@ function otRulesHTML(){
   return '<details class="card ot-rules"'+(S.otRulesOpen?' open':'')+' id="otRules"><summary><b>How fixed OT is counted</b> <span class="hint">— the rules, in plain words</span></summary><div class="cb"><ol>'+
     '<li><b>Every matching weekday is one session.</b> A doctor set for Monday 5–9 PM gets one session every Monday of the month (inside the months / year you gave the entry).</li>'+
     '<li><b>It has its own column.</b> Fixed OT shows in the <b>Fixed OT</b> column on the Doctors page. It is <u>not</u> added to Sessions, Opened or Total.</li>'+
-    '<li><b>A clash waits for you.</b> If the OT time overlaps the doctor\'s master-schedule clinic that day, the OT is held back until you say what he worked: <b>Master schedule</b> → the OT is not counted · <b>OT fixed session</b> or <b>Both</b> → the OT is counted. The clinic session always stays in Sessions.</li>'+
+    '<li><b>A clash waits for you.</b> If the OT time overlaps the doctor\'s master-schedule clinic, you choose what he worked (for all days, or day by day):'+
+      '<br><b>Master schedule</b> → count the clinic only; the OT is skipped.'+
+      '<br><b>OT fixed session</b> → count the OT only; that clinic comes out of Sessions and Total.'+
+      '<br><b>Both</b> → count the clinic and the OT.'+
+      '<br>Until you choose, the clinic counts and the OT waits.</li>'+
     '<li><b>Holidays, leave and leaving</b> do not stop it here: OT on a public holiday, on a day he closed the clinic, or after his last day is still counted on this page.</li>'+
     '<li><b>Paid extra is stricter.</b> The OT from the master file\'s OT sheet is paid on Paid extra: a day already paid in the log is not paid twice, and a closure that day takes its hours off.</li>'+
     '<li><b>Finance report</b> takes Fixed sessions from Paid extra first, and from this page when Paid extra has none.</li>'+
@@ -7421,9 +7452,21 @@ function renderDrawer(){
   });
 }
 
-function closeDrawer(){ el('drawer').classList.remove('on'); el('scrim').classList.remove('on'); S.dw=null; }
+function closeDrawer(){ el('drawer').classList.remove('on'); el('scrim').classList.remove('on'); S.dw=null;
+  /* the page behind the card was left alone while it was open */
+  if(S._behind){ S._behind=false; renderPage(); } }
 /* redraw the doctor card only while it is actually open — a background update
    must never pop it back up over the page */
+/* Light the pressed button at once, then recount on the next frame, so a click
+   never feels stuck while the numbers are worked out. Clicks in quick
+   succession share one recount. */
+var SOON=0;
+function refreshSoon(btn){
+  if(btn&&btn.parentNode){ Array.prototype.forEach.call(btn.parentNode.children,function(x){ x.classList.toggle('on',x===btn&&!btn.classList.contains('on')); });
+    btn.parentNode.classList.add('busy'); }
+  if(SOON) return;
+  SOON=requestAnimationFrame(function(){ setTimeout(function(){ SOON=0; refresh(); },0); });
+}
 function drawerRefresh(){ if(S.dw&&el('drawer')&&el('drawer').classList.contains('on')) renderDrawer(); }
 
 /* -------------------------------------------------------- dashboard page
@@ -9046,7 +9089,8 @@ function schedWho(){
   if(Srv.on&&Srv.user) return nz(Srv.user.name)||nz(Srv.user.email)||'signed in';
   return nz(S.settings.schedWho)||'unnamed';
 }
-function schedKey(t){ return nz(t.id)+'|'+nz(t.site)+'|'+nameKey(t.name); }
+function schedKey(t){ if(t._sk&&t._skn===t.name&&t._ski===t.id&&t._sks===t.site) return t._sk;
+  t._skn=t.name; t._ski=t.id; t._sks=t.site; return (t._sk=nz(t.id)+'|'+nz(t.site)+'|'+nameKey(t.name)); }
 function schedYMD(d){
   var m=nz(d).match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   return m? Date.UTC(+m[1],+m[2]-1,+m[3]) : null;
@@ -9068,46 +9112,59 @@ function schedChOn(){
    every change effective by then applied on top. n is the session count, h is
    what those sessions are worth, which is the figure used when counting by
    duration. A record with times sets both; one without means whole sessions. */
-function schedWeekOn(t,ms,withPedia){
-  var base={n:[],h:[]}, d;
+/* Everything that can change a doctor's week, prepared once per recount: the
+   template, then (in this order) the previous schedule before a confirmed
+   change, the Pedia month blocks, and the dated records — each with its dates
+   already read. The day-by-day loop then only compares numbers. */
+function schedWeekPrep(t,withPedia){
+  var st=schedStamp();
+  var c=withPedia? t._wkP : t._wkN;
+  if(c&&c.s===st&&c.w===t.week&&c.k===t.wk&&c.o===t.ntOld) return c;
+  var H=num(S.settings.hrs)||4, base={n:[],h:[]}, segs=[], d;
   for(d=0;d<7;d++){
     base.n[d]=(t.week&&t.week[d])||0;
     base.h[d]=(t.wk&&t.wk[d]!==undefined)? t.wk[d] : base.n[d];
   }
-  /* the Pedia Format month block, where there is one, is this doctor's week */
   /* counting only: the master grids, the export and the Data-tab comparison
      show the master as written */
-  if(withPedia&&t.ntOld) t.ntOld.forEach(function(o){ if(ms<o.a||ms>o.b) return;
-    for(var od=0;od<7;od++){ base.n[od]=o.pat.n[od]; base.h[od]=o.pat.h[od]; } });
+  if(withPedia&&t.ntOld) t.ntOld.forEach(function(o){ segs.push({a:o.a,b:o.b,pat:o.pat}); });
+  /* the Pedia Format month block, where there is one, is this doctor's week */
   var pr=withPedia&&S.pediaRecs&&S.pediaRecs[schedKey(t)];
-  if(pr) pr.forEach(function(r){
-    var from=schedYMD(r.from), to=schedYMD(r.to);
-    if(ms<from||ms>to) return;
-    base.n[r.day]=r.sessions;
-    base.h[r.day]=(r.hours>0)? r.hours/(num(S.settings.hrs)||4) : r.sessions;
-  });
-  if(!schedChOn()) return base;
-  var recs=schedFor(schedKey(t));
-  if(!recs.length) return base;
-  recs.forEach(function(r){
-    var from=schedYMD(r.from); if(from===null||ms<from) return;
-    var to=schedYMD(r.to); if(to!==null&&ms>to) return;
-    var dd=+r.day; if(!(dd>=0&&dd<=6)) return;
+  if(pr) pr.forEach(function(r){ var f=schedYMD(r.from), to=schedYMD(r.to); if(f===null||to===null) return;
+    segs.push({a:f,b:to,day:r.day,n:r.sessions,h:(r.hours>0)? r.hours/H : r.sessions}); });
+  if(schedChOn()) schedFor(schedKey(t)).forEach(function(r){
+    var f=schedYMD(r.from); if(f===null) return;
+    var to=schedYMD(r.to), dd=+r.day; if(!(dd>=0&&dd<=6)) return;
     var n=num(r.sessions); if(n===null||n<0) n=0;
-    base.n[dd]=n;
     var hrs=num(r.hours);
-    base.h[dd]=(hrs!==null&&hrs>0)? hrs/(num(S.settings.hrs)||4) : n;
-  });
-  return base;
+    segs.push({a:f,b:(to===null)? Infinity : to,day:dd,n:n,h:(hrs!==null&&hrs>0)? hrs/H : n}); });
+  c={s:st,w:t.week,k:t.wk,o:t.ntOld,base:base,segs:segs};
+  if(withPedia) t._wkP=c; else t._wkN=c;
+  return c;
+}
+function schedWeekOn(t,ms,withPedia){
+  var c=schedWeekPrep(t,withPedia), b=c.base;
+  var out={n:b.n.slice(),h:b.h.slice()};
+  for(var i=0;i<c.segs.length;i++){ var g=c.segs[i]; if(ms<g.a||ms>g.b) continue;
+    if(g.pat){ for(var od=0;od<7;od++){ out.n[od]=g.pat.n[od]; out.h[od]=g.pat.h[od]; } }
+    else { out.n[g.day]=g.n; out.h[g.day]=g.h; } }
+  return out;
 }
 /* a stamp that changes whenever anything the resolver reads changes, so the
    per-doctor memo cannot serve a stale week */
+var SCHED_ST=null;
 function schedStamp(){
+  if(SCHED_ST!==null) return SCHED_ST;      /* set for the length of one planning pass */
   var st=SchedStore.load();
   return [schedSrc(),schedChOn()?1:0,st.rows.length,S.settings.hrs,S.dayFilter,schedSrc()==='versions'?S.mvStamp:'',S.pediaStamp||'',S.ntStamp||''].join('~');
 }
 function schedPlanMap(t,year,m){
-  var c=t._planMap||(t._planMap={}), stamp=schedStamp(), k=year+'|'+m;
+  var outer=SCHED_ST; SCHED_ST=null;
+  var stamp=schedStamp(); SCHED_ST=stamp;
+  try{ return schedPlanMapRaw(t,year,m,stamp); } finally{ SCHED_ST=outer; }
+}
+function schedPlanMapRaw(t,year,m,stamp){
+  var c=t._planMap||(t._planMap={}), k=year+'|'+m;
   if(c.__s!==stamp){ t._planMap=c={__s:stamp}; }
   if(c[k]) return c[k];
   var wc=weekdayCounts(year), lastD=new Date(Date.UTC(year,m+1,0)).getUTCDate();
@@ -9156,7 +9213,9 @@ function dayCountFrom(t,d,year,m,fromD,wc){
   return Math.min(n,dayCount(t,d,m,wc));
 }
 /* what the template puts on one date for this doctor */
-function bkPlanOn(t,y,m,d){ return schedPlanMap(t,y,m)[d]||0; }
+function bkPlanOn(t,y,m,d){ var p=schedPlanMap(t,y,m)[d]||0; var f=otSkipOn(t,y,m,d); return f? p*(1-f) : p; }
+/* share of that day's clinic replaced by fixed OT ("OT fixed session" chosen) */
+function otSkipOn(t,y,m,d){ var k=t&&t.otSkip&&t.otSkipY===y&&t.otSkip[m]; return (k&&k[d])||0; }
 /* What one capacity row is worth in sessions on this page. The Rules are not
    consulted — a row's own duration over the hours a session runs is all that
    decides it — because the Session breakdown asks whether the clinic was open,
@@ -10816,7 +10875,8 @@ function buildValidation(){
     var pmV=schedPlanMap(t,year,m);
     for(var d=1;d<=dim;d++){
       var wd=new Date(Date.UTC(year,m,d)).getUTCDay();
-      var per=pmV[d]||0, on=per>0;
+      var per=pmV[d]||0, on=per>0, osk=otSkipOn(t,year,m,d);
+      if(osk) per=per*(1-osk);
       var spans=mstDay((t.spans&&t.spans[wd])||[]);
       days.push({d:d,wd:wd,roster:per,spans:on?spans:[],marks:{},notes:[]});
     }
@@ -10880,7 +10940,6 @@ function buildValidation(){
     var sessions=0, friExtra=0;
     days.forEach(function(c){
       if(!c.roster) return;
-      if(c.asFixed) return;                 /* that day was worked as fixed OT instead */
       if(c.wd===5){
         friExtra+=c.roster;
         c.marks.E=(c.marks.E||0)+c.roster;
@@ -11046,8 +11105,13 @@ function otMonthFor(t,year,m,rows){
     mine.forEach(function(a){ rost.forEach(function(b){ if(!hit&&otOverlap(a,b)) hit={a:a,b:b}; }); });
     var pick=hit? otPickFor(t.key,year,m,day,wd,hit.a).pick : '';
     if(per>0&&hit){
+      /* the share of the day's clinic that sits under the OT hours: all of it
+         for a one-clinic day, the clashing clinic only when he has two */
+      var hitW=0, allW=0;
+      rost.forEach(function(b){ var w=(t.whole||!b||b.f===null||b.f===undefined||b.t===null||b.t===undefined)? 1 : Math.max(0,b.t-b.f);
+        allW+=w; if(mine.some(function(a){ return otOverlap(a,b); })) hitW+=w; });
       out.clashes.push({key:t.key,name:t.name,site:t.site,year:year,month:m,day:day,
-        roster:per,ot:n,pick:pick,otTime:hit.a,rosterTime:hit.b});
+        roster:per,ot:n,pick:pick,otTime:hit.a,rosterTime:hit.b,frac:allW>0? Math.min(1,hitW/allW) : 1});
       if(pick==='fixed'||pick==='both'){ out.total+=n; out.days[day]=(out.days[day]||0)+n; }
       else if(pick!=='master') out.held+=n;     /* "master schedule" is a decision, not a wait */
     }else{
@@ -16303,7 +16367,10 @@ function syncControls(){
   Array.prototype.forEach.call(document.querySelectorAll('[data-i]'),function(n){
     n.textContent=T(n.getAttribute('data-i')); });
 }
-function refresh(){ compute(); saveConfig(); renderNav(); renderPage(); }
+function refresh(){ compute(); saveConfig(); renderNav();
+  var dw=el('drawer');
+  if(S.dw&&dw&&dw.classList.contains('on')){ S._behind=true; renderDrawer(); return; }
+  renderPage(); }
 
 function init(){
   /* settings have been read by now, so re-key anything saved by an older build
