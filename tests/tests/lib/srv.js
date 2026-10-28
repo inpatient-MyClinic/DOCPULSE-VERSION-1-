@@ -52,8 +52,11 @@ module.exports=async function boot(cookie){
   /* capture downloads instead of navigating */
   w.HTMLAnchorElement.prototype.click=function(){ w.__dl={name:this.download,blob:w.__lastBlob}; };
   /* the boot chain is async: wait for the roster to appear */
-  for(let i=0;i<120;i++){
-    if(w.__api&&w.__api.S&&w.__api.S.result) break;
+  /* up to a minute: a loaded machine running several tests at once is slow */
+  for(let i=0;i<600;i++){
+    const S0=w.__api&&w.__api.S;
+    /* both workbooks read, not just a first count from the saved schedule */
+    if(S0&&S0.result&&S0.master&&S0.capacity&&S0.capacity.rows&&S0.capacity.rows.length) break;
     await new Promise(r=>setTimeout(r,100));
   }
   return {w,api:w.__api,S:w.__api&&w.__api.S,req};

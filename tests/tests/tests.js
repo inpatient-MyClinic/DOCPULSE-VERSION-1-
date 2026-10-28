@@ -62,6 +62,7 @@ module.exports = [
   { name: 'hybrid-list' },
   { name: 'hybrid-allowance', capacity: 'cap-hyb.xlsx' },
   { name: 'hybrid-allowance-edit', capacity: 'cap-hyb.xlsx' },
+  { name: 'hybrid-rules', capacity: 'cap-hyb.xlsx', golden: false },
   { name: 'multiselect-master' },
   { name: 'multiselect-everywhere' },
   { name: 'doctors-filters' },
