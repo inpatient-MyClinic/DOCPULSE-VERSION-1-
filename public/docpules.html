@@ -2839,10 +2839,10 @@ function mstWeeklyFromSpans(spans,week){
 }
 function hybChip(t){
   if(!t.hybrid) return '';
-  var left=t.allowLeft, counted=t.yc||0;
+  var left=t.allowLeft, counted=Math.max(0,(t.yAL||0)-(t.allowUsed||0));
   return '<span class="hyb" title="'+esc('Allowed '+fmt(t.allow)+' sessions a year. Only closures for the reasons under Settings → Rules → H doctor rules use it (Annual Leave unless changed). '+
       fmt(t.allowUsed)+' used, '+fmt(left)+' left'+
-      (counted>0.0001? '. '+fmt(counted)+' closed sessions count against him (other reasons, or beyond the allowance).':'.'))+'">'+
+      (counted>0.0001? '. '+fmt(counted)+' beyond the allowance, so counted.':'.')+' Closures for other reasons count as usual.')+'">'+
     '<b>H</b>'+
     '<button class="hb" data-hyb="'+esc(t.key)+'|-" title="one fewer">−</button>'+
     '<span class="hn">'+fmt(t.allow)+'</span>'+
@@ -3684,7 +3684,7 @@ if(typeof window!=='undefined') window.addEventListener('beforeunload',function(
   /* warn only when something is still on its way to the server — a settings
      save waiting on its short delay, or a write not yet acknowledged. An
      unsaved *version* is not lost on reload (the pill on the page says so). */
-  try{ if(SRVT||(Srv&&Srv.queue&&Srv.queue.length)){ e.preventDefault(); e.returnValue='Some changes are still being saved — wait a second.'; return e.returnValue; } }catch(x){}
+  try{ if(SRVT||(Srv&&(Srv.saving>0||(Srv.queue&&Srv.queue.length)))){ e.preventDefault(); e.returnValue='Some changes are still being saved — wait a second.'; return e.returnValue; } }catch(x){}
 });
 /* ---- counting by version date ----
    With "Versions by date" chosen on the Data tab, each day is counted with the
@@ -7237,33 +7237,33 @@ function renderDrawer(){
   if(t.fromMaster) h+=pdWeekHTML(t,year,wm);
   h+=otDrawerHTML(t,year,wm);
   if(t.hybrid){
+    /* only the reasons ticked "Uses the allowance" under H doctor rules belong
+       here; every other closure is counted the usual way and shown apart */
     var rawC=0; for(var hm=0;hm<12;hm++) rawC+=(t.m[hm].cRaw!==undefined? t.m[hm].cRaw : t.m[hm].c);
-    var over=Math.max(0,rawC-t.allowUsed);
+    var alC=t.yAL||0, beyond=Math.max(0,alC-(t.allowUsed||0)), other=Math.max(0,rawC-alC);
+    var alNames=Object.keys(S.rules).filter(function(k){ var r=S.rules[k]; return hUsesAllow(r.main,r.sub)&&hCounted(r); })
+      .map(function(k){ return S.rules[k].sub||S.rules[k].main; });
+    alNames=alNames.filter(function(n,ix){ return alNames.indexOf(n)===ix; });
+    function tile(lab,val,col){ return '<div><div class="hint" style="font-weight:700">'+lab+'</div>'+
+      '<div style="font-size:19px;font-weight:800'+(col?';color:'+col:'')+'">'+val+'</div></div>'; }
     h+='<div class="card"><h3>Hybrid allowance <span class="tag">'+esc(t.status||'H')+'</span></h3><div class="cb">'+
-       '<p class="hint" style="margin-bottom:11px">A hybrid doctor may close this many sessions in the year without it counting. '+
-       'Only closures for the reasons set under <b>Settings → Rules → H doctor rules</b> use the allowance (Annual Leave unless changed), in date order. '+
-       'Every other closure, and anything beyond the allowance, reduces the total.</p>'+
+       '<p class="hint" style="margin-bottom:11px">Counts only the reasons set to <b>Uses the allowance</b> under '+
+       '<b>Settings → Rules → H doctor rules</b>'+(alNames.length? ': <b>'+esc(alNames.join(', '))+'</b>' : ' (none set)')+
+       '. They come out of the allowance first, in date order; only what is beyond it reduces the total.</p>'+
        '<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end">'+
          '<div><label class="hint" style="font-weight:700;display:block;margin-bottom:3px">Sessions allowed a year</label>'+
            '<input type="number" min="0" step="0.25" id="dwAllow" value="'+esc(String(t.allow))+'" '+
            'style="border:1px solid var(--line);border-radius:6px;padding:6px 9px;width:110px;'+
            'font-family:var(--mono);text-align:end;font-size:14px;font-weight:700"></div>'+
-         '<div><div class="hint" style="font-weight:700">Closed in the year</div>'+
-           '<div style="font-size:19px;font-weight:800">'+fmt(rawC)+'</div></div>'+
-         '<div><div class="hint" style="font-weight:700">of which use the allowance</div>'+
-           '<div style="font-size:19px;font-weight:800">'+fmt(t.yAL||0)+'</div></div>'+
-         '<div><div class="hint" style="font-weight:700">Used from the allowance</div>'+
-           '<div style="font-size:19px;font-weight:800;color:var(--teal)">'+fmt(t.allowUsed)+'</div></div>'+
-         '<div><div class="hint" style="font-weight:700">Left</div>'+
-           '<div style="font-size:19px;font-weight:800;color:'+(t.allowLeft>0?'var(--teal)':'var(--muted)')+'">'+
-             fmt(t.allowLeft)+'</div></div>'+
-         '<div><div class="hint" style="font-weight:700">Counted against him</div>'+
-           '<div style="font-size:19px;font-weight:800;color:'+(over>0.001?'var(--loss)':'var(--muted)')+'">'+
-             fmt(over)+'</div></div>'+
+         tile('Closed for these reasons',fmt(alC))+
+         tile('Used from the allowance',fmt(t.allowUsed),'var(--teal)')+
+         tile('Left',fmt(t.allowLeft),t.allowLeft>0?'var(--teal)':'var(--muted)')+
+         tile('Beyond the allowance',fmt(beyond),beyond>0.001?'var(--loss)':'var(--muted)')+
        '</div>'+
-       (over>0.001? '<p class="hint" style="margin-top:10px;color:var(--loss);font-weight:600">Over the allowance by '+
-         fmt(over)+' session'+(Math.abs(over-1)<0.001?'':'s')+' \u2014 that part is counted.'
-        : '<p class="hint" style="margin-top:10px">Still within the allowance, so no closure has counted against him.</p>')+
+       (beyond>0.001? '<p class="hint" style="margin-top:10px;color:var(--loss);font-weight:600">Over the allowance by '+
+         fmt(beyond)+' session'+(Math.abs(beyond-1)<0.001?'':'s')+' \u2014 that part is counted.</p>'
+        : '<p class="hint" style="margin-top:10px">Within the allowance: none of these closures has counted against him.</p>')+
+       (other>0.001? '<p class="hint" style="margin-top:4px">Other closures this year: <b>'+fmt(other)+'</b> \u2014 their reasons do not use the allowance, so they count as usual (they are in Closed above).</p>' : '')+
        '</div></div>';
   }
 
@@ -8979,14 +8979,23 @@ var Srv={
      opened straight from disk. */
   boot:function(year){
     Srv.year=year;
-    return fetch('/api/bootstrap?year='+encodeURIComponent(year),{credentials:'same-origin'})
-      .then(function(r){
-        if(r.status===401){ Srv.on=false; return null; }
-        if(!r.ok) throw new Error('server said '+r.status);
-        return r.json();
-      })
+    /* a dropped connection or a busy server is tried again before the page
+       gives up on the server (one failed request used to leave it empty) */
+    function get(tries){
+      return fetch('/api/bootstrap?year='+encodeURIComponent(year),{credentials:'same-origin'})
+        .then(function(r){
+          if(r.status===401) return null;
+          if(!r.ok) throw new Error('server said '+r.status);
+          return r.json();
+        })
+        .catch(function(e){
+          if(tries>=3) throw e;
+          return new Promise(function(res){ setTimeout(res,800*(tries+1)); }).then(function(){ return get(tries+1); });
+        });
+    }
+    return get(0)
       .then(function(j){
-        if(!j) return false;
+        if(!j){ Srv.on=false; return false; }
         Srv.on=true; Srv.user=j.user||null; Srv.cache=j.changes||[]; Srv.err='';
         Srv.boot_extra=j;
         return true;
@@ -9035,6 +9044,9 @@ var Srv={
   putSettings:function(obj,patch){
     if(!Srv.on) return Promise.resolve();
     var body={settings:obj||{}}; if(patch&&Object.keys(patch).length) body.patch=patch;
+    /* still on its way: leaving the page now would cut it off */
+    Srv.saving=(Srv.saving||0)+1;
+    var done=function(x){ Srv.saving=Math.max(0,(Srv.saving||0)-1); return x; };
     return fetch('/api/settings',{method:'PUT',credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(body)})
@@ -9050,7 +9062,7 @@ var Srv={
            a month later as two people reading different numbers */
         if(typeof toast==='function')
           toast('That setting was not saved for everyone \u2014 ' + e.message);
-      });
+      }).then(done,function(e){ done(); throw e; });
   },
   putSchedule:function(year,sched,note){
     if(!Srv.on) return Promise.resolve();
@@ -14639,6 +14651,7 @@ function renderRtm(){
      report came back empty with J1 doctors ticked out of sight. Say so. */
   var shownKeys={}; list.forEach(function(d){ shownKeys[d.key]=1; });
   var hidden=sel.filter(function(d){ return !shownKeys[d.key]; });
+  RT._hidden=hidden.map(function(d){ return d.key; });
   if(hidden.length){
     var bySite={}; hidden.forEach(function(d){ var k=d.site||'—'; bySite[k]=(bySite[k]||0)+1; });
     h+='<div class="cb" style="padding-top:10px;padding-bottom:0"><div class="note w" style="margin:0">'+
@@ -15271,7 +15284,33 @@ function wireRtm(){
   var fl=el('rtFilter'); if(fl) fl.onchange=function(){ RT.filter=this.value; renderRtm(); };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-row]'),function(c){
     c.onchange=function(){ RT.picked[parseInt(c.getAttribute('data-row'),10)]=c.checked; renderRtm(); }; });
-  var pa=el('rtPickAll'); if(pa) pa.onclick=function(){ RT.rows.forEach(function(r,i){ RT.picked[i]=true; }); renderRtm(); };
+  /* "Choose all" picks what the filters show — with no filter, that is every row */
+  var pa=el('rtPickAll'); if(pa) pa.onclick=function(){ rtShownIdx().forEach(function(i){ RT.picked[i]=true; }); renderRtm(); };
+  /* the report filters: they were drawn but never connected, so choosing one did nothing */
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm select[data-rtf]'),function(sl){
+    sl.onchange=function(){ rtFilterState()[sl.getAttribute('data-rtf')]=sl.value; renderRtm(); }; });
+  var rfq=el('rtFq');
+  if(rfq) rfq.oninput=function(){ var v=rfq.value; clearTimeout(RT._fqT);
+    RT._fqT=setTimeout(function(){ rtFilterState().q=v; renderRtm(); },250); };
+  var rfc=el('rtFclear'); if(rfc) rfc.onclick=function(){ RT.rf=null; rtFilterState(); renderRtm(); };
+  var rxt=el('rtXlsxTop'); if(rxt) rxt.onclick=rtExportShown;
+  var rch=el('rtClrHidden'); if(rch) rch.onclick=function(){ (RT._hidden||[]).forEach(function(k){ delete RT.sel[k]; }); renderRtm(); toast('Hidden doctors deselected'); };
+  /* AX spells a doctor differently: remember the spelling for that doctor */
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-axalt]'),function(b){
+    b.onclick=function(ev){ if(ev&&ev.stopPropagation) ev.stopPropagation();
+      var k=b.getAttribute('data-axalt'), a=(RT._axAlt||{})[k]; if(!a) return;
+      a.names.forEach(function(n){ rtAliasSet(n,k); });
+      renderRtm(); toast('Linked '+a.names.length+' AX spelling'+(a.names.length===1?'':'s')); }; });
+  /* names the directory does not know: point at a doctor, or add one */
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-unkmap]'),function(b){
+    b.onclick=function(){ var i=+b.getAttribute('data-unkmap'), u=(RT._unk||[])[i]; if(!u) return;
+      var pickEl=document.querySelector('#pg-rtm [data-unkpick="'+i+'"]'), v=pickEl&&pickEl.value;
+      if(!v){ alert('Choose the doctor this name means first.'); return; }
+      rtAliasSet(u.name,v); renderRtm(); toast(u.name+' recorded'); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-unkadd]'),function(b){
+    b.onclick=function(){ var i=+b.getAttribute('data-unkadd'), u=(RT._unk||[])[i]; if(!u) return;
+      RT.adding=true; RT.na={name:u.name}; renderRtm();
+      var f=el('naName'); if(f){ try{ f.scrollIntoView({block:'center'}); }catch(e){} f.focus(); } }; });
   var pn=el('rtPickNone'); if(pn) pn.onclick=function(){ RT.picked={}; renderRtm(); };
   var cp=el('rtCopy');
   if(cp) cp.onclick=function(){
@@ -15612,13 +15651,15 @@ function rptBuild(){
 
   var want=low(RT.rpt.status), sets=rptDocKeys(), windows=rptWindows();
   var ym=nz(RT.month), dayF=RT.gen.days, rtmF=RT.gen.rtm||{}, pfF=RT.gen.pf||{};
-  var out=[], unmatched=0, multi=0, seen=0, offMonth=0, offDoc=0, offWin=0;
+  var out=[], unmatched=0, multi=0, seen=0, offMonth=0, offDoc=0, offWin=0, read=0, offRead=0, offStatus=0, sawStatus={};
   var DAYN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   var tRes=rptSrc(am.res), tStatus=rptSrc(am.status), tDate=rptSrc(am.date);
 
   ax.parsed.rows.forEach(function(r){
-    if(!rtPasses('ax',r)) return;
-    if(want&&tStatus&&tStatus.src==='ax'&&low(r[tStatus.i])!==want) return;
+    read++;
+    if(!rtPasses('ax',r)){ offRead++; return; }
+    /* counted, so the report can say why a row is missing */
+    if(want&&tStatus&&tStatus.src==='ax'&&low(r[tStatus.i])!==want){ offStatus++; var sv=nz(r[tStatus.i])||'(blank)'; sawStatus[sv]=(sawStatus[sv]||0)+1; return; }
     var who=tRes? nz(rptCell(am.res,r,null)) : '';
     if(sets&&tRes&&tRes.src==='ax'&&!rptResourceMatches(who,sets)){ offDoc++; return; }
     var d=(tDate&&tDate.src==='ax')? rtDate(r[tDate.i],(new Date()).getFullYear()) : null;
@@ -15671,6 +15712,7 @@ function rptBuild(){
   out.forEach(function(r,i){ RT.picked[i]=true; });
   RT.rpt.built=true; RT.rpt.unmatched=unmatched; RT.rpt.multi=multi;
   RT.rpt.seen=seen; RT.rpt.offMonth=offMonth; RT.rpt.offDoc=offDoc; RT.rpt.offWin=offWin;
+  RT.rpt.read=read; RT.rpt.offRead=offRead; RT.rpt.offStatus=offStatus; RT.rpt.want=RT.rpt.status; RT.rpt.sawStatus=sawStatus;
   renderRtm();
   toast(out.length? fmt(out.length,0)+' rows from '+fmt(seen,0)+' appointments'
                   : 'Nothing matched — check the status value, the month and the column mapping');
@@ -15721,7 +15763,7 @@ function hRulesCard(keys,sideOf){
     var k=ruleKey(r.main,r.sub); hRows[k]=(hRows[k]||0)+1; });
   (R? R.rows : []).forEach(function(t){ if(t.hybrid&&!hDocs[t.key]){ hDocs[t.key]=1; nH++; } });
   var F=S.hruF||'', Q=low(S.hruQ||''), nAllow=0, nCount=0;
-  keys.forEach(function(k){ var r=S.rules[k]; if(hUsesAllow(r.main,r.sub)) nAllow++; if(hCounted(r)) nCount++; });
+  keys.forEach(function(k){ var r=S.rules[k]; if(hUsesAllow(r.main,r.sub)&&sideOf(k)!=='o') nAllow++; if(hCounted(r)) nCount++; });
   var list=keys.filter(function(k){
     var r=S.rules[k], al=hUsesAllow(r.main,r.sub), on=hCounted(r);
     if(F==='h'&&!hRows[k]) return false;
@@ -15751,7 +15793,7 @@ function hRulesCard(keys,sideOf){
   order.sort().forEach(function(g){
     h+='<div class="ru-g"><div class="ru-gh">'+esc(g)+' <span>'+groups[g].length+'</span></div>';
     groups[g].forEach(function(k){
-      var r=S.rules[k], on=hCounted(r), al=hUsesAllow(r.main,r.sub), sd=sideOf(k), n=hRows[k]||0;
+      var r=S.rules[k], on=hCounted(r), sd=sideOf(k), opens=(sd==='o'), al=hUsesAllow(r.main,r.sub)&&!opens, n=hRows[k]||0;
       var set=(S.settings.hAllow||{})[ruleKey(r.main,r.sub)]; set=(set===true||set===false);
       h+='<div class="ru-r'+(on?' on':'')+'">'+
         '<button type="button" class="ru-sw'+(on?' on':'')+'" data-hcnt="'+esc(k)+'" role="switch" aria-checked="'+on+'" title="'+(on?'Counted for H doctors — click to ignore for them':'Not counted for H doctors — click to count')+'"><i></i></button>'+
@@ -15761,9 +15803,11 @@ function hRulesCard(keys,sideOf){
           '<div class="ru-s">'+(!on? 'Not counted for H doctors — their rows change nothing'
               : al? 'Counted for H doctors · a closure comes out of the allowance first'
               : 'Counted for H doctors · a closure reduces the total')+'</div></div>'+
-        '<label class="hru-al" title="'+(on? 'Take closures for this reason from the H allowance first' : 'Count this reason for H doctors first')+'">'+
+        (opens? '<span class="hru-al" title="The allowance is spent by closures only; an opening is counted in Opened as usual">'+
+            '<button type="button" class="ru-sw" disabled><i></i></button><span>Only closures use the allowance</span></span>'
+          : '<label class="hru-al" title="'+(on? 'Take closures for this reason from the H allowance first' : 'Count this reason for H doctors first')+'">'+
           '<button type="button" class="ru-sw'+(al?' on':'')+'" data-hal="'+esc(k)+'" role="switch" aria-checked="'+al+'"'+(on?'':' disabled')+'><i></i></button>'+
-          '<span>Uses the allowance'+(set? '' : ' <small>(default)</small>')+'</span></label>'+
+          '<span>Uses the allowance'+(set? '' : ' <small>(default)</small>')+'</span></label>')+
         '<div class="ru-cap" title="'+fmt(n,0)+' rows for H doctors in the capacity log"><div class="ru-n"><b>'+fmt(n,0)+'</b> H rows</div></div>'+
         '</div>'; });
     h+='</div>'; });
@@ -16602,13 +16646,19 @@ function srvBoot(){
 }
 /* The workbooks the server already holds, so nobody has to find the files
    again. A fresh upload replaces them for everyone. */
+/* a workbook download, tried again on a dropped connection */
+function srvGetBuf(url,tries){
+  return fetch(url,{credentials:'same-origin'})
+    .then(function(r){ if(!r.ok) throw new Error('could not fetch ('+r.status+')'); return r.arrayBuffer(); })
+    .catch(function(e){ if(tries>=3) throw e;
+      return new Promise(function(res){ setTimeout(res,800*(tries+1)); }).then(function(){ return srvGetBuf(url,tries+1); }); });
+}
 function srvLoadFiles(kinds){
   if(!Srv.on||!S.srvFiles) return Promise.resolve();
   var jobs=[];
   (kinds||['master','capacity']).forEach(function(kind){
     if(!S.srvFiles[kind]) return;
-    jobs.push(fetch('/api/files/latest/'+kind,{credentials:'same-origin'})
-      .then(function(r){ if(!r.ok) throw new Error('could not fetch'); return r.arrayBuffer(); })
+    jobs.push(srvGetBuf('/api/files/latest/'+kind,0)
       .then(function(buf){
         var wb=XLSX.read(new Uint8Array(buf),{type:'array',cellStyles:true});
         var name=S.srvFiles[kind].name||'workbook.xlsx';
