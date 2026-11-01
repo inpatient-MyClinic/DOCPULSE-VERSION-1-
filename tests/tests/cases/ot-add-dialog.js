@@ -11,7 +11,7 @@ const SP=T.SP;
   await p.fill('#email',T.email); await p.fill('#password',T.password); await p.click('#go'); await p.waitForURL('**/');
   await p.waitForTimeout(12000);
   const nav=n=>p.evaluate(n=>{ [...document.querySelectorAll('#nav button')].find(x=>x.textContent.indexOf(n)>=0).click(); },n);
-  await nav('OT fixed'); await p.waitForTimeout(1200);
+  await nav('OT fixed'); await p.waitForTimeout(1200); await p.selectOption('#otMonthSel','9').catch(()=>{}); await p.waitForTimeout(600);   /* October, whatever today is */
   await p.screenshot({path:T.out('ot-0.png')});
   await p.click('#otAdd'); await p.waitForTimeout(500);
   await p.fill('[data-otf="name"]','Taha Samman'); await p.waitForTimeout(800);

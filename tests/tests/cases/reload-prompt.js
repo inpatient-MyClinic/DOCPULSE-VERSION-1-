@@ -14,7 +14,7 @@ const {chromium}=require('playwright-core');
   dialogs=[];
   await p.waitForTimeout(9000);
   await p.evaluate(()=>{ [...document.querySelectorAll('#nav button')].find(x=>x.textContent.indexOf('Master')>=0).click(); }); await p.waitForTimeout(1200);
-  await p.click('[data-mwhole]'); await p.waitForTimeout(100);
+  await p.click('[data-mwhole]');   /* reload straight away, while the save is still waiting */
   await p.reload().catch(()=>{}); await p.waitForTimeout(2000);
   console.log('reload right after a click (save pending) → warning shown?',dialogs.includes('beforeunload'));
   await b.close();

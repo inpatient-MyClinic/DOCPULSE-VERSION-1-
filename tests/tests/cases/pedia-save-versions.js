@@ -14,7 +14,10 @@ const SP=T.SP;
   await nav('Master'); await p.waitForTimeout(2500);
   const card=()=>p.evaluate(()=>(document.querySelector('.pd-card')||{}).innerText||'').then(x=>x.replace(/\s+/g,' ').slice(0,420));
   console.log('before:',await card());
-  await p.click('#pdSaveV'); await p.waitForTimeout(9000);
+  await p.click('#pdSaveV');
+  /* six versions are saved one after another: wait for the save to finish, not a fixed time */
+  for(let i=0;i<120;i++){ await p.waitForTimeout(500); if(!/Saving/.test(await card())&&i>4) break; }
+  await p.waitForTimeout(1000);
   console.log('after :',await card());
   console.log('versions card:',await p.evaluate(()=>[...document.querySelectorAll('.mv-m')].map(x=>x.innerText.replace(/\s+/g,' ')).join(' | ')));
   await p.click('#pdSaveV').catch(()=>console.log('  (no save button — all saved)'));

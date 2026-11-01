@@ -11,7 +11,7 @@ const SP=T.SP;
   await p.fill('#email',T.email); await p.fill('#password',T.password); await p.click('#go'); await p.waitForURL('**/');
   await p.waitForTimeout(12000);
   const nav=n=>p.evaluate(n=>{ [...document.querySelectorAll('#nav button')].find(x=>x.textContent.indexOf(n)>=0).click(); },n);
-  await nav('OT fixed'); await p.waitForTimeout(1200);
+  await nav('OT fixed'); await p.waitForTimeout(1200); await p.selectOption('#otMonthSel','9').catch(()=>{}); await p.waitForTimeout(600);   /* October, whatever today is */
   await p.click('#otAdd'); await p.waitForTimeout(500);
   await p.type('#otf_name','Taha Sam',{delay:40}); await p.waitForTimeout(900);
   console.log('focus kept:',await p.evaluate(()=>document.activeElement&&document.activeElement.id));
@@ -29,7 +29,7 @@ const SP=T.SP;
   console.log('doctors Fixed OT:',await p.evaluate(()=>{ const ths=[...document.querySelectorAll('#pg-summary thead th')].map(x=>x.textContent.trim());
     const r=[...document.querySelectorAll('#pg-summary tbody tr')].find(x=>/Taha Samman/.test(x.textContent));
     return r.querySelectorAll('td')[ths.findIndex(x=>/^(OT Fixed|Fixed OT)$/i.test(x))].textContent; }));
-  await nav('OT fixed'); await p.waitForTimeout(800);
+  await nav('OT fixed'); await p.waitForTimeout(800); await p.selectOption('#otMonthSel','9').catch(()=>{}); await p.waitForTimeout(600);
   await p.click('[data-otedit="0"]'); await p.waitForTimeout(600);
   console.log('edit opens with:',await p.evaluate(()=>document.getElementById('otTot').textContent));
   console.log('errors',errs); await b.close();

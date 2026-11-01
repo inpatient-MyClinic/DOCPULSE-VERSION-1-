@@ -50,6 +50,23 @@ const T=require('../lib/ctx');
   T.check('"Counted for H" off: other staff are unchanged', r(otherAfter)===r(otherBefore), otherBefore+' → '+otherAfter);
   const sw2=[...w.document.querySelectorAll('#pg-rules [data-hcnt]')].find(b=>b.getAttribute('data-hcnt')===rk); if(sw2) sw2.click();
   T.check('switch back on: the rule is as it was', JSON.stringify(S.rules[rk])===before||(S.rules[rk].include==='Y'&&(api.S.rules[rk].filter==='ALL'||/H/.test(S.rules[rk].filter))), JSON.stringify(S.rules[rk]));
+  /* the doctor card's allowance box counts only the reasons that use the allowance */
+  S.settings.hAllow={}; S.settings.hybAllow[key]=12; api.refresh();
+  api.openDrawer(key); await new Promise(r=>setTimeout(r,200));
+  const box=[...w.document.querySelectorAll('#drawer .card')].find(c=>/Hybrid allowance/.test(c.querySelector('h3').textContent));
+  const txt=box? box.textContent.replace(/\s+/g,' ') : '';
+  const tt=S.result.rows.find(x=>x.key===key);
+  console.log('card:',txt.slice(0,400));
+  T.check('card: "Closed for these reasons" is only the allowance reasons ('+r(tt.yAL)+')', txt.indexOf('Closed for these reasons'+api.fmt(tt.yAL))>=0, txt.slice(0,300));
+  T.check('card: within the allowance, nothing is reported as over it', /Within the allowance/.test(txt) && !/Over the allowance/.test(txt));
+  T.check('card: other closures are shown apart, not as "over the allowance"', /Other closures this year: \S+/.test(txt));
+  const chip=(w.document.querySelector('#pg-summary .hyb')||{}).textContent||'';
+  S.settings.hybAllow[key]=1; api.refresh(); api.openDrawer(key); await new Promise(r=>setTimeout(r,200));
+  const box2=[...w.document.querySelectorAll('#drawer .card')].find(c=>/Hybrid allowance/.test(c.querySelector('h3').textContent));
+  const t2b=S.result.rows.find(x=>x.key===key), beyond=r(t2b.yAL-t2b.allowUsed);
+  T.check('card: with a smaller allowance, "over" is the allowance reasons beyond it ('+beyond+')', beyond>0 && box2.textContent.replace(/\s+/g,' ').indexOf('Over the allowance by '+api.fmt(beyond))>=0);
+  w.document.getElementById('dwX')&&w.document.getElementById('dwX').click();
+  S.settings.hybAllow[key]=50; api.refresh();
   /* Counting rules: two staff types picked together ("FT,PT") count rows of either — they used to count nobody */
   const cand=Object.keys(S.rules).find(k=>{ const ru=S.rules[k]; if(ru.include!=='Y'||ru.noH) return false;
     return S.capacity.rows.some(x=>x.main===ru.main&&x.sub===ru.sub&&x.date&&/^(FT|PT)$/i.test(x.empStatus)); });

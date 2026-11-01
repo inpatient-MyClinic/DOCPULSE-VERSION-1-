@@ -50,7 +50,7 @@ const SP=T.SP;
   await p.screenshot({path:T.out('ms-m1.png'),clip:{x:240,y:0,width:1460,height:700}});
   await p.keyboard.press('Escape');
   await p.click('#mvDay').catch(()=>{}); await p.waitForTimeout(1000);
-  console.log('day board ok',await p.evaluate(()=>document.querySelectorAll('#pg-master .db2-card, #pg-master [class*=db2]').length));
+  console.log('day board ok',await p.evaluate(()=>document.querySelectorAll('#pg-master .db2-card, #pg-master [class*=db2]').length>0));   /* its size depends on today */
   await p.click('#mfClear'); await p.waitForTimeout(600); console.log('master after Clear',await rows('pg-master'));
   console.log('errors',errs); await b.close();
 })().catch(e=>{console.error(e.message);process.exit(1);});

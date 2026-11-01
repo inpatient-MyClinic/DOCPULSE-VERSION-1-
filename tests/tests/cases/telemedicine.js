@@ -19,6 +19,7 @@ const SP=T.SP;
   await p.screenshot({path:T.out('rt-2.png')});
   await p.click('#rtAdv summary'); await p.waitForTimeout(500);
   console.log('adv open:',await p.evaluate(()=>document.getElementById('rtAdv').open),'| has read filter:',await p.evaluate(()=>!!document.querySelector('#rtAdv #rtAddRule')));
+  await p.evaluate(()=>{ const m=document.getElementById('rtMonth'); if(m){ m.value='2026-10'; m.dispatchEvent(new Event('change',{bubbles:true})); } }); await p.waitForTimeout(600);   /* October, whatever today is */
   console.log('steps:',await p.evaluate(()=>[...document.querySelectorAll('.rt-step')].map(x=>x.textContent).join(' | ')));
   console.log('errors',errs); await b.close();
 })().catch(e=>{console.error(e.message);process.exit(1);});

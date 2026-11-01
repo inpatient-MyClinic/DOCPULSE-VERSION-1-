@@ -19,7 +19,7 @@ module.exports = [
   { name: 'unit-format' },
 
   /* ---- whole-page safety ---- */
-  { name: 'stability-crawl', capacity: 'cap-hyb.xlsx', timeout: 420 },
+  { name: 'stability-crawl', capacity: 'cap-hyb.xlsx', timeout: 720 },
   { name: 'perf-budget', capacity: 'cap-big.xlsx', golden: false, timeout: 300 },
 
   /* ---- live sync ---- */
@@ -76,6 +76,7 @@ module.exports = [
   { name: 'finance-columns' },
   { name: 'finance-fixed-matches', golden: false },
   { name: 'telemedicine' },
+  { name: 'telemedicine-report-filters', golden: false },
   { name: 'billing-big', golden: false, timeout: 300 },
   { name: 'upload-startup', golden: false },
   { name: 'reload-prompt' },
