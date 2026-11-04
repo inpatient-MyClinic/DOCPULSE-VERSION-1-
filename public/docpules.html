@@ -939,6 +939,39 @@ div.dpg{min-width:0;width:auto}
 .rtsw.on{background:var(--ok-bg);border-color:var(--teal);color:var(--teal)}
 .rtsw.on>i{background:var(--teal)}
 .rtsw.on>i:after{inset-inline-start:13px}
+/* Telemedicine: a doctor's week as a small schedule, each day on its own line */
+#pg-rtm .rtRow{align-items:flex-start}
+#pg-rtm .rtRow>input[type=checkbox]{margin-top:10px}
+#pg-rtm .rtList{max-height:640px}
+#pg-rtm .rtRow.sel{box-shadow:inset 3px 0 0 #4F46E5,0 0 0 1px #C7D2FE inset}
+#pg-rtm .rtAv{flex:0 0 auto;width:34px;height:34px;border-radius:10px;color:#fff;font-weight:800;font-size:12px;display:inline-flex;align-items:center;justify-content:center;letter-spacing:.3px;align-self:flex-start;margin-top:1px}
+#pg-rtm .rtTop{display:flex;align-items:center;gap:12px;justify-content:space-between}
+#pg-rtm .rtStrip{display:flex;gap:3px;flex:0 0 auto}
+#pg-rtm .rtS{width:24px;height:22px;border-radius:6px;background:#F1F5F9;color:#94A3B8;font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+#pg-rtm .rtS.on{background:#CCFBF1;color:#0F766E}
+#pg-rtm .rtS.var{background:#DBEAFE;color:#1D4ED8;box-shadow:inset 0 -2px 0 #1D4ED8}
+#pg-rtm .rtRow .rtCfg .dchip[aria-pressed]{min-width:44px;justify-content:center}
+#pg-rtm .rtRow .rtCfg .dchip[aria-pressed=true]{background:#0F766E;border-color:#0F766E;color:#fff}
+#pg-rtm .rtWk{margin-top:9px;border:1px solid #E3E8F0;border-radius:12px;overflow:hidden;background:#fff;cursor:default}
+#pg-rtm .rtWkRow{display:grid;grid-template-columns:100px auto 18px auto 52px 1fr;align-items:center;gap:8px;padding:8px 12px}
+#pg-rtm .rtWkRow .rtsw{justify-self:end}
+#pg-rtm .rtWk>.rtWkRow+.rtWkRow,#pg-rtm .rtWk>.rtDates+.rtWkRow{border-top:1px solid #EEF1F6}
+#pg-rtm .rtWkDay{font-weight:700;font-size:12.5px;color:#15202E}
+#pg-rtm .rtWkH{font-size:11.5px;color:#64748B;font-family:var(--mono);white-space:nowrap}
+#pg-rtm .tfld{width:96px;border:1px solid #CBD5E1;border-radius:8px;padding:5px 8px;font-size:12.5px;font-family:var(--mono);background:#fff;color:#15202E}
+#pg-rtm .tfld:hover{border-color:#94A3B8}
+#pg-rtm .tfld:focus{outline:2px solid #2563EB;outline-offset:1px;border-color:#2563EB}
+#pg-rtm .tfld[aria-invalid=true]{border-color:var(--loss);background:#FEF2F2}
+#pg-rtm .rtsw.sm{padding:3px 9px 3px 5px;font-size:11px}
+#pg-rtm .rtDates{background:#F8FAFC;border-top:1px dashed #DCE3ED;padding:8px 12px 10px 120px;display:flex;flex-direction:column;gap:6px}
+#pg-rtm .rtDateRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#pg-rtm .rtDateLab{min-width:86px;font-size:12px;font-weight:600;color:#334155}
+#pg-rtm .rtDateRow.set .rtDateLab{color:#1D4ED8}
+#pg-rtm .rtDateRow.off .rtDateLab{text-decoration:line-through;color:#94A3B8}
+#pg-rtm .rtck{width:22px;height:22px;border-radius:6px;border:1.5px solid #CBD5E1;background:#fff;color:#fff;font-size:13px;font-weight:800;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+#pg-rtm .rtck.on{background:#0F766E;border-color:#0F766E}
+#pg-rtm .dchip:focus-visible,#pg-rtm .rtsw:focus-visible,#pg-rtm .rtck:focus-visible,#pg-rtm .btn:focus-visible{outline:2px solid #2563EB;outline-offset:2px}
+@media (max-width:760px){#pg-rtm .rtWkRow{grid-template-columns:1fr 1fr;}#pg-rtm .rtDates{padding-left:12px}}
 .rt{border:1px solid var(--line);background:#F6F7FA;color:var(--muted);border-radius:5px;
   padding:3px 7px;margin:0 1px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans)}
 .rt.on{background:var(--navy);border-color:var(--navy);color:#fff}
@@ -2212,6 +2245,9 @@ function compute(){
     /* an H doctor's allowance is spent by the reasons picked under H doctor
        rules (Annual Leave unless changed) */
     if(side==='c'&&hUsesAllow(r.main,r.sub)) t.m[r.date.m].cAL=(t.m[r.date.m].cAL||0)+w;
+    /* an opening ticked under H doctor rules (a leave withdrawn: closed, then
+       opened again) gives that session back to the allowance */
+    else if(side==='o'&&hGivesBack(r.main,r.sub)) t.m[r.date.m].oAL=(t.m[r.date.m].oAL||0)+w;
 
     var ra=reasonAgg[k]||(reasonAgg[k]={main:r.main,sub:r.sub,c:0,o:0,n:0});
     ra[side]+=w; ra.n++;
@@ -2258,18 +2294,26 @@ function compute(){
      filed as Annual Leave use the allowance; while it lasts they do not reduce
      the total. Every other closure counts against him as usual. */
   rows.forEach(function(t){
-    t.allow=0; t.allowUsed=0; t.allowLeft=0; t.yAL=0;
+    t.allow=0; t.allowUsed=0; t.allowLeft=0; t.yAL=0; t.yBack=0;
     if(!t.hybrid) return;
     t.allow=hybAllowance(t);
-    var left=t.allow;
+    var left=t.allow, used=0;
     for(var m=0;m<12;m++){
-      var c=t.m[m].c, al=Math.min(c,t.m[m].cAL||0), free=Math.min(left,al);
-      t.yAL+=al;
-      t.m[m].cFree=free; t.m[m].cRaw=c;
-      t.m[m].c=c-free; left-=free;
+      /* A leave that is closed and then opened again (a withdrawal ticked to
+         give back) cancels out: the closure is counted again and the opening
+         stands, so the total is as if nothing happened, and the session is
+         back in the allowance. In the same month that is just closures minus
+         openings; a withdrawal in a later month takes back what an earlier
+         month spent. */
+      var c=t.m[m].c, al=Math.min(c,t.m[m].cAL||0), back=t.m[m].oAL||0, net=al-back, free=0, ret=0;
+      if(net>0) free=Math.min(left,net);
+      else if(net<0) ret=Math.min(-net,used);
+      t.yAL+=al; t.yBack+=back;
+      t.m[m].cFree=free; t.m[m].cRaw=c; t.m[m].cBack=ret;
+      t.m[m].c=c-free+ret; left=left-free+ret; used=used+free-ret;
       t.m[m].t=t.m[m].s-t.m[m].c+t.m[m].o;
     }
-    t.allowUsed=t.allow-left; t.allowLeft=left;
+    t.allowUsed=used; t.allowLeft=left;
     t.yc=0; t.yt=0;
     for(var m2=0;m2<12;m2++){ t.yc+=t.m[m2].c; t.yt+=t.m[m2].t; }
   });
@@ -2839,7 +2883,7 @@ function mstWeeklyFromSpans(spans,week){
 }
 function hybChip(t){
   if(!t.hybrid) return '';
-  var left=t.allowLeft, counted=Math.max(0,(t.yAL||0)-(t.allowUsed||0));
+  var left=t.allowLeft, counted=Math.max(0,(t.yAL||0)-(t.yBack||0)-(t.allowUsed||0));
   return '<span class="hyb" title="'+esc('Allowed '+fmt(t.allow)+' sessions a year. Only closures for the reasons under Settings → Rules → H doctor rules use it (Annual Leave unless changed). '+
       fmt(t.allowUsed)+' used, '+fmt(left)+' left'+
       (counted>0.0001? '. '+fmt(counted)+' beyond the allowance, so counted.':'.')+' Closures for other reasons count as usual.')+'">'+
@@ -5864,9 +5908,6 @@ function finHTML(){
       '<div><b>'+fmt(sum(rows,'eid'))+'</b><span>on Eid · '+eidN+' day'+(eidN===1?'':'s')+'</span></div>'+
       '<div><b>'+fmt(sum(rows,'fix'))+'</b><span>fixed sessions</span></div>'+
       '<div><b>'+rows.length+'</b><span>doctors</span></div></div>'+
-    ((F.sheetOnly&&F.sheetOnly.length)? '<div class="fin-warn"><b>'+F.sheetOnly.length+' doctor'+(F.sheetOnly.length===1?' has':'s have')+
-      ' fixed sessions in the master file\'s OT sheet but none on the OT fixed page</b>, so they are not in Fixed: '+
-      esc(F.sheetOnly.map(function(r){ return (r.name||r.id)+' ('+r.site+')'; }).join(', '))+'. Add them on the <b>OT fixed</b> page to count them.</div>' : '')+
     (F.unnamed.length? '<div class="fin-warn">'+F.unnamed.length+' holiday date'+(F.unnamed.length===1?' has':'s have')+' no name this month ('+
       esc(F.unnamed.map(function(h){ return verFmtIso(h.d); }).join(', '))+') — name '+(F.unnamed.length===1?'it':'them')+' in <b>Settings → Rules → Public holidays</b> to count '+(F.unnamed.length===1?'it':'them')+' here.</div>' : '')+
     '<div class="fin-g">'+tbl('FT')+tbl('PT')+tbl('Other')+'</div>'+
@@ -6646,7 +6687,7 @@ function otRulesHTML(){
       '<br><b>Both</b> → count the clinic and the OT.'+
       '<br>Until you choose, the clinic counts and the OT waits.</li>'+
     '<li><b>Holidays, leave and leaving</b> do not stop it here: OT on a public holiday, on a day he closed the clinic, or after his last day is still counted on this page.</li>'+
-    '<li><b>Paid extra is stricter.</b> The OT from the master file\'s OT sheet is paid on Paid extra: a day already paid in the log is not paid twice, and a closure that day takes its hours off.</li>'+
+    '<li><b>Paid extra is stricter.</b> The fixed OT from this page is paid on Paid extra: a day already paid in the log is not paid twice, and a closure that day takes its hours off.</li>'+
     '<li><b>Finance report</b> takes Fixed sessions from Paid extra first, and from this page when Paid extra has none.</li>'+
     '</ol></div></details>';
 }
@@ -7240,22 +7281,28 @@ function renderDrawer(){
     /* only the reasons ticked "Uses the allowance" under H doctor rules belong
        here; every other closure is counted the usual way and shown apart */
     var rawC=0; for(var hm=0;hm<12;hm++) rawC+=(t.m[hm].cRaw!==undefined? t.m[hm].cRaw : t.m[hm].c);
-    var alC=t.yAL||0, beyond=Math.max(0,alC-(t.allowUsed||0)), other=Math.max(0,rawC-alC);
-    var alNames=Object.keys(S.rules).filter(function(k){ var r=S.rules[k]; return hUsesAllow(r.main,r.sub)&&hCounted(r); })
-      .map(function(k){ return S.rules[k].sub||S.rules[k].main; });
-    alNames=alNames.filter(function(n,ix){ return alNames.indexOf(n)===ix; });
+    var alC=t.yAL||0, beyond=Math.max(0,alC-(t.yBack||0)-(t.allowUsed||0)), other=Math.max(0,rawC-alC);
+    /* a reason is a closing one or an opening one by what the log mostly does with it */
+    var RA=(S.result&&S.result.reasonAgg)||{}, opensK=function(k){ var x=RA[k]; return !!x&&(x.o||0)>(x.c||0); };
+    var uniqN=function(a){ return a.filter(function(n,ix){ return a.indexOf(n)===ix; }); };
+    var alNames=uniqN(Object.keys(S.rules).filter(function(k){ var r=S.rules[k]; return !opensK(k)&&hUsesAllow(r.main,r.sub)&&hCounted(r); })
+      .map(function(k){ return S.rules[k].sub||S.rules[k].main; }));
+    var backNames=uniqN(Object.keys(S.rules).filter(function(k){ var r=S.rules[k]; return opensK(k)&&hGivesBack(r.main,r.sub)&&hCounted(r); })
+      .map(function(k){ return S.rules[k].sub||S.rules[k].main; }));
     function tile(lab,val,col){ return '<div><div class="hint" style="font-weight:700">'+lab+'</div>'+
       '<div style="font-size:19px;font-weight:800'+(col?';color:'+col:'')+'">'+val+'</div></div>'; }
     h+='<div class="card"><h3>Hybrid allowance <span class="tag">'+esc(t.status||'H')+'</span></h3><div class="cb">'+
        '<p class="hint" style="margin-bottom:11px">Counts only the reasons set to <b>Uses the allowance</b> under '+
        '<b>Settings → Rules → H doctor rules</b>'+(alNames.length? ': <b>'+esc(alNames.join(', '))+'</b>' : ' (none set)')+
-       '. They come out of the allowance first, in date order; only what is beyond it reduces the total.</p>'+
+       '. They come out of the allowance first, in date order; only what is beyond it reduces the total.'+
+       (backNames.length? ' An opening for <b>'+esc(backNames.join(', '))+'</b> gives the session back.' : '')+'</p>'+
        '<div style="display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end">'+
          '<div><label class="hint" style="font-weight:700;display:block;margin-bottom:3px">Sessions allowed a year</label>'+
            '<input type="number" min="0" step="0.25" id="dwAllow" value="'+esc(String(t.allow))+'" '+
            'style="border:1px solid var(--line);border-radius:6px;padding:6px 9px;width:110px;'+
            'font-family:var(--mono);text-align:end;font-size:14px;font-weight:700"></div>'+
          tile('Closed for these reasons',fmt(alC))+
+         ((t.yBack||0)>0.001? tile('Given back by openings',fmt(t.yBack),'var(--gain)') : '')+
          tile('Used from the allowance',fmt(t.allowUsed),'var(--teal)')+
          tile('Left',fmt(t.allowLeft),t.allowLeft>0?'var(--teal)':'var(--muted)')+
          tile('Beyond the allowance',fmt(beyond),beyond>0.001?'var(--loss)':'var(--muted)')+
@@ -8166,12 +8213,94 @@ function otVerdict(hits,col,vals){
 /* one entry per occurrence, marked paid or blocked, shaped like a log row so
    the rest of the page treats both the same */
 function otItems(){ return pdCache('otitems',otItemsRaw); }
+/* one fixed OT occurrence, judged against the log the way Paid extra does it:
+   a paid row that day means it is already counted, a closure takes its hours */
+function otItemAdd(out,ctx,t,dt,day){
+  var ix=ctx.ix, hrsDef=ctx.hrsDef, pcol=ctx.pcol, pvals=ctx.pvals, ded=ctx.ded, used=ctx.used, left=ctx.left;
+        var key=dt.y+'-'+dt.m+'-'+dt.d;
+  var hits=(nz(t.id)&&(ix[nz(t.id)+'|'+nz(t.site)+'|'+key]||ix[nz(t.id)+'|*|'+key]))||
+           ix['~'+nameKey(t.name)+'|*|'+key]||null;
+  var v=otVerdict(hits,pcol,pvals);
+  /* whatever blocked or unpaid time the log's rows did not absorb */
+  var dk=(nz(t.id)||'~'+nameKey(t.name))+'|'+dt.y+'-'+dt.m+'-'+dt.d;
+  var full=(t.hours>0? t.hours : hrsDef), net=full, cutWhy='', check='';
+  if(!v&&ded[dk]){
+    var d=ded[dk], mine=pdSpan(t), cut=0, check='';
+    if(mine) d.spans.forEach(function(sp){
+      var ov=pdOverlap(mine,sp);
+      if(ov>0){ cut+=ov; if(!cutWhy) cutWhy=sp.why; }
+    });
+    else if(d.spans.length){
+      /* the fixed session names a weekday but no hours, so a closure at a
+         stated time cannot be matched against it: pay it, flag it */
+      check='the log also shows '+d.why+' that day at '+
+        d.spans.map(function(sp){ return rtRange(sp.s,sp.e); }).join(', ')+
+        ', and the fixed session states no time to compare it with';
+    }
+    var pool=(used[dk]!==undefined)? used[dk]
+           : (left[dk]!==undefined? left[dk] : d.loose);
+    if(cut<full&&pool>0){
+      if(mine){
+        if(!check) check='the log also shows '+d.why+' that day, with no times on it, so it '+
+          'could not be matched against this session';
+      }else{
+        var extra=Math.min(pool,full-cut); used[dk]=pool-extra; cut+=extra;
+        if(!cutWhy) cutWhy=d.why;
+      }
+    }
+    cut=Math.min(cut,full);
+    if(cut>0){
+      net=full-cut;
+      if(net<=0) v={kind:'blocked',why:cutWhy+', which covers the whole session'};
+    }
+  }
+  out.push({sheet:t.sheet,row:t.row,site:t.site,empStatus:'',dept:t.dept,spec:t.spec,
+    id:t.id,name:t.name,date:dt,
+    status:v? (v.kind==='dup'?'In the log':'Blocked') : 'Open',
+    hours:full,hoursFull:full,checkWhy:check,
+    hoursNet:(net<full&&net>0)? net : undefined,
+    cutWhy:(net<full&&net>0)? cutWhy : '',
+    from:t.from,to:t.to,
+    main:'Fixed OT',sub:MST_DAYS[day]+' fixed session',type:'Permanent extra',
+    ot:true,blocked:!!(v&&v.kind==='blocked'),dup:!!(v&&v.kind==='dup'),
+    why:v? v.why : '',raw:t.raw});
+}
+/* Paid extra takes fixed OT from the OT fixed page — the same days the Doctors
+   page counts as OT Fixed, after the clash choices — not from the master
+   file's OT sheet. */
 function otItemsRaw(){
+  if(!otOn()||!(S.settings.ot||[]).length||!S.result) return [];
+  pdEntries();
+  var left=pdCache('netleft',function(){ return {}; });
+  var year=S.result.year, rows=S.result.rows, out=[];
+  var ctx={ix:otDayIndex(),hrsDef:num(S.settings.hrs)||4,pcol:pdCol(),pvals:pdVals(),ded:pdDeduct(),used:{},left:left};
+  var keys={}; otList().forEach(function(o){ var k=otKeyOf(o,rows); if(k) keys[k]=1; });
+  rows.forEach(function(t){
+    if(!keys[t.key]) return;
+    for(var m=0;m<12;m++){
+      var P=otMonthFor(t,year,m,rows), F=otForMonth(t.key,year,m,rows);
+      Object.keys(P.days).forEach(function(d){
+        var day=+d, n=P.days[d]||0; if(!(n>0)) return;
+        var dt={y:year,m:m,d:day}, wd=new Date(Date.UTC(year,m,day)).getUTCDay();
+        var spans=(F.times[d]||[]).slice(0,Math.ceil(n));
+        if(!spans.length) spans=[null];
+        spans.forEach(function(sp){
+          var it={sheet:'OT fixed page',row:'',id:t.id,name:t.name,site:t.site,dept:t.dept,spec:t.spec,
+            hours:sp? (sp.t-sp.f)/60 : null, from:sp? clock12(sp.f) : '', to:sp? clock12(sp.t) : '', raw:{}};
+          otItemAdd(out,ctx,it,dt,wd);
+        });
+      });
+    }
+  });
+  return out;
+}
+function otItemsSheet(){
   if(!otOn()||!S.ot) return [];
   pdEntries();                          /* the log's own rows take their cut first */
   var left=pdCache('netleft',function(){ return {}; });
   var year=S.settings.year, ix=otDayIndex(), hrsDef=num(S.settings.hrs)||4, out=[];
   var pcol=pdCol(), pvals=pdVals(), dayCache={}, ded=pdDeduct(), used={};
+  var ctx={ix:ix,hrsDef:hrsDef,pcol:pcol,pvals:pvals,ded:ded,used:used,left:left};
   S.ot.rows.forEach(function(t){
     if(!t.active||!t.days.length) return;
     /* the months the fixed session actually exists in, for this year */
@@ -8198,53 +8327,7 @@ function otItemsRaw(){
         var ms=Date.UTC(dt.y,dt.m,dt.d);
         if(lo!==null&&ms<lo) return;
         if(hi!==null&&ms>hi) return;
-        var key=dt.y+'-'+dt.m+'-'+dt.d;
-        var hits=(nz(t.id)&&(ix[nz(t.id)+'|'+nz(t.site)+'|'+key]||ix[nz(t.id)+'|*|'+key]))||
-                 ix['~'+nameKey(t.name)+'|*|'+key]||null;
-        var v=otVerdict(hits,pcol,pvals);
-        /* whatever blocked or unpaid time the log's rows did not absorb */
-        var dk=(nz(t.id)||'~'+nameKey(t.name))+'|'+dt.y+'-'+dt.m+'-'+dt.d;
-        var full=(t.hours>0? t.hours : hrsDef), net=full, cutWhy='', check='';
-        if(!v&&ded[dk]){
-          var d=ded[dk], mine=pdSpan(t), cut=0, check='';
-          if(mine) d.spans.forEach(function(sp){
-            var ov=pdOverlap(mine,sp);
-            if(ov>0){ cut+=ov; if(!cutWhy) cutWhy=sp.why; }
-          });
-          else if(d.spans.length){
-            /* the fixed session names a weekday but no hours, so a closure at a
-               stated time cannot be matched against it: pay it, flag it */
-            check='the log also shows '+d.why+' that day at '+
-              d.spans.map(function(sp){ return rtRange(sp.s,sp.e); }).join(', ')+
-              ', and the fixed session states no time to compare it with';
-          }
-          var pool=(used[dk]!==undefined)? used[dk]
-                 : (left[dk]!==undefined? left[dk] : d.loose);
-          if(cut<full&&pool>0){
-            if(mine){
-              if(!check) check='the log also shows '+d.why+' that day, with no times on it, so it '+
-                'could not be matched against this session';
-            }else{
-              var extra=Math.min(pool,full-cut); used[dk]=pool-extra; cut+=extra;
-              if(!cutWhy) cutWhy=d.why;
-            }
-          }
-          cut=Math.min(cut,full);
-          if(cut>0){
-            net=full-cut;
-            if(net<=0) v={kind:'blocked',why:cutWhy+', which covers the whole session'};
-          }
-        }
-        out.push({sheet:t.sheet,row:t.row,site:t.site,empStatus:'',dept:t.dept,spec:t.spec,
-          id:t.id,name:t.name,date:dt,
-          status:v? (v.kind==='dup'?'In the log':'Blocked') : 'Open',
-          hours:full,hoursFull:full,checkWhy:check,
-          hoursNet:(net<full&&net>0)? net : undefined,
-          cutWhy:(net<full&&net>0)? cutWhy : '',
-          from:t.from,to:t.to,
-          main:'Fixed OT',sub:MST_DAYS[day]+' fixed session',type:'Permanent extra',
-          ot:true,blocked:!!(v&&v.kind==='blocked'),dup:!!(v&&v.kind==='dup'),
-          why:v? v.why : '',raw:t.raw});
+        otItemAdd(out,ctx,t,dt,day);
       });
     });
   });
@@ -8659,39 +8742,22 @@ function pdRulesHTML(mode,pcol,pvals,pvalList,pairs,sel,nSel,cols,colVals,rate){
         : nSel+' of '+pairs.length+' open reasons')+'</span></h3>';
   {
     h+='<div class="cb">'+
-      /* the fixed sessions that live in the master file */
+      /* fixed OT comes from the OT fixed page, the same as the Doctors page */
       '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:10px;'+
         'margin-bottom:10px;border-bottom:1px solid var(--line-s)">'+
         '<b style="font-size:12px">Fixed OT sessions</b>'+
         '<label class="hint" style="display:flex;align-items:center;gap:6px">'+
           '<input type="checkbox" id="pdOtOn"'+(otOn()?' checked':'')+'> count them</label>'+
-        '<select id="pdOtSheet"><option value="">— sheet in the master file —</option>'+
-          ((S.wbM&&S.wbM.SheetNames)||[]).map(function(n){
-            return '<option'+(otSheet()===n?' selected':'')+' value="'+esc(n)+'">'+esc(n)+'</option>'; }).join('')+
-          '</select>'+
-        (S.ot? '<span class="hint">'+fmt(S.ot.stats.n,0)+' rows · '+fmt(S.ot.stats.active,0)+' active · '+
-               fmt(S.ot.stats.off,0)+' not active'+
-               (S.ot.stats.dated? ' · '+fmt(S.ot.stats.dated,0)+' with a start or end month':'')+
-               (S.ot.stats.noDay? ' · <b style="color:var(--warn)">'+fmt(S.ot.stats.noDay,0)+' with no weekday</b>':'')+
-               '</span>'
-             : '<span class="hint">'+(S.wbM? 'no OT sheet found — pick one above'
-                                           : 'load the master file on the Data page')+'</span>')+
+        '<span class="hint">from the <b>OT fixed</b> page: '+fmt(otList().length,0)+' doctor entr'+(otList().length===1?'y':'ies')+
+          ' — the same days the Doctors page counts as OT Fixed, after the clash choices</span>'+
       '</div>'+
-      (S.ot? '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">'+
+      ((otList().length)? '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">'+
         '<label class="hint" style="display:flex;align-items:center;gap:6px">'+
           '<input type="checkbox" id="pdOtUnpaid"'+(otUnpaidCancels()?' checked':'')+'>'+
           ' unpaid hours that day are deducted</label>'+
         '<label class="hint" style="display:flex;align-items:center;gap:6px">'+
           '<input type="checkbox" id="pdOtDedup"'+(otDedupe()?' checked':'')+'>'+
-          ' never count a day twice</label></div>'+
-        '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px">'+
-        '<span class="hint">Columns</span>'+
-        [['id','ID'],['name','Doctor'],['site','Branch'],['status','Status'],['day','Weekday']].map(function(o){
-          var cur=(S.settings.otMap||{})[o[0]]||'';
-          return '<select data-otm="'+o[0]+'"><option value="">'+esc(o[1])+': auto</option>'+
-            S.ot.headers.map(function(hh){ return '<option'+(cur===hh?' selected':'')+' value="'+esc(hh)+'">'+
-              esc(o[1])+': '+esc(hh)+'</option>'; }).join('')+'</select>'; }).join('')+
-        '</div>' : '')+
+          ' never count a day twice</label></div>' : '')+
       '<div class="seg" id="pdMode" style="margin-bottom:10px">'+
         [['col','Marked paid in the sheet'],['reason','By reason']].map(function(o){
           return '<button data-x="'+o[0]+'"'+(mode===o[0]?' class="on"':'')+'>'+esc(o[1])+'</button>'; }).join('')+
@@ -11669,10 +11735,10 @@ function renderBrk(){
      'an opening on the same day cancel each other out \u2014 on a clinic day the session simply ran, and on '+
      'a free day nothing ran at all.</div>'+
      (otShow? '<div class="note w"><b>Fixed OT has its own column.</b> Those '+fmt(G.ot)+' sessions are '+
-       'not in the log \u2014 the app projects them from <b>'+esc((S.ot&&S.ot.sheet)||'the OT sheet')+'</b> '+
-       'in the master file, one for every occurrence of the weekday written against an active doctor, '+
+       'not in the log \u2014 they come from the <b>OT fixed</b> page, '+
+       'on the same days the Doctors page counts as OT Fixed, '+
        'and they are <b>shown but not added to the total</b>, since they are paid on their own terms. '+
-       'If a doctor shows them without having worked them, check that sheet, or switch fixed OT off under '+
+       'If a doctor shows them without having worked them, check the OT fixed page, or switch fixed OT off under '+
        'Settings \u203a Paid extra rules.</div>' : '');
 
   h+='<div class="rail">'+
@@ -11791,7 +11857,7 @@ function bkDiag(x,msel){
   add('weighted by duration',S.settings.weighted? 'yes':'no');
   add('paid rule',pdMode()==='col'? ('column "'+pdCol()+'" = '+
       Object.keys(pdVals()).filter(function(k){return pdVals()[k];}).join(' / ')) : 'by reason pair');
-  add('fixed OT',otOn()? ((S.ot&&S.ot.sheet)||'on, no sheet found') : 'off');
+  add('fixed OT',otOn()? ('OT fixed page · '+otList().length+' entries') : 'off');
   add('public holidays',bkHolDates(year).map(function(h){
       return h.d+' '+MS[h.m]; }).join(', ')||'none');
   add('day filter',(S.dayFilter===''||S.dayFilter===null)? 'none' : MST_DAYS[+S.dayFilter]);
@@ -12223,7 +12289,7 @@ function exportBrk(){
     ['Rule','fixed + extra \u2212 blocked \u2212 public holidays (fixed OT is reported separately)'],
     ['Fixed','projected from the master schedule'],
     ['Worked','every session opened in the log for that doctor, paid or unpaid'],
-    ['Fixed OT','projected from the OT sheet in the master file, not from the log'],
+    ['Fixed OT','from the OT fixed page (the same days the Doctors page counts), not from the log'],
     ['Blocked','closures recorded in the daily capacity log'],
     ['Public holidays','the dates set on the breakdown page, counted only where the template '+
       'puts a session on that weekday and the log has no closure for that day'],['']];
@@ -12256,6 +12322,7 @@ function pdStamp(){
     st.paidRSet,JSON.stringify(st.paidR||{}),st.paidOpenOnly,st.paidByHours,
     st.otOn,st.otSheet,JSON.stringify(st.otMap||{}),st.otUnpaidCancels,st.otDedupe,S.dayFilter,
     (S.ot&&S.ot.rows.length)||0,(S.ot&&S.ot.sheet)||'',
+    JSON.stringify(st.ot||[]),JSON.stringify(st.otRule||{}),JSON.stringify(st.otClash||{}),
     /* the day and holiday indexes read these too; left out of the key, a
        holiday added after the index was first built was never seen */
     JSON.stringify(st.holidays||[]),st.weighted?1:0,st.schedApply?1:0,st.schedSrc||'',
@@ -12818,8 +12885,8 @@ function renderPaid(){
        : (nSel? pairs.filter(function(p){return sel[p.k];}).map(function(p){
             return '<span class="fchip on">'+esc(p.main+' › '+p.sub)+' <b>'+fmt(p.n,0)+'</b></span>'; }).join('')
           : '<span class="hint">No reason ticked — nothing is counted. Set it in Settings.</span>'))+
-     (otOn()&&S.ot? '<span class="fchip on">fixed OT from '+esc(S.ot.sheet)+' · <b>'+
-        fmt(S.ot.stats.active,0)+' active</b></span>' : '')+
+     (otOn()&&otList().length? '<span class="fchip on">fixed OT from the OT fixed page · <b>'+
+        fmt(otList().length,0)+' doctor entr'+(otList().length===1?'y':'ies')+'</b></span>' : '')+
      (rate? '<span class="fchip on">'+fmt(rate,0)+' per '+esc(pdUnitLabel())+'</span>' : '')+
      '</div></div></div>';
 
@@ -13158,20 +13225,16 @@ function exportPaid(){
       var p=k.split('|'); inf.push([p[0],p[1]]); } });
   }
   inf.push(['']);
-  if(otOn()&&S.ot){
-    inf.push(['Fixed OT sheet',S.ot.sheet]);
-    inf.push(['Fixed OT rows',S.ot.stats.n+' rows, '+S.ot.stats.active+' active'+
-      (S.ot.stats.dated? ', '+S.ot.stats.dated+' with a start or end month' : '')]);
-    inf.push(['Start dates','a status like "Active from September" starts the fixed session that month; '+
-      'extras the doctor did before it still count, from the log']);
-    inf.push(['Fixed OT rule','every occurrence of the weekday named on an active row, '+
-      'minus the days the capacity log shows blocked for that doctor']);
+  if(otOn()&&otList().length){
+    inf.push(['Fixed OT','from the OT fixed page — '+otList().length+' doctor entries']);
+    inf.push(['Fixed OT rule','the days the Doctors page counts as OT Fixed (after the clash choices), '+
+      'minus the hours the capacity log shows blocked for that doctor']);
     inf.push(['Unpaid rows',otUnpaidCancels()? 'an unpaid row that day cancels the fixed session'
                                              : 'ignored']);
     inf.push(['Same day in the log',otDedupe()? 'counted once, from the log' : 'both counted']);
     inf.push(['']);
   }
-  inf.push(['Rows come from the daily capacity log, and from the fixed OT sheet where that is switched on.']);
+  inf.push(['Rows come from the daily capacity log, and from the OT fixed page where fixed OT is switched on.']);
   inf.push(['Session equivalent divides the logged duration by the hours per session; a row with no duration counts as one.']);
   var wsi=XLSX.utils.aoa_to_sheet(inf); wsi['!cols']=[{wch:26},{wch:60}];
   XLSX.utils.book_append_sheet(wb,wsi,'About');
@@ -13830,8 +13893,13 @@ function rtEnsure(d){
   var c=RT.cfg[d.key];
   if(!c){
     var saved=(S.settings.rtmSched||{})[d.key];
-    c=RT.cfg[d.key]={days: saved? JSON.parse(JSON.stringify(saved.days||{})) : {}};
+    c=RT.cfg[d.key]={days: saved? JSON.parse(JSON.stringify(saved.days||{})) : {},
+      /* "each date": a weekday whose dates can each have their own hours, or
+         be off — one Tuesday 5–8 PM, the next 6–9 PM */
+      perDate: saved&&saved.perDate? JSON.parse(JSON.stringify(saved.perDate)) : {},
+      dates: saved&&saved.dates? JSON.parse(JSON.stringify(saved.dates)) : {}};
   }
+  c.perDate=c.perDate||{}; c.dates=c.dates||{};
   return c;
 }
 /* Being "on telemedicine" is a saved fact, not a side effect of having ticked a
@@ -13842,6 +13910,7 @@ function rtSaveDoctor(d){
   if(!Object.keys(c.days).length) return false;
   S.settings.rtmSched=S.settings.rtmSched||{};
   S.settings.rtmSched[d.key]={days:JSON.parse(JSON.stringify(c.days)),
+    perDate:JSON.parse(JSON.stringify(c.perDate||{})),dates:JSON.parse(JSON.stringify(c.dates||{})),
     name:d.name,id:d.id,site:d.site,status:d.status,spec:d.spec};
   saveConfig();
   return true;
@@ -13855,7 +13924,10 @@ function rtUnsaveDoctor(d){
 function rtSync(d){
   var m=S.settings.rtmSched||{};
   if(!m[d.key]) return;
-  m[d.key].days=JSON.parse(JSON.stringify(rtEnsure(d).days));
+  var cc=rtEnsure(d);
+  m[d.key].days=JSON.parse(JSON.stringify(cc.days));
+  m[d.key].perDate=JSON.parse(JSON.stringify(cc.perDate||{}));
+  m[d.key].dates=JSON.parse(JSON.stringify(cc.dates||{}));
   m[d.key].name=d.name; m[d.key].id=d.id; m[d.key].site=d.site;
   m[d.key].status=d.status; m[d.key].spec=d.spec;
   saveConfig();
@@ -13869,7 +13941,81 @@ function rtDayWindow(d,dy){ return rtEnsure(d).days[dy]||null; }
 function rtScheduleText(d){
   var c=rtEnsure(d);
   return RT_DAYS.filter(function(x){ return c.days[x]; })
-    .map(function(x){ return x+' '+rtFmtT(c.days[x].f)+'–'+rtFmtT(c.days[x].t); }).join('   ·   ');
+    .map(function(x){ var n=rtDateOverrides(d,x).length;
+      return x+' '+rtFmtT(c.days[x].f)+'–'+rtFmtT(c.days[x].t)+(n? ' ('+n+' date'+(n===1?'':'s')+' different)' : ''); }).join('   ·   ');
+}
+/* the dates of a weekday, in the month on view, that have their own hours or are off */
+function rtDateOverrides(d,dy){
+  var c=rtEnsure(d); if(!c.perDate[dy]) return [];
+  return rtDatesFor(RT.month,dy).map(function(dt){ return rtIso({y:dt.getUTCFullYear(),m:dt.getUTCMonth(),d:dt.getUTCDate()}); })
+    .filter(function(iso){ return !!c.dates[iso]; });
+}
+/* the window that applies on one date: its own, none (off), or the weekday's */
+function rtWindowOn(c,dy,iso){
+  if(c.perDate&&c.perDate[dy]&&iso&&c.dates&&c.dates[iso]) return c.dates[iso].off? null : c.dates[iso];
+  return (c.days||{})[dy]||null;
+}
+/* every quarter hour, for the time boxes — any other time can be typed */
+function rtTimeList(){
+  var o=[]; for(var m=0;m<24*60;m+=15) o.push('<option value="'+rtFmtT12(m)+'">');
+  return '<datalist id="rtTimeList">'+o.join('')+'</datalist>';
+}
+function rtFmtT12(m){ var h=Math.floor(m/60)%24, mm=m%60, ap=h>=12?'PM':'AM', hh=h%12||12; return hh+':'+String(mm).padStart(2,'0')+' '+ap; }
+/* the doctor's initials on the branch colour, and his week at a glance */
+function rtAvatar(d){
+  var ini=nz(d.name).replace(/\(.*?\)/g,' ').replace(/^(dr\.?|prof\.?)\s+/i,'').split(/\s+/).filter(function(w){ return /^[A-Za-z\u0600-\u06FF]/.test(w); });
+  ini=((ini[0]||'?').charAt(0)+(ini.length>1? ini[ini.length-1].charAt(0) : '')).toUpperCase();
+  var hx=(typeof finSiteHex==='function'&&d.site)? finSiteHex(d.site) : '94A3B8';
+  return '<span class="rtAv" aria-hidden="true" style="background:#'+hx+'">'+esc(ini)+'</span>';
+}
+function rtStrip(d){
+  var c=rtEnsure(d), on=RT_DAYS.filter(function(dy){ return c.days[dy]; });
+  return '<div class="rtStrip" role="img" aria-label="'+esc(on.length? 'Telemedicine on '+on.map(function(dy){ return RT_DAYFULL[dy]; }).join(', ') : 'No telemedicine days')+'">'+
+    RT_DAYS.map(function(dy){ var w=c.days[dy], n=w? rtDateOverrides(d,dy).length : 0;
+      return '<span class="rtS'+(w?' on':'')+(n?' var':'')+'" title="'+esc(RT_DAYFULL[dy]+(w? ' '+rtFmtT(w.f)+'–'+rtFmtT(w.t)+(n? ' · '+n+' date'+(n===1?'':'s')+' different' : '') : ' · off'))+'">'+dy.slice(0,2)+'</span>'; }).join('')+
+    '</div>';
+}
+var RT_DAYFULL={Sat:'Saturday',Sun:'Sunday',Mon:'Monday',Tue:'Tuesday',Wed:'Wednesday',Thu:'Thursday',Fri:'Friday'};
+function rtDayRowHTML(d,dy){
+  var w=rtDayWindow(d,dy), c=rtEnsure(d), per=!!c.perDate[dy], K=esc(d.key), full=RT_DAYFULL[dy];
+  var h='<div class="rtWkRow">'+
+    '<span class="rtWkDay">'+full+'</span>'+
+    rtTimeBox('data-dfrom="'+K+'|'+dy+'"',w.f,full+', from')+
+    '<span class="mt" aria-hidden="true">to</span>'+
+    rtTimeBox('data-dto="'+K+'|'+dy+'"',w.t,full+', to')+
+    '<span class="rtWkH">'+fmt(Math.max(0,(w.t-w.f))/60)+' h</span>'+
+    '<button type="button" class="rtsw sm'+(per?' on':'')+'" role="switch" aria-checked="'+per+'" data-perdate="'+K+'|'+dy+'" '+
+      'title="Set the hours for each '+full+' of '+esc(rtMonthLabel())+' on its own">'+
+      '<i></i>each '+full.toLowerCase()+'</button>'+
+    '</div>';
+  if(per){
+    var dates=rtDatesFor(RT.month,dy);
+    h+='<div class="rtDates" role="group" aria-label="Each '+full+' in '+esc(rtMonthLabel())+'">';
+    if(!dates.length) h+='<span class="mt">Choose a month on the right to list its '+full.toLowerCase()+'s.</span>';
+    dates.forEach(function(dt){
+      var iso=rtIso({y:dt.getUTCFullYear(),m:dt.getUTCMonth(),d:dt.getUTCDate()}), o=c.dates[iso], off=!!(o&&o.off), win=(o&&!off)? o : w;
+      var lab=dy+' '+dt.getUTCDate()+' '+MONTHS_EN[dt.getUTCMonth()].slice(0,3);
+      h+='<div class="rtDateRow'+(o&&!off?' set':'')+(off?' off':'')+'">'+
+        '<button type="button" class="rtck'+(off?'':' on')+'" role="checkbox" aria-checked="'+(!off)+'" data-dwork="'+K+'|'+iso+'" '+
+          'aria-label="Telemedicine on '+esc(lab)+'" title="'+(off?'Off this date — click to work it':'Works this date — click to take it off')+'">'+(off?'':'\u2713')+'</button>'+
+        '<span class="rtDateLab">'+esc(lab)+'</span>'+
+        (off? '<span class="mt">no telemedicine this date</span>'
+          : rtTimeBox('data-dtf="'+K+'|'+iso+'|'+dy+'|f"',win.f,lab+', from')+
+            '<span class="mt" aria-hidden="true">to</span>'+
+            rtTimeBox('data-dtf="'+K+'|'+iso+'|'+dy+'|t"',win.t,lab+', to')+
+            '<span class="rtWkH">'+fmt(Math.max(0,(win.t-win.f))/60)+' h</span>')+
+        (o? '<button type="button" class="dchip" data-dreset="'+K+'|'+iso+'" title="Use the same hours as every '+full+'">use the '+full.toLowerCase()+' hours</button>'
+          : '<span class="mt">same as every '+full.toLowerCase()+'</span>')+
+        '</div>';
+    });
+    h+='</div>';
+  }
+  return h;
+}
+function rtTimeBox(attr,val,label){
+  return '<input type="text" class="tfld" list="rtTimeList" autocomplete="off" spellcheck="false" '+
+    'aria-label="'+esc(label)+'" title="'+esc(label)+' — pick from the list or type any time, e.g. 5:10 PM or 17:10" '+
+    attr+' value="'+rtFmtT12(val)+'">';
 }
 function rtWeeklyHours(d){
   var c=rtEnsure(d), n=0;
@@ -14335,7 +14481,9 @@ function rtUnknownRes(){
   });
   var out=[];
   Object.keys(count).forEach(function(nm){
-    if(rptResourceMatches(nm,all)) return;             /* aliases count here too */
+    /* a name the directory knows, or one recorded against a doctor, is not
+       unknown — this compared against objects, so every name looked unknown */
+    if(rtAliasTarget(nm)||rptResourceMatches(nm,all.map(function(x){ return x.t; }))) return;
     out.push({name:nm,n:count[nm],guess:rtNearDoctor(nm)});
   });
   out.sort(function(a,b){ return b.n-a.n; });
@@ -14719,13 +14867,15 @@ function renderRtm(){
     });
   });
   RT._axAlt=axAlt;
-  h+='<div class="rtList" id="rtListBox">';
+  h+=rtTimeList()+'<div class="rtList" id="rtListBox">';
   if(!list.length) h+='<div class="empty" style="padding:26px">No doctor matches these filters.</div>';
   list.forEach(function(d){
     var on=!!RT.sel[d.key];
     h+='<div class="rtRow'+(on?' sel':'')+'" data-rowpick="'+esc(d.key)+'" style="cursor:pointer">'+
-      '<input type="checkbox" data-pick2="'+esc(d.key)+'"'+(on?' checked':'')+'>'+
+      '<input type="checkbox" data-pick2="'+esc(d.key)+'"'+(on?' checked':'')+' aria-label="Select '+esc(d.name)+'">'+
+      rtAvatar(d)+
       '<div style="flex:1;min-width:0">'+
+        '<div class="rtTop"><div style="min-width:0">'+
         '<div class="rtNm">'+esc(d.name)+
           (rtOnList(d)?' <span class="pill pt" title="saved to the telemedicine list">RTM</span>':'')+
           (!rtOnList(d)&&rtHasSchedule(d)?' <span class="pill" style="background:var(--warn-bg);color:var(--warn)" title="schedule set but not saved yet">unsaved</span>':'')+
@@ -14733,6 +14883,7 @@ function renderRtm(){
         '<div class="mt" style="margin-top:1px">'+
           (d.status? '<b style="color:var(--muted)">'+esc(d.status)+'</b> · ':'')+
           (d.site? esc(d.site)+' · ':'')+esc(d.id)+(d.spec? ' · '+esc(d.spec):'')+'</div>'+
+        '</div>'+rtStrip(d)+'</div>'+
         (rtHasSchedule(d)? '<div class="mt" style="margin-top:2px;color:var(--teal)">'+
            esc(rtScheduleText(d))+'   ·   '+fmt(rtWeeklyHours(d))+' h a week</div>':'')+
         (axAlt[d.key]? '<div class="mt" style="margin-top:3px;color:var(--warn)">'+
@@ -14742,7 +14893,8 @@ function renderRtm(){
            '</div>':'')+
         (on? '<div class="rtCfg" style="margin-top:5px">'+
           RT_DAYS.map(function(dy){
-            return '<button class="dchip'+(rtDayOn(d,dy)?' on':'')+'" data-day="'+esc(d.key)+'|'+dy+'">'+dy+'</button>'; }).join('')+
+            return '<button type="button" class="dchip'+(rtDayOn(d,dy)?' on':'')+'" aria-pressed="'+rtDayOn(d,dy)+'" '+
+              'aria-label="'+esc(RT_DAYFULL[dy])+' telemedicine '+(rtDayOn(d,dy)?'on':'off')+'" data-day="'+esc(d.key)+'|'+dy+'">'+dy+'</button>'; }).join('')+
           /* Membership of the telemedicine list is a switch. It has nothing to
              do with the doctor directory below it, which is why the two sit
              apart and read differently. */
@@ -14760,15 +14912,8 @@ function renderRtm(){
         '</div>'+
         (rtHasSchedule(d)? '' : '<div class="mt" style="margin-top:4px;color:var(--warn)">'+
            'No telemedicine schedule yet — switch on the days this doctor works.</div>')+
-        RT_DAYS.filter(function(dy){ return rtDayOn(d,dy); }).map(function(dy){
-          var w=rtDayWindow(d,dy);
-          return '<div class="rtCfg" style="margin-top:4px">'+
-            '<span class="dchip on" style="pointer-events:none;min-width:44px;justify-content:center">'+dy+'</span>'+
-            '<input type="time" class="tsel" step="900" data-dfrom="'+esc(d.key)+'|'+dy+'" value="'+rtHHMM(w.f)+'">'+
-            '<span class="mt">to</span>'+
-            '<input type="time" class="tsel" step="900" data-dto="'+esc(d.key)+'|'+dy+'" value="'+rtHHMM(w.t)+'">'+
-            '<span class="mt">'+fmt(Math.max(0,(w.t-w.f))/60)+' h</span>'+
-            '</div>'; }).join('')
+        (rtHasSchedule(d)? '<div class="rtWk" role="group" aria-label="Telemedicine hours for '+esc(d.name)+'">'+
+          RT_DAYS.filter(function(dy){ return rtDayOn(d,dy); }).map(function(dy){ return rtDayRowHTML(d,dy); }).join('')+'</div>' : '')
         :'')+
       '</div></div>';
   });
@@ -15086,7 +15231,7 @@ function wireRtm(){
      click anywhere on it rather than only on the small box */
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-rowpick]'),function(r){
     r.onclick=function(e){
-      if(e.target&&/^(INPUT|SELECT|BUTTON|OPTION|LABEL)$/.test(e.target.tagName)) return;
+      if(e.target&&e.target.closest&&e.target.closest('input,select,button,option,label,a,.rtWk')) return;
       var id=r.getAttribute('data-rowpick');
       if(RT.sel[id]) delete RT.sel[id]; else RT.sel[id]=1;
       renderRtm(); }; });
@@ -15101,16 +15246,50 @@ function wireRtm(){
       var raw=b.getAttribute('data-day'), i=raw.lastIndexOf('|');
       var d=docOf(raw.slice(0,i)), dy=raw.slice(i+1); if(!d) return;
       rtSetDay(d,dy,!rtDayOn(d,dy)); rtSync(d); renderRtm(); }; });
-  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-dfrom]'),function(i){
-    i.onchange=function(){ var raw=i.getAttribute('data-dfrom'), q=raw.lastIndexOf('|');
+  /* a time box takes a time from the list or anything typed: 5 PM, 5:10 pm, 17:10 */
+  function rtReadTime(i,old){
+    var v=parseClock12(i.value);
+    if(v===null||v>=24*60){ i.setAttribute('aria-invalid','true'); toast('Could not read "'+i.value+'" as a time — try 5:30 PM or 17:30');
+      i.value=rtFmtT12(old); setTimeout(function(){ i.removeAttribute('aria-invalid'); },2500); return null; }
+    return v;
+  }
+  function rtSetWin(w,which,v){
+    if(which==='f'){ w.f=v; if(w.t<=w.f) w.t=Math.min(24*60-15,w.f+60); }
+    else { w.t=v; if(w.t<=w.f) w.f=Math.max(0,w.t-60); }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-dfrom],#pg-rtm [data-dto]'),function(i){
+    i.onkeydown=function(e){ if(e.key==='Enter') i.blur(); };
+    i.onchange=function(){ var isF=i.hasAttribute('data-dfrom'), raw=i.getAttribute(isF?'data-dfrom':'data-dto'), q=raw.lastIndexOf('|');
       var d=docOf(raw.slice(0,q)); if(!d) return;
-      var w=rtDayWindow(d,raw.slice(q+1)), v=rtFromHHMM(i.value); if(!w||v===null) return;
-      w.f=v; if(w.t<=w.f) w.t=Math.min(24*60-15,w.f+60); rtSync(d); renderRtm(); }; });
-  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-dto]'),function(i){
-    i.onchange=function(){ var raw=i.getAttribute('data-dto'), q=raw.lastIndexOf('|');
-      var d=docOf(raw.slice(0,q)); if(!d) return;
-      var w=rtDayWindow(d,raw.slice(q+1)), v=rtFromHHMM(i.value); if(!w||v===null) return;
-      w.t=v; if(w.t<=w.f) w.f=Math.max(0,w.t-60); rtSync(d); renderRtm(); }; });
+      var w=rtDayWindow(d,raw.slice(q+1)); if(!w) return;
+      var v=rtReadTime(i,isF? w.f : w.t); if(v===null) return;
+      rtSetWin(w,isF?'f':'t',v); rtSync(d); renderRtm(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-dtf]'),function(i){
+    i.onkeydown=function(e){ if(e.key==='Enter') i.blur(); };
+    i.onchange=function(){ var p=i.getAttribute('data-dtf').split('|'), which=p.pop(), dy=p.pop(), iso=p.pop(), d=docOf(p.join('|')); if(!d) return;
+      var c=rtEnsure(d), base=rtDayWindow(d,dy); if(!base) return;
+      var cur=c.dates[iso]&&!c.dates[iso].off? c.dates[iso] : {f:base.f,t:base.t};
+      var v=rtReadTime(i,which==='f'? cur.f : cur.t); if(v===null) return;
+      var w={f:cur.f,t:cur.t}; rtSetWin(w,which,v);
+      if(w.f===base.f&&w.t===base.t) delete c.dates[iso]; else c.dates[iso]=w;
+      rtSync(d); renderRtm(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-perdate]'),function(b){
+    b.onclick=function(ev){ if(ev&&ev.stopPropagation) ev.stopPropagation();
+      var raw=b.getAttribute('data-perdate'), q=raw.lastIndexOf('|'), d=docOf(raw.slice(0,q)), dy=raw.slice(q+1); if(!d) return;
+      var c=rtEnsure(d); if(c.perDate[dy]) delete c.perDate[dy]; else c.perDate[dy]=true;
+      rtSync(d); renderRtm();
+      var nb=document.querySelector('#pg-rtm [data-perdate="'+raw.replace(/"/g,'\\"')+'"]'); if(nb) nb.focus(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-dwork]'),function(b){
+    b.onclick=function(ev){ if(ev&&ev.stopPropagation) ev.stopPropagation();
+      var raw=b.getAttribute('data-dwork'), q=raw.lastIndexOf('|'), d=docOf(raw.slice(0,q)), iso=raw.slice(q+1); if(!d) return;
+      var c=rtEnsure(d);
+      if(c.dates[iso]&&c.dates[iso].off) delete c.dates[iso]; else c.dates[iso]={off:true};
+      rtSync(d); renderRtm();
+      var nb=document.querySelector('#pg-rtm [data-dwork="'+raw.replace(/"/g,'\\"')+'"]'); if(nb) nb.focus(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-dreset]'),function(b){
+    b.onclick=function(ev){ if(ev&&ev.stopPropagation) ev.stopPropagation();
+      var raw=b.getAttribute('data-dreset'), q=raw.lastIndexOf('|'), d=docOf(raw.slice(0,q)); if(!d) return;
+      delete rtEnsure(d).dates[raw.slice(q+1)]; rtSync(d); renderRtm(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rtm [data-applyall]'),function(b){
     b.onclick=function(ev){ if(ev&&ev.stopPropagation) ev.stopPropagation();
       var src=docOf(b.getAttribute('data-applyall')); if(!src) return;
@@ -15119,6 +15298,7 @@ function wireRtm(){
         if(d.key===src.key) return;
         var c=rtEnsure(d); c.days={};
         RT_DAYS.forEach(function(dy){ if(from.days[dy]) c.days[dy]={f:from.days[dy].f,t:from.days[dy].t}; });
+        c.perDate=JSON.parse(JSON.stringify(from.perDate||{})); c.dates=JSON.parse(JSON.stringify(from.dates||{}));
         rtSync(d); n++; });
       renderRtm();
       toast(n? 'Schedule copied to '+n+' other doctor'+(n===1?'':'s') : 'No other doctor is selected'); }; });
@@ -15580,9 +15760,9 @@ function rptKey(v){ return nz(v).toUpperCase().replace(/[^A-Z0-9]/g,''); }
 function rptWindows(){
   var sel=rtSelected().filter(rtHasSchedule);
   if(!sel.length) return null;
-  return sel.map(function(d){ return {t:rtToks(d.name),days:rtEnsure(d).days}; });
+  return sel.map(function(d){ var c=rtEnsure(d); return {t:rtToks(d.name),days:c.days,perDate:c.perDate,dates:c.dates}; });
 }
-function rptWindowFor(name,windows,dayName){
+function rptWindowFor(name,windows,dayName,iso){
   if(!dayName) return null;
   var key=dayName.slice(0,3), ht=rtToks(name);
   if(!ht.length) return null;
@@ -15594,7 +15774,7 @@ function rptWindowFor(name,windows,dayName){
       if(dt.length===1||ht.length===1) hit=true;
       else for(var j=0;j<ht.length-1&&!hit;j++) if(dt.indexOf(ht[j])>=0) hit=true;
     }
-    if(hit&&w.days[key]) return w.days[key];
+    if(hit&&w.days[key]) return rtWindowOn(w,key,iso);
   }
   return null;
 }
@@ -15669,7 +15849,7 @@ function rptBuild(){
     /* if the doctor has a telemedicine schedule, the appointment must fall on
        one of their days and inside that day's window */
     if(windows){
-      var win=rptWindowFor(who,windows,dayName);
+      var win=rptWindowFor(who,windows,dayName,d? rtIso(d) : '');
       if(!win){ offWin++; return; }
       var mins=rptMinutes(rptCell(am.time,r,null));
       if(mins!==null&&(mins<win.f||mins>win.t)){ offWin++; return; }
@@ -15726,6 +15906,8 @@ function rptBuild(){
 /* An H doctor's allowance is spent by the reasons ticked under H doctor rules.
    Nothing ticked or unticked there yet: Annual Leave, as it always was. */
 function hAllowDefault(main,sub){ return /annual\s*leave/i.test(nz(sub)+' '+nz(main)); }
+/* an opening reason gives back only when ticked on purpose — never by default */
+function hGivesBack(main,sub){ return (S.settings.hAllow||{})[ruleKey(main,sub)]===true; }
 function hUsesAllow(main,sub){
   var o=(S.settings.hAllow||{})[ruleKey(main,sub)];
   if(o===true||o===false) return o;
@@ -15793,18 +15975,21 @@ function hRulesCard(keys,sideOf){
   order.sort().forEach(function(g){
     h+='<div class="ru-g"><div class="ru-gh">'+esc(g)+' <span>'+groups[g].length+'</span></div>';
     groups[g].forEach(function(k){
-      var r=S.rules[k], on=hCounted(r), sd=sideOf(k), opens=(sd==='o'), al=hUsesAllow(r.main,r.sub)&&!opens, n=hRows[k]||0;
+      var r=S.rules[k], on=hCounted(r), sd=sideOf(k), opens=(sd==='o'), al=opens? hGivesBack(r.main,r.sub) : hUsesAllow(r.main,r.sub), n=hRows[k]||0;
       var set=(S.settings.hAllow||{})[ruleKey(r.main,r.sub)]; set=(set===true||set===false);
       h+='<div class="ru-r'+(on?' on':'')+'">'+
         '<button type="button" class="ru-sw'+(on?' on':'')+'" data-hcnt="'+esc(k)+'" role="switch" aria-checked="'+on+'" title="'+(on?'Counted for H doctors — click to ignore for them':'Not counted for H doctors — click to count')+'"><i></i></button>'+
         '<div class="ru-nm"><div class="ru-t">'+esc(r.sub||'(blank)')+
           (sd? '<span class="ru-side '+sd+'">'+(sd==='o'?'opens sessions':'closes sessions')+'</span>' : '')+
-          (al? '<span class="ru-tag info">uses the allowance</span>' : '')+'</div>'+
+          (al? '<span class="ru-tag info">'+(opens? 'gives back to the allowance' : 'uses the allowance')+'</span>' : '')+'</div>'+
           '<div class="ru-s">'+(!on? 'Not counted for H doctors — their rows change nothing'
+              : opens? (al? 'Counted for H doctors · an opening gives that session back to the allowance (closed, then opened again)'
+                          : 'Counted for H doctors · an opening is counted in Opened as usual')
               : al? 'Counted for H doctors · a closure comes out of the allowance first'
               : 'Counted for H doctors · a closure reduces the total')+'</div></div>'+
-        (opens? '<span class="hru-al" title="The allowance is spent by closures only; an opening is counted in Opened as usual">'+
-            '<button type="button" class="ru-sw" disabled><i></i></button><span>Only closures use the allowance</span></span>'
+        (opens? '<label class="hru-al" title="A doctor who closed and then opened again: the opening gives that session back to the allowance">'+
+            '<button type="button" class="ru-sw'+(al?' on':'')+'" data-hal="'+esc(k)+'" data-open="1" role="switch" aria-checked="'+al+'"'+(on?'':' disabled')+'><i></i></button>'+
+            '<span>Gives back to the allowance</span></label>'
           : '<label class="hru-al" title="'+(on? 'Take closures for this reason from the H allowance first' : 'Count this reason for H doctors first')+'">'+
           '<button type="button" class="ru-sw'+(al?' on':'')+'" data-hal="'+esc(k)+'" role="switch" aria-checked="'+al+'"'+(on?'':' disabled')+'><i></i></button>'+
           '<span>Uses the allowance'+(set? '' : ' <small>(default)</small>')+'</span></label>')+
@@ -16053,8 +16238,13 @@ function renderRules(){
       toast((r.sub||r.main)+(on?' is now counted for H doctors':' is no longer counted for H doctors')); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hal]'),function(b){
     b.onclick=function(){ var r=S.rules[b.getAttribute('data-hal')]; if(!r||b.disabled) return;
-      var k=ruleKey(r.main,r.sub), on=!hUsesAllow(r.main,r.sub);
+      var k=ruleKey(r.main,r.sub);
       S.settings.hAllow=S.settings.hAllow||{};
+      if(b.getAttribute('data-open')){
+        var onB=!hGivesBack(r.main,r.sub);
+        if(onB) S.settings.hAllow[k]=true; else delete S.settings.hAllow[k];
+        refresh(); toast((r.sub||r.main)+(onB?' now gives sessions back to the H allowance':' no longer gives back to the H allowance')); return; }
+      var on=!hUsesAllow(r.main,r.sub);
       if(on===hAllowDefault(r.main,r.sub)) delete S.settings.hAllow[k]; else S.settings.hAllow[k]=on;
       refresh(); toast((r.sub||r.main)+(on?' now uses the H allowance':' no longer uses the H allowance')); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hruf]'),function(b){
