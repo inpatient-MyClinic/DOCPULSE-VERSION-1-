@@ -23,13 +23,15 @@ const GOLD = path.join(FIX, 'golden');
 const OUTROOT = path.join(HERE, '.out');
 
 const argv = process.argv.slice(2);
-let update = false, jobs = 2; const pick = [];
+let update = false, jobs = 2, quick = false; const pick = [];
 for (let i = 0; i < argv.length; i++) {
   if (argv[i] === '--update') update = true;
+  else if (argv[i] === '--quick') quick = true;
   else if (argv[i] === '-j') jobs = Math.max(1, +argv[++i] || 1);
   else pick.push(argv[i]);
 }
-const todo = LIST.filter((t) => !pick.length || pick.some((p) => t.name.includes(p)));
+/* --quick: the fast core (every number, the counting rules) plus any names given */
+const todo = LIST.filter((t) => (quick && t.quick) || (!pick.length && !quick) || pick.some((p) => t.name.includes(p)));
 
 function chromePath() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;

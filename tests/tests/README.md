@@ -9,7 +9,8 @@ Every bug that has been fixed has a test here, so it cannot come back unnoticed.
 cd tests
 npm install                     # once: jsdom + playwright-core
 npx playwright install chromium # once, if you have no Chromium (or set CHROME_PATH)
-node run.js                     # everything (about 15–25 minutes)
+node run.js --quick ot          # the fast core + tests named "ot" (1–3 minutes) — every change
+node run.js                     # everything (about 15 minutes) — shared code, or before a big release
 node run.js ot live             # only tests whose name contains "ot" or "live"
 node run.js -j 3                # three at a time
 ```

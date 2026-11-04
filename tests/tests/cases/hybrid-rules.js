@@ -67,6 +67,35 @@ const T=require('../lib/ctx');
   T.check('card: with a smaller allowance, "over" is the allowance reasons beyond it ('+beyond+')', beyond>0 && box2.textContent.replace(/\s+/g,' ').indexOf('Over the allowance by '+api.fmt(beyond))>=0);
   w.document.getElementById('dwX')&&w.document.getElementById('dwX').click();
   S.settings.hybAllow[key]=50; api.refresh();
+  /* an opening ticked "Gives back to the allowance": closed, then opened again */
+  S.settings.hAllow={}; S.settings.hybAllow[key]=12; api.refresh();
+  const base=look();
+  const alRow=S.capacity.rows.find(x=>x._used&&(x.id+'|'+x.site)===(pick.id+'|'+pick.site)&&/annual\s*leave/i.test(x.sub)&&/close/i.test(x.status));
+  const mkOpen=(month)=>Object.assign({},alRow,{status:'Open',main:'Official Leave',sub:'Leave Withdrawal (Full Timer)',row:99999+month,
+    date:{y:alRow.date.y,m:month,d:Math.min(alRow.date.d,28)},_flags:[]});
+  api.ensureRule('Official Leave','Leave Withdrawal (Full Timer)').include='Y';
+  const wk=Object.keys(S.rules).find(k=>S.rules[k].sub==='Leave Withdrawal (Full Timer)');
+  S.capacity.rows.push(mkOpen(alRow.date.m)); api.refresh();
+  const plain=look();
+  T.check('a withdrawal not ticked: it is just an opening (Total +1, allowance unchanged)', r(plain.yt-base.yt)===1 && plain.used===base.used, {base,plain});
+  S.settings.hAllow={}; S.settings.hAllow[wk]=true; api.refresh();
+  const same=look();
+  T.check('ticked, same month: the session goes back to the allowance and the Total is as if nothing happened', same.used===r(base.used-1) && same.yt===base.yt, {base,same});
+  S.capacity.rows.pop(); S.capacity.rows.push(mkOpen(Math.min(11,alRow.date.m+2))); api.refresh();
+  const later=look();
+  T.check('ticked, in a later month: it still gives back what the earlier month spent', later.used===r(base.used-1) && later.yt===base.yt, {base,later});
+  api.openDrawer(key); await new Promise(r=>setTimeout(r,200));
+  const cardTxt=([...w.document.querySelectorAll('#drawer .card')].find(c=>/Hybrid allowance/.test(c.querySelector('h3').textContent))||{}).textContent||'';
+  T.check('the doctor card shows "Given back by openings"', /Given back by openings\s*1(?![0-9.])/.test(cardTxt), cardTxt.replace(/\s+/g,' ').slice(150,600));
+  w.document.getElementById('dwX')&&w.document.getElementById('dwX').click();
+  /* the switch on Settings → Rules → H doctor rules works for an opening reason */
+  S.settings.hAllow={}; api.refresh();
+  const nav2=[...w.document.querySelectorAll('#nav button')].find(x=>/Settings/.test(x.textContent)); if(nav2) nav2.click(); S.setTab='rules'; api.refresh();
+  const swo=[...w.document.querySelectorAll('#pg-rules [data-hal]')].find(b=>b.getAttribute('data-hal')===wk);
+  T.check('the opening reason has a working "Gives back to the allowance" switch', !!swo && !swo.disabled && /Gives back/.test(swo.parentNode.textContent));
+  if(swo){ swo.click(); }
+  T.check('switching it on saves it and gives the session back', S.settings.hAllow[wk]===true && look().used===r(base.used-1));
+  S.capacity.rows.pop(); S.settings.hAllow={}; S.settings.hybAllow[key]=50; api.refresh();
   /* Counting rules: two staff types picked together ("FT,PT") count rows of either — they used to count nobody */
   const cand=Object.keys(S.rules).find(k=>{ const ru=S.rules[k]; if(ru.include!=='Y'||ru.noH) return false;
     return S.capacity.rows.some(x=>x.main===ru.main&&x.sub===ru.sub&&x.date&&/^(FT|PT)$/i.test(x.empStatus)); });

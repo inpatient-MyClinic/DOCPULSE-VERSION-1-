@@ -8,15 +8,16 @@
    args      command-line arguments for the case
    golden    compare the printed output with fixtures/golden/<name>.txt (default true)
    snapshot  compare out/snapshot.json with fixtures/golden/<name>.json
+   quick     part of the quick check (node run.js --quick): fast, and covers the counting
    timeout   seconds (default 240)                                             */
 module.exports = [
   /* ---- the numbers: every doctor, every month, in every counting mode ---- */
-  { name: 'numbers-plain', args: ['plain'], snapshot: true, golden: false },
-  { name: 'numbers-rules-holidays', args: ['rules'], snapshot: true, golden: false },
-  { name: 'numbers-docpules-master', args: ['dpm', 'cfg'], snapshot: true, golden: false },
-  { name: 'numbers-big-log', capacity: 'cap-big.xlsx', args: ['big'], snapshot: true, golden: false },
+  { name: 'numbers-plain', quick: true, args: ['plain'], snapshot: true, golden: false },
+  { name: 'numbers-rules-holidays', quick: true, args: ['rules'], snapshot: true, golden: false },
+  { name: 'numbers-docpules-master', quick: true, args: ['dpm', 'cfg'], snapshot: true, golden: false },
+  { name: 'numbers-big-log', quick: true, capacity: 'cap-big.xlsx', args: ['big'], snapshot: true, golden: false },
   { name: 'numbers-versions', steps: ['_setup-versions'], args: ['versions'], snapshot: true, golden: false, timeout: 300 },
-  { name: 'unit-format' },
+  { name: 'unit-format', quick: true },
 
   /* ---- whole-page safety ---- */
   { name: 'stability-crawl', capacity: 'cap-hyb.xlsx', timeout: 720 },
@@ -27,8 +28,8 @@ module.exports = [
   { name: 'live-upload-version-restart', golden: false, timeout: 300 },
 
   /* ---- fixed OT ---- */
-  { name: 'ot-choice-counts' },
-  { name: 'ot-fixed-total', golden: false },
+  { name: 'ot-choice-counts', quick: true },
+  { name: 'ot-fixed-total', quick: true, golden: false },
   { name: 'card-ot-template', golden: false },
   { name: 'ot-page-browser' },
   { name: 'ot-add-dialog' },
@@ -59,10 +60,10 @@ module.exports = [
   { name: 'pedia-month-card-2' },
 
   /* ---- doctors, hybrid, filters ---- */
-  { name: 'hybrid-list' },
+  { name: 'hybrid-list', quick: true },
   { name: 'hybrid-allowance', capacity: 'cap-hyb.xlsx' },
   { name: 'hybrid-allowance-edit', capacity: 'cap-hyb.xlsx' },
-  { name: 'hybrid-rules', capacity: 'cap-hyb.xlsx', golden: false },
+  { name: 'hybrid-rules', quick: true, capacity: 'cap-hyb.xlsx', golden: false },
   { name: 'multiselect-master' },
   { name: 'multiselect-everywhere' },
   { name: 'doctors-filters' },
@@ -74,7 +75,8 @@ module.exports = [
   /* ---- finance, telemedicine, files ---- */
   { name: 'finance-holidays' },
   { name: 'finance-columns' },
-  { name: 'finance-fixed-matches', golden: false },
+  { name: 'finance-fixed-matches', quick: true, golden: false },
+  { name: 'paid-extra-fixed-ot', golden: false, quick: true },
   { name: 'telemedicine' },
   { name: 'telemedicine-report-filters', golden: false },
   { name: 'billing-big', golden: false, timeout: 300 },

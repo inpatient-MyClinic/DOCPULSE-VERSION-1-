@@ -28,7 +28,6 @@ const T=require('../lib/ctx');
   const Oct=api.finBuild(9), el=Oct.rows.find(x=>x.id==='2037'&&x.site==='J3'), ab=Oct.rows.find(x=>x.id==='661'&&x.site==='J1');
   T.check('Elsherife Oct: Fixed 10 (5 Saturdays × 1 PM–9 PM = 2 sessions each), same as Doctors page', el&&el.fix===10&&r(doc('2037','J3').m[9].ot)===10, el&&el.fix);
   T.check('Abu ElHasan Oct: Fixed = his OT Fixed on the Doctors page ('+(ab&&ab.fix)+')', ab&&r(ab.fix)===r(doc('661','J1').m[9].ot)&&ab.fix>5, ab&&ab.fix);
-  T.check('doctors on the master file\'s OT sheet but not on the OT fixed page are listed, not silently dropped ('+(Oct.sheetOnly||[]).length+')',
-    (Oct.sheetOnly||[]).length>0 && !(Oct.sheetOnly||[]).some(x=>x.id==='2037'||x.id==='661'), (Oct.sheetOnly||[]).map(x=>x.name));
+  T.check('Finance and Paid extra both take fixed OT from the OT fixed page, so nobody is left over from the OT sheet', !(Oct.sheetOnly||[]).length, (Oct.sheetOnly||[]).map(x=>x.name));
   T.done();
 })().catch(e=>{console.error(e);process.exit(1);});
