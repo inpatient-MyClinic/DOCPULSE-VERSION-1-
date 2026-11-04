@@ -79,6 +79,7 @@ module.exports = [
   { name: 'paid-extra-fixed-ot', golden: false, quick: true },
   { name: 'telemedicine' },
   { name: 'telemedicine-report-filters', golden: false },
+  { name: 'telemedicine-each-date', golden: false },
   { name: 'billing-big', golden: false, timeout: 300 },
   { name: 'upload-startup', golden: false },
   { name: 'reload-prompt' },
