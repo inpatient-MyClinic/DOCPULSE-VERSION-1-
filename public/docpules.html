@@ -775,6 +775,36 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .ot-pk button{font:inherit;font-size:11.5px;font-weight:600;padding:4px 10px;border:0;background:#fff;color:#475569;cursor:pointer;white-space:nowrap}
 .ot-pk button+button{border-left:1px solid #CBD5E1}.ot-pk button:hover{background:#F1F5F9}.ot-pk button.on{background:#0F766E;color:#fff}
 .ot-pk.busy{cursor:progress;opacity:.75}
+.sd-when{margin:6px 14px 4px 62px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px}
+.sd-when .pd-sw span{font-weight:500}.sd-when.keep .pd-sw input:checked+i{background:#B45309}.sd-when.new .pd-sw input:checked+i{background:#0F766E}
+.sd-when .pd-sw:focus-within i{outline:2px solid #2563EB;outline-offset:2px}
+.sd-wd{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:#334155}
+.sd-wd input{font:inherit;font-size:12.5px;padding:4px 8px;border:1px solid #CBD5E1;border-radius:8px;background:#fff}
+.sd-wd input:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
+.sd-wq{display:inline-flex;gap:4px;flex-wrap:wrap}.sd-wq button{font:inherit;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid #E2E8F0;background:#fff;color:#475569;cursor:pointer}
+.sd-wq button:hover{border-color:#94A3B8}.sd-wq button.on{background:#0F172A;border-color:#0F172A;color:#fff}.sd-wq button:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
+.sd-tl{flex-basis:100%;display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.sd-tl>span{flex:1;min-width:190px;display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 6px;padding:6px 11px;border-radius:10px;font-size:12.5px}
+.sd-tl>span small{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;opacity:.75}.sd-tl>span em{font-style:normal;font-weight:700}
+.sd-tl .a{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A}.sd-tl .b{background:#F0FDFA;color:#115E59;border:1px solid #99F6E4}
+.sd-tl>i{align-self:center;font-style:normal;font-weight:800;color:#94A3B8}.sd-tl.dw{margin-bottom:10px}
+.sd-bdg{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;vertical-align:1px;white-space:nowrap}
+.sd-bdg.pending{background:#FEF3C7;color:#92400E}.sd-bdg.soon{background:#E0F2FE;color:#075985}.sd-bdg.since{background:#CCFBF1;color:#115E59}
+.sd-note>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sd-note>summary::-webkit-details-marker{display:none}.sd-note>summary:focus-visible{outline:2px solid #2563EB;outline-offset:-2px;border-radius:12px}
+.sd-note.w{border-color:#FCD34D;background:linear-gradient(180deg,#FFFBEB,#fff 64px)}.sd-note.s{border-color:#7DD3FC;background:linear-gradient(180deg,#F0F9FF,#fff 64px)}
+.sd-note.y{border-color:#99F6E4;background:linear-gradient(180deg,#F0FDFA,#fff 64px)}
+.sd-nic{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;background:#0F766E;color:#fff;flex:none}
+.sd-note.w .sd-nic{background:#F59E0B}.sd-note.s .sd-nic{background:#0284C7}.sd-note.n .sd-nic{background:#94A3B8}
+.sd-ntt{flex:1;min-width:220px;display:flex;flex-direction:column;gap:2px}.sd-ntt b{font-size:13.5px}.sd-ntt span{font-size:12.5px;color:#475569}
+.sd-nw{display:inline-flex;align-items:baseline;gap:5px;font-size:12px;color:#64748B}.sd-nw s{color:#94A3B8}.sd-nw b{font-size:18px;color:#0F172A}.sd-nw i{font-style:normal}
+.sd-nw em{font-style:normal;font-weight:700;font-size:11px;padding:1px 6px;border-radius:999px}.sd-nw em.g{background:#DCFCE7;color:#166534}.sd-nw em.l{background:#FEE2E2;color:#991B1B}
+.sd-note .sd-days{margin:0 0 10px}
+.fold-b{font:inherit;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:999px;border:1px solid #CBD5E1;background:#fff;color:#334155;cursor:pointer;white-space:nowrap;flex:none}
+.fold-b:hover{border-color:#64748B;background:#F8FAFC}.fold-b i{font-style:normal;font-size:11px}
+.fold-b:focus-visible{outline:2px solid #2563EB;outline-offset:2px}
+.oc-card>.oc-hd{cursor:pointer;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.oc-card:not(.warn).folded{background:#fff}
 .oc-card{border-color:#E2E8F0}.oc-card.warn{border-color:#FCD34D;background:linear-gradient(180deg,#FFFBEB,#fff 60px)}
 .oc-card>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .oc-card>summary::-webkit-details-marker{display:none}
@@ -2512,7 +2542,7 @@ var SRVT=null;
    the server already holds in its own table). */
 var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule','hAllow','openClash',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','otRule','hAllow','openClash',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -3643,7 +3673,8 @@ function mvCardHTML(){
   var sm=(S.mvMonth===undefined||S.mvMonth===null)? null : S.mvMonth;
   if(sm===null){ for(var q=11;q>=0;q--) if(byM[q].length){ sm=q; break; } }
   var un=mvUnsaved();
-  var h='<div class="card mv" id="mvCard"><div class="mv-hd"><div><h3 style="margin:0">Versions</h3>'+
+  var mvOpen=foldOn('mv',false);
+  var h='<div class="card mv'+(mvOpen?'':' folded')+'" id="mvCard"><div class="mv-hd"><div><h3 style="margin:0">Versions</h3>'+
     (S.master&&S.master.mv
       ? '<p class="hint" style="margin:3px 0 0"><b style="color:#4338CA">Counting by version date.</b> Each day uses the version in force that day. The table below shows the latest version. Edit, then save a version with the date the change starts.</p></div>'
       : '<p class="hint" style="margin:3px 0 0">Every saved master schedule, filed by the date it applies from. To count by these dates, choose <b>Versions by date</b> on the Data tab.</p></div>')+
@@ -3652,6 +3683,7 @@ function mvCardHTML(){
       '<button type="button" class="btn pri" id="mvSaveBtn">Save version</button>'+
       '<button type="button" class="btn" id="mvUpBtn">↑ Upload a master</button>'+
       '<button type="button" class="btn" id="mvTrashBtn">Trash'+(binned.length? ' <b class="mv-tc">'+binned.length+'</b>' : '')+'</button>'+
+      foldBtn('mv',mvOpen,'the versions calendar')+
     '</div></div>';
   h+='<div class="mv-years">'+years.map(function(yy){
       var n=(S.mv.years[yy]||[]).filter(function(v){ return !trash[v.id]&&+mvEff(v).slice(0,4)===yy; }).length;
@@ -3690,6 +3722,7 @@ function mvCardHTML(){
       h+='</div>';
     }
   }
+  if(!mvOpen){ var hdEnd=h.indexOf('<div class="mv-years">'); if(hdEnd>0) h=h.slice(0,hdEnd); }
   if(S.mvShowTrash){
     h+='<div class="mv-trash"><div class="mv-lh">Trash · kept 30 days, then gone for good</div>';
     if(!binned.length) h+='<div class="hint">The trash is empty.</div>';
@@ -4861,7 +4894,7 @@ function nameKey(n){ return low(n).replace(/[^a-z0-9\u0600-\u06FF]/g,''); }
    anything unclear is reported in Health rather than guessed at. */
 /* ---- constants these screens were built on ---- */
 var DOC_BUCKETS=['dayOff','whole','altPick','altAnchor','mstAlt','schedFrom','lineSpan',
-                 'hybAllow','leftDocs','mstEdit','removed','noteSkip','otClash','otRule','sdDec','sdPrev','noteDec',
+                 'hybAllow','leftDocs','mstEdit','removed','noteSkip','otClash','otRule','sdDec','sdPrev','sdDated','sdLog','noteDec',
                  'rtmSched','rtmRemoved'];
 /* Which shared settings are lists and which are keyed objects. Read when the
    server's copy arrives, so a wrong shape is dropped instead of thrown. */
@@ -5098,7 +5131,7 @@ function snapshotDiff(oldIx,newIx){
     }
     if(nz(a.spec).replace(/\s+/g,' ')!==nz(b.spec).replace(/\s+/g,' ')) bits.push('specialty: '+(a.spec||'—')+'  \u2192  '+(b.spec||'—'));
     if(bits.length) changed.push({key:k,id:b.id,name:b.name,site:b.site,status:b.status,bits:bits,dd:dd,
-      specA:nz(a.spec).replace(/\s+/g,' '),specB:nz(b.spec).replace(/\s+/g,' '),old:a,
+      specA:nz(a.spec).replace(/\s+/g,' '),specB:nz(b.spec).replace(/\s+/g,' '),old:a,neu:b,
       wa:(a.raw||[]).reduce(function(s2,l){ return s2+l.length; },0),
       wb:(b.raw||[]).reduce(function(s2,l){ return s2+l.length; },0)});
   });
@@ -6000,6 +6033,15 @@ function finRender(){
     finExport({y:F.y,m:F.m,month:F.month,hols:F.hols,unnamed:F.unnamed,rows:F.rows.filter(finPass)}); };
 }
 if(typeof document!=='undefined') document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S&&S.fin&&!S.msOpen){ S.fin=null; finRender(); } });
+/* ---- panels that fold away, so the table under them is one glance away.
+   Open or closed is remembered on this browser (per person, not shared). ---- */
+function foldOn(k,def){ S.fold=S.fold||{}; if(k in S.fold) return S.fold[k];
+  var v=null; try{ v=localStorage.getItem('dp.fold.'+k); }catch(e){}
+  return (S.fold[k]=(v===null)? !!def : v==='1'); }
+function foldSet(k,v){ S.fold=S.fold||{}; S.fold[k]=!!v; try{ localStorage.setItem('dp.fold.'+k,v?'1':'0'); }catch(e){} }
+function foldBtn(k,open,what){
+  return '<button type="button" class="fold-b'+(open?' on':'')+'" data-fold="'+k+'" aria-expanded="'+open+'" title="'+(open?'Hide ':'Show ')+esc(what)+'">'+
+    (open?'Hide':'Show')+'<i aria-hidden="true">'+(open?'\u25B4':'\u25BE')+'</i></button>'; }
 /* ---- an opening at the same hours as his clinic: counted once, you choose which ---- */
 var OC_PICK={roster:'Master schedule session',open:'Opened request'};
 function ocTime(a){ return clock12(a.f).replace(':00','').replace(' ','')+'–'+clock12(a.t).replace(':00','').replace(' ',''); }
@@ -6028,7 +6070,21 @@ function ocRowHTML(c,withDoc){
 function ocCardHTML(list,full){
   if(!list||!list.length) return '';
   var wait=list.filter(function(c){ return !c.pick; }).length;
-  var open=!full? true : (S.ocOpen===undefined)? wait>0 : S.ocOpen;
+  if(full){
+    var fo=foldOn('oc',false);
+    return '<div class="card oc-card'+(wait?' warn':'')+(fo?'':' folded')+'" id="ocCard"><div class="oc-hd" data-fold="oc">'+
+      '<span class="oc-ic" aria-hidden="true">\u26A0</span>'+
+      '<b>'+list.length+' opened request'+(list.length===1?'':'s')+' at the same time as a clinic</b>'+
+      ' <span class="hint">\u2014 each is counted <b>once</b>. Choose which.</span>'+
+      (wait? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+wait+' waiting</span>' : ' <span class="tag">all decided</span>')+
+      '<span style="flex:1"></span>'+foldBtn('oc',fo,'the opened requests at the same time as a clinic')+'</div>'+
+      (fo? '<div class="cb">'+
+        (wait>1? '<div class="oc-all"><span class="hint">Set every waiting one to:</span>'+
+          ['roster','open'].map(function(k){ return '<button type="button" class="btn sm" data-ocall="'+k+'">'+OC_PICK[k]+'</button>'; }).join('')+'</div>' : '')+
+        list.map(function(c){ return ocRowHTML(c,true); }).join('')+'</div>' : '')+
+      '</div>';
+  }
+  var open=true;
   return '<details class="card oc-card'+(wait?' warn':'')+'" id="'+(full?'ocCard':'ocCardDw')+'"'+(open?' open':'')+'><summary>'+
     '<span class="oc-ic" aria-hidden="true">\u26A0</span>'+
     '<b>'+list.length+' opened request'+(list.length===1?'':'s')+' at the same time as a clinic</b>'+
@@ -6096,7 +6152,7 @@ function renderSummary(){
     h+='<tr class="click" data-k="'+esc(t.key)+'">'+
       '<td class="stick"><div class="dr"'+(hasLeft(t)?' style="text-decoration:line-through;opacity:.65"':'')+'>'+
         esc(t.name||'(no name)')+statusDot(t.fName,'Name')+
-        (hasLeft(t)?' <span class="pill" style="background:#FDECEC;color:var(--loss)">left</span>':'')+'</div>'+
+        (hasLeft(t)?' <span class="pill" style="background:#FDECEC;color:var(--loss)">left</span>':'')+sdBadgeHTML(t)+'</div>'+
         '<div class="mt">'+esc(t.id)+(t.fromMaster?'':' · no master line')+(t.lines>1?' · '+t.lines+' lines':'')+
         '</div>'+hybChip(t)+'</td>'+
       '<td>'+finSiteTag(t.site)+'</td><td class="mt">'+esc(t.spec||'—')+'</td>'+
@@ -6369,7 +6425,12 @@ if(typeof document!=='undefined'){
       S.settings.openClash=S.settings.openClash||{};
       ((S.result&&S.result.openClash)||[]).forEach(function(c){ if(!c.pick) S.settings.openClash[c.id]=oa; });
       refresh(); toast('Every waiting one set to '+OC_PICK[oa]); return; }
-    if((n=t.closest('#ocCard>summary'))){ var oc=el('ocCard'); S.ocOpen=!(oc&&oc.open); }
+    if((n=t.closest('[data-fold]'))){ var fk=n.getAttribute('data-fold'); foldSet(fk,!foldOn(fk));
+      if(S.page==='master') renderMaster(); else renderSummary();
+      var fb=document.querySelector('.fold-b[data-fold="'+fk+'"]'); if(fb) try{ fb.focus({preventScroll:true}); }catch(_){}
+      return; }
+    if((n=t.closest('#sdNote>summary'))){ var sn=el('sdNote'); S.sdNoteOpen=!(sn&&sn.open); }
+    if((n=t.closest('#sdGoReview'))){ closeDrawer(); go('master'); return; }
     if((n=t.closest('[data-otrule]'))){ var rr=n.getAttribute('data-otrule'), ri=rr.lastIndexOf('|');
       S.settings.otRule=S.settings.otRule||{};
       var sid=rr.slice(0,ri), rp=rr.slice(ri+1);
@@ -6497,10 +6558,12 @@ function sdPanelHTML(D){
   var F=[['all','All'],['flag','⚠ Check the file'],['fewer','Fewer sessions'],['more','More sessions'],['time','Time moved'],['col','Colour only']];
   var list=D.changed.filter(function(c){ var i=info[c.key];
     return fl==='all'? true : fl==='flag'? i.flag : i.cat===fl; });
-  var h='<div class="card sd"><div class="sd-top">'+
+  var sdOpen=foldOn('sd',false);
+  var h='<div class="card sd'+(sdOpen?'':' folded')+'"><div class="sd-top">'+
     '<div class="sd-ic">⇄</div><div class="sd-tt"><b>The new master file changes '+tot+' doctor'+(tot===1?'':'s')+'</b>'+
       '<span>Check each one: <b>Keep old</b> holds what you had, <b>Use new</b> takes the file.</span></div>'+
-    '<div class="sd-kp"><div><b class="w">'+tot+'</b>changed</div><div><b class="t">'+D.added.length+'</b>new</div><div><b class="l">'+D.removed.length+'</b>gone</div></div></div>'+
+    '<div class="sd-kp"><div><b class="w">'+tot+'</b>changed</div><div><b class="t">'+D.added.length+'</b>new</div><div><b class="l">'+D.removed.length+'</b>gone</div></div>'+
+    foldBtn('sd',sdOpen,'the doctors the new master file changes')+'</div>'+
     '<div class="sd-prog"><div class="sd-bar"><i style="width:'+pct+'%"></i></div><span><b>'+done+'</b> of '+tot+' decided</span>'+
       '<div class="spacer"></div>'+
       (done<tot? '<button type="button" class="sd-btn ghost" id="sdKeep">Keep old for the rest</button>'+
@@ -6508,8 +6571,9 @@ function sdPanelHTML(D){
       '</div>'+
     (done===tot? '<div class="sd-ready"><b>✓ All '+tot+' decided.</b> <span>Check your choices below — you can still switch any of them. Nothing is saved until you press Save.</span>'+
         '<button type="button" class="sd-btn pri big" id="sdSave">Save my decisions</button></div>'
-      : (done? '<div class="sd-note">You can switch or undo any choice until everything is decided and saved.</div>' : ''))+
-    '<div class="sd-f">'+F.map(function(x){ var n=cnt[x[0]]||0; if(x[0]!=='all'&&!n) return '';
+      : (done&&sdOpen? '<div class="sd-note">You can switch or undo any choice until everything is decided and saved.</div>' : ''));
+  if(!sdOpen) return h+'</div>';
+  h+='<div class="sd-f">'+F.map(function(x){ var n=cnt[x[0]]||0; if(x[0]!=='all'&&!n) return '';
       return '<button type="button" class="db2-fc'+(fl===x[0]?' on':'')+(x[0]==='flag'?' warn':'')+'" data-sdf="'+x[0]+'">'+x[1]+' <b>'+n+'</b></button>'; }).join('')+'</div>'+
     '<div class="sd-list">';
   list.slice(0,150).forEach(function(c){
@@ -6518,7 +6582,7 @@ function sdPanelHTML(D){
       '<div class="sd-dh"><div class="sd-av">'+esc(nz(c.name).replace(/^dr\.?\s*/i,'').split(/\s+/).slice(0,2).map(function(w){ return w.charAt(0); }).join('').toUpperCase())+'</div>'+
         '<div class="sd-nm"><b>'+esc(c.name)+'</b><div>'+finSiteTag(c.site)+' '+finStTag({status:c.status})+
           (c.specA!==c.specB? ' <span class="sd-sp">Specialty: '+esc(c.specA||'—')+' → <b>'+esc(c.specB||'—')+'</b></span>' : '')+'</div></div>'+
-        (d==='keep'? '<div class="sd-wk" title="Sessions a week"><b>'+c.wa+'</b><small>a week</small><em class="z">stays</em></div>' :
+        (d==='keep'&&!sdDatedOf(c.key)? '<div class="sd-wk" title="Sessions a week"><b>'+c.wa+'</b><small>a week</small><em class="z">stays</em></div>' :
         '<div class="sd-wk" title="Sessions a week"><span>'+c.wa+'</span><i>→</i><b>'+c.wb+'</b><small>a week</small>'+
           (diff? '<em class="'+(diff<0?'l':'g')+'">'+(diff>0?'+':'')+diff+'</em>' : '<em class="z">same</em>')+'</div>')+
         '<div class="sd-dec"><div class="sd-seg'+(d?' picked':'')+'">'+
@@ -6526,8 +6590,9 @@ function sdPanelHTML(D){
           '<button type="button" class="'+(d==='new'?'on':'')+'" data-sdnew="'+esc(c.key)+'">'+(d==='new'?'✓ ':'')+'Use new</button></div>'+
           (d? '<button type="button" class="sd-undo" data-sdundo="'+esc(c.key)+'" title="Undo this choice">↺ Undo</button>' : '')+'</div>'+
       '</div>'+
-      (d? '<div class="sd-res '+d+'">'+(d==='keep'? '<b>Keeping the old schedule</b> — the new file is ignored for this doctor ('+c.wa+' a week stays).'
-                                               : '<b>Using the new file</b> — '+c.wb+' a week from now on.')+'</div>' : '');
+      (d? '<div class="sd-res '+d+'">'+((sdDatedOf(c.key)||{}).side===d? '<b>Old schedule until '+esc(ntFmt(sdIsoAdd(sdDatedOf(c.key).from,-1)))+'</b> ('+c.wa+' a week), then <b>the new file from '+esc(ntFmt(sdDatedOf(c.key).from))+'</b> ('+c.wb+' a week).'
+          : d==='keep'? '<b>Keeping the old schedule</b> — the new file is ignored for this doctor ('+c.wa+' a week stays).'
+                      : '<b>Using the new file</b> — '+c.wb+' a week from now on.')+'</div>'+sdWhenHTML(c,d) : '');
     h+='<div class="sd-days'+(d?' '+d:'')+'">'+c.dd.map(function(x){
       var k=sdDayKind(x), w=sdWhy(x);
       return '<div class="sd-day"><div class="sd-dn">'+SD_DAY[x.d].slice(0,3)+'</div>'+
@@ -6549,6 +6614,126 @@ function sdPanelHTML(D){
   if(D.removed.length) h+='<details class="sd-more"><summary><b class="l">−'+D.removed.length+'</b> doctor'+(D.removed.length===1?'':'s')+' no longer in the file</summary>'+
     D.removed.slice(0,60).map(function(a){ return '<div class="sd-row">'+finSiteTag(a.site)+'<b>'+esc(a.name)+'</b><span>'+esc(wk(a))+'</span></div>'; }).join('')+'</details>';
   return h+'</div>';
+}
+/* ---- a new schedule from a date you choose ----
+   In the new-master review, Keep old can run only until a date and Use new
+   can start only on a date. Either way he is counted on his old week before
+   the switch and on the new file from it (settings.sdDated, shared). Each
+   saved decision is also logged (settings.sdLog) so his card can say so. */
+function sdDatedOf(key){ var x=(S.settings.sdDated||{})[key]; return x&&x.old&&ntMs(x.from)!==null? x : null; }
+function sdIsoAdd(iso,n){ var ms=ntMs(iso); return ms===null? '' : new Date(ms+n*86400000).toISOString().slice(0,10); }
+function sdToday(){ var n=new Date(); return ntIso(n.getFullYear(),n.getMonth(),n.getDate()); }
+function sdMonth1(k){ var n=new Date(), y=n.getFullYear(), m=n.getMonth()+k; y+=Math.floor(m/12); m=((m%12)+12)%12; return ntIso(y,m,1); }
+function sdDaysOf(raw){ var days={};
+  MST_DAYS.forEach(function(nm,d){ days[nm]=((raw&&raw[d])||[]).map(function(x){
+    return {f:(x.f===null||x.f===undefined)?17*60:x.f,t:(x.t===null||x.t===undefined)?21*60:x.t,fill:(x.fill&&x.fill!=='none')?x.fill:''}; }); });
+  return days; }
+function sdPatOf(days){ var H=num(S.settings.hrs)||4, p={n:[0,0,0,0,0,0,0],h:[0,0,0,0,0,0,0]};
+  MST_DAYS.forEach(function(nm,d){ ((days&&days[nm])||[]).forEach(function(sp){
+    if(!colorCounts(sp.fill||'NONE')) return; p.n[d]+=1; p.h[d]+=(sp.t-sp.f)/60/H; }); });
+  return p; }
+function sdSetDated(c,side,from){
+  S.settings.sdDated=S.settings.sdDated||{};
+  S.settings.sdDated[c.key]={from:from,side:side,old:sdDaysOf(c.old&&c.old.raw),neu:sdDaysOf(c.neu&&c.neu.raw),
+    wa:c.wa,wb:c.wb,n:c.name,s:c.site,at:(new Date()).toISOString(),by:schedWho()};
+}
+function sdClearDated(k){ if(S.settings.sdDated) delete S.settings.sdDated[k]; }
+/* back to whatever he had before Keep old was pressed, still remembering it */
+function sdPrevBack(k){ var P=S.settings.sdPrev||{}, prev=(k in P)? P[k] : null;
+  S.settings.mstEdit=S.settings.mstEdit||{}; if(prev) S.settings.mstEdit[k]=prev; else delete S.settings.mstEdit[k]; }
+function sdLogPut(c,d){
+  var x=sdDatedOf(c.key);
+  S.settings.sdLog=S.settings.sdLog||{};
+  S.settings.sdLog[c.key]={d:d,from:x? x.from : sdToday(),dated:!!x,wa:c.wa,wb:c.wb,
+    old:sdDaysOf(c.old&&c.old.raw),neu:sdDaysOf(c.neu&&c.neu.raw),file:(S.files&&S.files.m)||'',at:(new Date()).toISOString(),by:schedWho()};
+}
+function sdQuick(d){
+  /* Use new: the 1st of this month and the next three. Keep old: the end of this month and the next three. */
+  return (d==='keep'? [1,2,3,4] : [0,1,2,3]).map(function(i){ var f=sdMonth1(i), ms=ntMs(f), dt=new Date(ms-(d==='keep'?86400000:0));
+    return {from:f,lab:d==='keep'? 'end of '+MONTHS_EN[dt.getUTCMonth()].slice(0,3) : '1 '+MONTHS_EN[dt.getUTCMonth()].slice(0,3)+(dt.getUTCFullYear()!==new Date().getFullYear()?' '+dt.getUTCFullYear():'')}; });
+}
+function sdWhenHTML(c,d){
+  if(!d) return '';
+  var x=sdDatedOf(c.key), on=!!x&&x.side===d, k=esc(c.key);
+  var h='<div class="sd-when '+d+(on?' on':'')+'"><label class="pd-sw sd-sw"><input type="checkbox" data-sdwhen="'+k+'"'+(on?' checked':'')+'><i></i><span>'+
+    (d==='keep'? 'Keep the old schedule only <b>until a date</b>' : 'Start the new schedule <b>on a date</b>')+'</span></label>';
+  if(on){
+    var shown=d==='keep'? sdIsoAdd(x.from,-1) : x.from;
+    h+='<label class="sd-wd"><span>'+(d==='keep'? 'Old until' : 'New from')+'</span><input type="date" data-sdwd="'+k+'" value="'+esc(shown)+'" '+
+        'aria-label="'+(d==='keep'? 'Last day of the old schedule' : 'First day of the new schedule')+' for '+esc(c.name)+'"></label>'+
+      '<span class="sd-wq" role="group" aria-label="Quick dates">'+sdQuick(d).map(function(q){
+        return '<button type="button" class="'+(q.from===x.from?'on':'')+'" data-sdwq="'+k+'|'+q.from+'">'+esc(q.lab)+'</button>'; }).join('')+'</span>'+
+      '<div class="sd-tl" aria-label="What is counted">'+
+        '<span class="a"><small>Counted before</small><b>Old</b> '+c.wa+' a week <em>until '+esc(ntFmt(sdIsoAdd(x.from,-1)))+'</em></span>'+
+        '<i aria-hidden="true">→</i>'+
+        '<span class="b"><small>Counted from</small><b>New</b> '+c.wb+' a week <em>from '+esc(ntFmt(x.from))+'</em></span></div>';
+  }
+  return h+'</div>';
+}
+/* ---- what the card and the Doctors list say about a schedule change ---- */
+function sdChangeOf(t){
+  if(!t) return null;
+  var D=S.pendingDiff, P=D&&D.changed? D.changed.filter(function(c){ return c.key===t.key; })[0] : null;
+  var x=sdDatedOf(t.key), L=(S.settings.sdLog||{})[t.key], today=sdToday();
+  if(P){ var st=sdLoad(D)[t.key]||'';
+    return {kind:'pending',d:st,dated:x&&x.side===st? x : null,old:sdDaysOf(P.old&&P.old.raw),neu:sdDaysOf(P.neu&&P.neu.raw),wa:P.wa,wb:P.wb,
+      from:x&&x.side===st? x.from : ''}; }
+  if(x) return {kind:x.from>today? 'soon' : 'since',d:x.side,dated:x,old:x.old,neu:x.neu,wa:x.wa,wb:x.wb,from:x.from,by:x.by,at:x.at};
+  if(L) return {kind:L.d==='keep'? 'kept' : 'since',d:L.d,old:L.old,neu:L.neu,wa:L.wa,wb:L.wb,from:L.from,by:L.by,at:L.at,file:L.file};
+  return null;
+}
+function sdDaysAgo(iso){ var a=ntMs(iso), b=ntMs(sdToday()); return (a===null||b===null)? 9999 : Math.round((b-a)/86400000); }
+/* worth flagging on the list: waiting, coming, or started in the last 60 days */
+function sdFresh(c){ return !!c&&(c.kind==='pending'||c.kind==='soon'||(c.kind==='since'&&sdDaysAgo(c.from)<=60)); }
+function sdBadgeHTML(t){
+  var c=sdChangeOf(t); if(!sdFresh(c)) return '';
+  var lab=c.kind==='pending'? 'New schedule · review' : c.kind==='soon'? 'New schedule '+ntFmt(c.from).replace(/ \d{4}$/,'') : 'New schedule since '+ntFmt(c.from).replace(/ \d{4}$/,'');
+  return ' <span class="sd-bdg '+c.kind+'" title="'+esc(c.wa+' → '+c.wb+' a week')+'">⇄ '+esc(lab)+'</span>';
+}
+function sdDaysHTML(old,neu){
+  var rows=MST_DAYS.map(function(nm,d){
+    var a=(old&&old[nm])||[], b=(neu&&neu[nm])||[];
+    var ka=a.map(function(x){ return x.f+'-'+x.t+':'+nz(x.fill).toUpperCase(); }).sort().join(' '),
+        kb=b.map(function(x){ return x.f+'-'+x.t+':'+nz(x.fill).toUpperCase(); }).sort().join(' ');
+    if(ka===kb) return '';
+    var k=sdDayKind({a:a,b:b});
+    return '<div class="sd-day"><div class="sd-dn">'+SD_DAY[d].slice(0,3)+'</div>'+
+      '<div class="sd-was">'+(a.length? a.map(function(cc){ return sdChip(cc,'old'); }).join('') : '<span class="sd-none">no session</span>')+'</div>'+
+      '<div class="sd-arr" aria-hidden="true">→</div>'+
+      '<div class="sd-now">'+(b.length? b.map(function(cc){ return sdChip(cc,'new'); }).join('') : '<span class="sd-none x">no session</span>')+'</div>'+
+      '<span class="sd-k '+k.k+'">'+esc(k.t)+'</span></div>'; }).join('');
+  return rows? '<div class="sd-days">'+rows+'</div>' : '<p class="hint">Only the colour or the specialty changed.</p>';
+}
+function sdNoticeHTML(t,year){
+  var c=sdChangeOf(t); if(!c) return '';
+  var fresh=sdFresh(c), until=c.from? sdIsoAdd(c.from,-1) : '';
+  var title, sub, tone;
+  if(c.kind==='pending'){ tone='w';
+    title='The new master file changes his schedule';
+    sub=!c.d? 'Waiting for your choice on the Master schedule page — until then the new file is counted.'
+      : c.dated? 'Your choice so far: old schedule until <b>'+esc(ntFmt(until))+'</b>, new from <b>'+esc(ntFmt(c.from))+'</b> — save it on the Master schedule page.'
+      : c.d==='keep'? 'Your choice so far: <b>keep the old schedule</b> — save it on the Master schedule page.'
+      : 'Your choice so far: <b>use the new file</b> — save it on the Master schedule page.'; }
+  else if(c.kind==='soon'){ tone='s'; var inD=-sdDaysAgo(c.from);
+    title='New schedule from '+ntFmt(c.from);
+    sub='Starts in <b>'+inD+' day'+(inD===1?'':'s')+'</b>. Until <b>'+esc(ntFmt(until))+'</b> he is counted on his old week.'; }
+  else if(c.kind==='kept'){ tone='n';
+    title='The master file changed his schedule — you kept the old one';
+    sub='Decided '+esc(ntFmt((c.at||'').slice(0,10)))+(c.by? ' by '+esc(c.by) : '')+'. The new file is ignored for him.'; }
+  else { tone='y';
+    title='New schedule since '+ntFmt(c.from);
+    sub=c.dated? 'Counted on his old week until <b>'+esc(ntFmt(until))+'</b>, on the new one from <b>'+esc(ntFmt(c.from))+'</b>.'
+      : 'From the new master file'+(c.file? ' (<b>'+esc(c.file)+'</b>)' : '')+', counted from the day it was saved.'; }
+  var wk='<span class="sd-nw"><s>'+c.wa+'</s><i aria-hidden="true">→</i><b>'+(c.kind==='kept'? c.wa : c.wb)+'</b><small>a week</small>'+
+    (c.kind!=='kept'&&c.wb!==c.wa? '<em class="'+(c.wb<c.wa?'l':'g')+'">'+(c.wb>c.wa?'+':'')+(c.wb-c.wa)+'</em>' : '')+'</span>';
+  var tl=c.from&&(c.dated||c.kind==='soon')? '<div class="sd-tl dw"><span class="a"><small>Counted before</small><b>Old</b> '+c.wa+' a week <em>until '+esc(ntFmt(until))+'</em></span>'+
+      '<i aria-hidden="true">→</i><span class="b"><small>Counted from</small><b>New</b> '+c.wb+' a week <em>from '+esc(ntFmt(c.from))+'</em></span></div>' : '';
+  var open=(S.sdNoteOpen===undefined)? fresh : S.sdNoteOpen;
+  return '<details class="card sd-note '+tone+'" id="sdNote"'+(open?' open':'')+'><summary>'+
+    '<span class="sd-nic" aria-hidden="true">⇄</span><span class="sd-ntt"><b>'+esc(title)+'</b><span>'+sub+'</span></span>'+wk+'</summary>'+
+    '<div class="cb">'+tl+sdDaysHTML(c.old,c.neu)+
+    (c.kind==='pending'? '<button type="button" class="btn sm" id="sdGoReview">Open the review on the Master schedule page</button>' : '')+
+    '</div></details>';
 }
 function sdKeptHTML(){
   var K=S.settings.sdKept||{}, E=S.settings.mstEdit||{};
@@ -6600,7 +6785,8 @@ function sdFinish(){
   var st=sdLoad(D);
   if(D.changed.some(function(c){ return !st[c.key]; })) return false;
   S.settings.sdKept=S.settings.sdKept||{};
-  D.changed.forEach(function(c){ if(st[c.key]==='keep') S.settings.sdKept[c.key]={n:c.name,s:c.site,at:(new Date()).toISOString()}; });
+  D.changed.forEach(function(c){ if(st[c.key]==='keep'&&!sdDatedOf(c.key)) S.settings.sdKept[c.key]={n:c.name,s:c.site,at:(new Date()).toISOString()}; });
+  D.changed.forEach(function(c){ sdLogPut(c,st[c.key]); });
   D.changed.forEach(function(c){ if(S.settings.sdDec) delete S.settings.sdDec[c.key]; if(S.settings.sdPrev) delete S.settings.sdPrev[c.key]; });
   saveSchedule(); S.pendingDiff=null; S.settled={};
   toast('All decided — the new file is saved as your schedule');
@@ -6615,16 +6801,29 @@ function sdWire(){
     b.onclick=function(){ S.sdF=b.getAttribute('data-sdf'); renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdnew]'),function(b){
     b.onclick=function(){ var k=b.getAttribute('data-sdnew'), c=byKey(k); if(!c) return;
-      var was=(S.settled||{})[k]; sdPut(c,'new');
-      if(was==='keep'){ sdUnkeep(k); refresh(); } else renderMaster(); }; });
+      var was=(S.settled||{})[k], dat=!!sdDatedOf(k); sdClearDated(k); sdPut(c,'new');
+      if(was==='keep'){ sdUnkeep(k); refresh(); } else if(dat) refresh(); else renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdkeep]'),function(b){
     b.onclick=function(){ var c=byKey(b.getAttribute('data-sdkeep')); if(!c) return;
       if((S.settled||{})[c.key]==='keep') return;
-      sdKeepOne(c); sdPut(c,'keep'); refresh(); }; });
+      sdClearDated(c.key); sdKeepOne(c); sdPut(c,'keep'); refresh(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdundo]'),function(b){
-    b.onclick=function(){ var k=b.getAttribute('data-sdundo'), c=byKey(k), was=(S.settled||{})[k];
-      if(c) sdPut(c,null);
-      if(was==='keep'){ sdUnkeep(k); refresh(); } else renderMaster(); }; });
+    b.onclick=function(){ var k=b.getAttribute('data-sdundo'), c=byKey(k), was=(S.settled||{})[k], dat=!!sdDatedOf(k);
+      sdClearDated(k); if(c) sdPut(c,null);
+      if(was==='keep'){ sdUnkeep(k); refresh(); } else if(dat) refresh(); else renderMaster(); }; });
+  /* Keep old until / Use new from a date */
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdwhen]'),function(b){
+    b.onchange=function(){ var k=b.getAttribute('data-sdwhen'), c=byKey(k), d=(S.settled||{})[k]; if(!c||!d) return;
+      if(b.checked){ if(d==='keep') sdPrevBack(k); sdSetDated(c,d,sdMonth1(1)); }
+      else { sdClearDated(k); if(d==='keep') sdKeepOne(c); }
+      refresh();
+      if(b.checked){ var x=sdDatedOf(k); toast(c.name+': old schedule until '+ntFmt(sdIsoAdd(x.from,-1))+', new from '+ntFmt(x.from)); } }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdwd]'),function(inp){
+    inp.onchange=function(){ var k=inp.getAttribute('data-sdwd'), x=sdDatedOf(k), v=inp.value; if(!x||ntMs(v)===null) return;
+      x.from=(x.side==='keep')? sdIsoAdd(v,1) : v; x.at=(new Date()).toISOString(); x.by=schedWho(); refresh(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-sdwq]'),function(b){
+    b.onclick=function(){ var raw=b.getAttribute('data-sdwq'), i=raw.lastIndexOf('|'), x=sdDatedOf(raw.slice(0,i)); if(!x) return;
+      x.from=raw.slice(i+1); x.at=(new Date()).toISOString(); x.by=schedWho(); refresh(); }; });
   var sa=el('sdAccept');
   if(sa) sa.onclick=function(){ sdLoad(D);
     D.changed.forEach(function(c){ if(!S.settled[c.key]) sdPut(c,'new'); });
@@ -6645,11 +6844,13 @@ function pdCardHTML(){
   var sel=(S.pdMonth!==undefined&&months.indexOf(S.pdMonth)>=0)? S.pdMonth : null;
   var vst={}; try{ vst=pdVersionState(); }catch(e){}
   var unsaved=Object.keys(vst).filter(function(m){ return !vst[m].saved; }).length;
-  var h='<div class="card pd-card"><div class="pd-top">'+
+  var pdOpen=foldOn('pd',false);
+  var h='<div class="card pd-card'+(pdOpen?'':' folded')+'"><div class="pd-top">'+
     '<div class="pd-ic">P</div><div class="pd-tt"><b>Pedia schedule · J1</b>'+
       '<span>From the <b>'+esc(I.sheet)+'</b> sheet. In these months each Pedia doctor is counted with that month\'s week; other months use the main sheet.</span></div>'+
-    '<label class="pd-sw"><input type="checkbox" id="pdOn"'+(on?' checked':'')+'><i></i><span>'+(on?'Counting':'Off — the main sheet is used')+'</span></label></div>'+
-    '<div class="pd-months">'+MONTHS_EN.map(function(mn,i){ var has=months.indexOf(i)>=0;
+    '<label class="pd-sw"><input type="checkbox" id="pdOn"'+(on?' checked':'')+'><i></i><span>'+(on?'Counting':'Off — the main sheet is used')+'</span></label>'+foldBtn('pd',pdOpen,'the Pedia months')+'</div>';
+  if(!pdOpen) return h+'</div>';
+  h+='<div class="pd-months">'+MONTHS_EN.map(function(mn,i){ var has=months.indexOf(i)>=0;
       return '<button type="button" class="pd-m'+(has?' has':'')+(sel===i?' on':'')+'"'+(has?' data-pdm="'+i+'"':' disabled')+'>'+
         '<b>'+mn.slice(0,3)+'</b><small>'+(has? (I.rows[i]||[]).length+' dr' : '—')+'</small>'+
         (has&&vst[i]? '<em class="'+(vst[i].saved?'ok':'no')+'">'+(vst[i].saved?'✓ version':'not saved')+'</em>' : '')+'</button>'; }).join('')+'</div>'+
@@ -7024,6 +7225,17 @@ function ntApply(rows){
     if(old.length) t.ntOld=old;
     stamp.push(t.key+':'+JSON.stringify(w)+':'+old.map(function(o){ return o.v+'@'+o.a+'-'+o.b; }).join(','));
   });
+  /* a new master file switched on a date you chose (Keep old until / Use new
+     from): the old week counts every day before that date. It goes last, so
+     it is the one that holds for those days. */
+  var SD=S.settings.sdDated||{};
+  rows.forEach(function(t){
+    t.sdSwitch=null;
+    var x=SD[t.key]; if(!x||!x.old) return; var f=ntMs(x.from); if(f===null) return;
+    t.ntOld=(t.ntOld||[]).concat([{a:-8.64e15,b:f-1,pat:sdPatOf(x.old),v:'sd'}]);
+    t.sdSwitch=x;
+    stamp.push(t.key+':sd:'+x.from+':'+mvHash(JSON.stringify(x.old)));
+  });
   S.ntStamp=mvHash(stamp.join('|'));
 }
 
@@ -7064,11 +7276,11 @@ function ntCardHTML(){
   var todo=cnt.todo+cnt.changed;
   var fl=S.ntF||(todo? 'todo' : 'ok');
   var clear=all.filter(function(it){ var st=ntState(it); return (st==='todo')&&ntEvOf(it).every(function(e){ return e.sure&&!e.old&&(e.from||e.to); }); }).length;
-  var open=S.ntOpen!==undefined? S.ntOpen : !!todo; S._ntOpenNow=open;
+  var open=foldOn('nt',false); S._ntOpenNow=open;
   var h='<div class="card nt" id="ntCard"><div class="nt-top"><div class="nt-ic">📅</div><div class="nt-tt"><b>Dates in the doctors\' notes</b>'+
       '<span>'+(todo? '<b>'+todo+'</b> to confirm — check the date and what it means, then confirm. Confirmed dates count for everyone, in every month.'
         : '✓ Every note with a date is reviewed — '+cnt.ok+' confirmed, '+cnt.skip+' skipped.')+'</span></div>'+
-      '<button type="button" class="btn sm" id="ntToggle">'+(open? 'Hide' : 'Show')+'</button></div>';
+      foldBtn('nt',open,'the dates in the doctors\' notes')+'</div>';
   if(!open) return h+'</div>';
   var F=[['todo','To confirm',todo],['check','⚠ Check',cnt.check],['ok','✓ Confirmed',cnt.ok],['skip','Skipped',cnt.skip],['old','Before '+S.settings.year,cnt.old],['all','All',all.length]];
   h+='<div class="nt-bar">'+F.map(function(x){ if(x[0]!=='todo'&&x[0]!=='all'&&!x[2]) return '';
@@ -7111,7 +7323,7 @@ function ntWire(){
   function item(k){ return ntItems().filter(function(it){ return it.key===k; })[0]; }
   function draft(k){ var it=item(k); S.ntDraft=S.ntDraft||{}; if(!S.ntDraft[k]) S.ntDraft[k]=JSON.parse(JSON.stringify(it.ev)); return S.ntDraft[k]; }
   function q(sel){ return Array.prototype.slice.call(root.querySelectorAll(sel)); }
-  var tg=el('ntToggle'); if(tg) tg.onclick=function(){ S.ntOpen=!S._ntOpenNow; renderMaster(); };
+
   q('[data-ntfl]').forEach(function(b){ b.onclick=function(){ S.ntF=b.getAttribute('data-ntfl'); renderMaster(); }; });
   q('[data-ntk]').forEach(function(x){ x.onchange=function(){ var p=x.getAttribute('data-ntk').split('|'), i=+p.pop(), k=p.join('|'), e=draft(k)[i];
     e.kind=x.value; if(e.kind==='stop'&&!e.to) e.to=e.from; if(e.kind!=='stop'&&!e.from) e.from=e.to; if(e.kind!=='temp'&&e.kind!=='stop') e.to=''; e.sure=true; e.why=[]; renderMaster(); }; });
@@ -7168,6 +7380,9 @@ function pdNote(rows,y,m){
 function pdWeekOf(t,y,m){
   var by=pdMonthRows(y,m), p=by&&by[t.key];
   if(p) return {spans:pdSpans(p),src:'pedia'};
+  var sx=sdDatedOf(t.key);
+  if(sx&&m!==null&&m!==undefined&&Date.UTC(y,m+1,0)<ntMs(sx.from))
+    return {spans:MST_DAYS.map(function(nm){ return (sx.old[nm]||[]).filter(function(sp){ return colorCounts(sp.fill||'NONE'); }); }),src:'old',sd:sx};
   /* a saved version in force at the end of that month */
   if(m!==null&&m!==undefined&&Srv.on){
     if(!(S.mv&&S.mv.years&&S.mv.years[y])){ mvLoad(y).then(drawerRefresh); }
@@ -7214,12 +7429,14 @@ function pdWeekHTML(t,y,m){
   var vn=W.v? mvNote(W.v) : null, why=(W.src!=='pedia')? pdWhyNot(t,y,m) : '';
   return dpgStyle()+'<div class="card pdw"><h3>'+esc(label)+
       (W.src==='pedia'? ' <span class="pd-tag">Pedia Format · '+MONTHS_EN[m].slice(0,3)+'</span>'
+        : W.src==='old'? ' <span class="pd-tag" style="background:#FFFBEB;border-color:#FCD34D;color:#92400E">old schedule · until '+esc(ntFmt(sdIsoAdd(W.sd.from,-1)))+'</span>'
         : W.src==='version'? ' <span class="pd-tag" style="background:#EEF2FF;border-color:#C7D2FE;color:#3730A3">version from '+esc(verFmtIso(mvEff(W.v)))+(vn&&vn.src==='pedia'?' · Pedia Format':'')+'</span>'
         : ' <span class="tag">main sheet</span>')+
       ' <span class="tag">'+fmt(n,0)+' a week · '+fmt(hrs)+' h</span></h3>'+
     '<div class="cb dpg"><div class="pdw-g">'+cells+'</div>'+
     (why? '<div class="note w" style="margin-top:10px">'+why+'</div>' : '')+
     (W.src==='pedia'? '<p class="hint" style="margin-top:8px">This month this doctor works the week in the <b>Pedia Format</b> sheet, and the sessions above are counted from it.</p>'
+      : W.src==='old'? '<p class="hint" style="margin-top:8px">'+MONTHS_EN[m]+' is before his new schedule starts (<b>'+esc(ntFmt(W.sd.from))+'</b>), so this month is counted on his old week.</p>'
       : W.src==='version'? '<p class="hint" style="margin-top:8px">The master version in force at the end of '+MONTHS_EN[m]+'.</p>'
       : (m===null||m===undefined? '<p class="hint" style="margin-top:8px">Choose a month to see the schedule for that month.</p>' : ''))+
     '</div></div>';
@@ -7360,6 +7577,7 @@ function renderDrawer(){
   if(t.lines>1) h+='<div class="note i"><b>'+t.lines+' schedule lines</b> at this site were added together (rows '+t.rows.join(', ')+
     ' of the master sheet). Parallel clinics are normal; a duplicate is not.</div>';
 
+  h+=sdNoticeHTML(t,year);
   /* every figure on the rail follows the month selected below */
   var dm=S.dw.month, span=(dm===null)? null : t.m[dm];
   var vS=span? span.s : t.ys, vC=span? span.c : t.yc, vO=span? span.o : t.yo,
@@ -17144,7 +17362,7 @@ function liveRedraw(){
 
 /* expose pure functions for verification outside the browser */
 if(typeof module!=='undefined'&&module.exports)
-  module.exports={dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
+  module.exports={nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
     parseMaster:parseMaster,parseCapacity:parseCapacity,parseHybrid:parseHybrid,
     pickMasterSheet:pickMasterSheet,pickCapSheets:pickCapSheets,pickHybridSheet:pickHybridSheet,
     compute:compute,S:S,ensureRule:ensureRule,weekdayCounts:weekdayCounts,durHours:durHours,serialDate:serialDate,
