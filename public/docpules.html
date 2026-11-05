@@ -774,7 +774,21 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .ot-pk{display:inline-flex;border:1px solid #CBD5E1;border-radius:999px;overflow:hidden}
 .ot-pk button{font:inherit;font-size:11.5px;font-weight:600;padding:4px 10px;border:0;background:#fff;color:#475569;cursor:pointer;white-space:nowrap}
 .ot-pk button+button{border-left:1px solid #CBD5E1}.ot-pk button:hover{background:#F1F5F9}.ot-pk button.on{background:#0F766E;color:#fff}
-.ot-pk.busy{cursor:progress;opacity:.75}.ot-pk.busy button{cursor:progress}
+.ot-pk.busy{cursor:progress;opacity:.75}
+.oc-card{border-color:#E2E8F0}.oc-card.warn{border-color:#FCD34D;background:linear-gradient(180deg,#FFFBEB,#fff 60px)}
+.oc-card>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.oc-card>summary::-webkit-details-marker{display:none}
+.oc-card>summary:focus-visible{outline:2px solid #2563EB;outline-offset:-2px;border-radius:12px}
+.oc-ic{width:24px;height:24px;border-radius:7px;background:#FEF3C7;color:#B45309;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+.oc-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:9px 12px;border:1px solid #EEF1F6;border-radius:11px;margin-bottom:6px;background:#fff}
+.oc-r.wait{border-color:#FDE68A;box-shadow:inset 3px 0 0 #F59E0B}
+.oc-doc{min-width:180px;display:flex;flex-direction:column}.oc-when{min-width:86px;font-size:12.5px}
+.oc-vs{display:flex;align-items:center;gap:6px;flex:1;min-width:260px;flex-wrap:wrap}
+.oc-a,.oc-b{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.oc-a{background:#EEF2FF;color:#3730A3}.oc-b{background:#ECFDF5;color:#047857}
+.oc-x{font-weight:800;color:#B45309}
+.oc-all{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.oc-pk button:focus-visible{outline:2px solid #2563EB;outline-offset:-2px}.ot-pk.busy button{cursor:progress}
 .ot-st{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}.ot-st.y{background:#CCFBF1;color:#0F766E}.ot-st.w{background:#FEF3C7;color:#B45309}.ot-st.n{background:#F1F5F9;color:#64748B}
 .ot-rules summary{cursor:pointer;padding:14px 18px;list-style:none}.ot-rules ol{margin:0 0 4px 18px;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#334155}
 .ot-chk{margin-top:14px}
@@ -2148,7 +2162,7 @@ function compute(){
 
   /* one request per doctor, day, side and time: the same session filed twice
      is still one session */
-  var seenReq={};
+  var seenReq={}, ocCands=[], ocClose={};
   var stats={inYear:0,offYear:0,noDur:0,unmatched:0,unmatchedRows:{},badStatus:{},counted:0,dupReq:0,dupRows:[]},
       ruleHit={}, reasonAgg={}, extras=[];
 
@@ -2240,7 +2254,13 @@ function compute(){
       seenReq[dupK]=r;
     }
     if(!t.fromMaster) stats.unmatchedRows[kk]=(stats.unmatchedRows[kk]||0)+1;
-    t.m[r.date.m][side]+=w; r._used=true;
+    t.m[r.date.m][side]+=w; r._used=true; r._openClash='';
+    /* kept for the same-time check below: an opening at the hours of a clinic
+       he already has that day, and the closures that would explain it */
+    if(rf!==null&&rt!==null){
+      if(side==='o') ocCands.push({r:r,t:t,w:w,f:rf,tt:rt,k:k,back:hGivesBack(r.main,r.sub)});
+      else (ocClose[kk+'|'+r.date.m+'-'+r.date.d]=ocClose[kk+'|'+r.date.m+'-'+r.date.d]||[]).push({f:rf,t:rt});
+    }
     t.reqN=(t.reqN||0)+1; (t.reqM=t.reqM||{})[r.date.m]=(t.reqM[r.date.m]||0)+1;
     /* an H doctor's allowance is spent by the reasons picked under H doctor
        rules (Annual Leave unless changed) */
@@ -2253,6 +2273,46 @@ function compute(){
     ra[side]+=w; ra.n++;
   });
   stats.unmatched=extras.length;
+
+  /* An opening filed for hours the doctor already has a clinic that day is the
+     same session twice: one doctor, one time. It counts once, and you choose
+     which: the master schedule session (the default until you choose — the
+     opening is set aside), or the opened request (the clinic comes out of
+     Sessions instead). A closure at those hours that day means the clinic was
+     shut and opened again, which is not a double; neither is a public holiday,
+     when the clinic does not run. */
+  var ocList=[], ocPick=S.settings.openClash||{}, ocHol=(typeof bkHolIndex==='function')? bkHolIndex() : {};
+  ocCands.forEach(function(x){
+    var r=x.r, t=x.t, m=r.date.m, d=r.date.d;
+    if(ocHol[m+'-'+d]) return;
+    var plan=schedPlanMap(t,year,m)[d]||0; if(!(plan>0)) return;
+    var wd=new Date(Date.UTC(year,m,d)).getUTCDay(), a={f:x.f,t:x.tt};
+    var rost=mstDay((t.spans&&t.spans[wd])||[]);
+    var hits=rost.filter(function(b){ return otOverlap(a,{f:b.f,t:b.t}); });
+    if(!hits.length) return;   /* no clinic time to compare with: not a clash we can prove */
+    if((ocClose[t.key+'|'+m+'-'+d]||[]).some(function(c){ return otOverlap(a,c); })) return;
+    var hitW=0, allW=0;
+    rost.forEach(function(b){ var wv=t.whole? 1 : Math.max(0,b.t-b.f); allW+=wv; if(hits.indexOf(b)>=0) hitW+=wv; });
+    var frac=allW>0? Math.min(1,hitW/allW) : 1;
+    var id=t.key+'|'+year+'-'+m+'-'+d+'|'+x.f+'-'+x.tt, pick=ocPick[id]||'';
+    var rec={id:id,key:t.key,name:t.name,site:t.site,year:year,month:m,day:d,wd:wd,open:a,
+      roster:hits.length? hits.map(function(b){ return {f:b.f,t:b.t}; }) : null,
+      plan:plan,w:x.w,reason:nz(r.main)+' \u203a '+nz(r.sub),row:r.row,sheet:r.sheet,pick:pick,frac:frac};
+    ocList.push(rec); (t.openClash=t.openClash||[]).push(rec);
+    if(pick==='open'){
+      var sub=plan*frac;
+      t.m[m].s-=sub; r._openClash='open';
+      t.otSkip=t.otSkip||{}; t.otSkipY=year; t.otSkip[m]=t.otSkip[m]||{};
+      t.otSkip[m][d]=Math.min(1,(t.otSkip[m][d]||0)+frac);
+    }else{
+      t.m[m].o-=x.w; r._used=false; r._openClash='roster';
+      r._why=pick? 'same hours as his clinic \u2014 counted as the master schedule session (your choice)'
+                 : 'same hours as his clinic \u2014 counted once, as the clinic, until you choose';
+      stats.counted--;
+      if(reasonAgg[x.k]){ reasonAgg[x.k].o-=x.w; }
+      if(x.back) t.m[m].oAL=Math.max(0,(t.m[m].oAL||0)-x.w);
+    }
+  });
 
   /* public holidays: the clinic is shut, so a session the template put on that
      day is closed. Days the log already records a closure for are left alone,
@@ -2360,11 +2420,11 @@ function compute(){
         /* "OT fixed session" means he worked the OT instead of that clinic, so
            the clinic leaves Sessions (and Total). A public holiday already
            takes the whole clinic, so nothing more comes off that day. */
-        var holX=bkHolIndex(), sk={};
+        var holX=bkHolIndex(), sk=(t.otSkip&&t.otSkipY===year&&t.otSkip[mf])||{};
         (pj.clashes||[]).forEach(function(c){
           if(c.pick!=='fixed'||!(c.frac>0)||holX[mf+'-'+c.day]) return;
           var sub=(pmf[c.day]||0)*c.frac; if(!(sub>0)) return;
-          sk[c.day]=c.frac;
+          sk[c.day]=Math.min(1,(sk[c.day]||0)+c.frac);
           t.m[mf].s-=sub; t.m[mf].t-=sub; t.ys-=sub; t.yt-=sub;
           t.m[mf].otSkip=(t.m[mf].otSkip||0)+sub;
           if(new Date(Date.UTC(year,mf,c.day)).getUTCDay()===5){ t.m[mf].fri-=sub; t.yfri-=sub; }
@@ -2404,7 +2464,7 @@ function compute(){
   });
 
   S.siteIdx=null;          /* rebuilt from the roster on next use */
-  S.result={year:year,rows:rows,grand:G,stats:stats,ruleHit:ruleHit,pairCount:pairCount,
+  S.result={year:year,rows:rows,grand:G,stats:stats,ruleHit:ruleHit,pairCount:pairCount,openClash:ocList,
     pairNew:pairNew,reasonAgg:reasonAgg,noId:noId,wc:wc,hybrid:hybrid,
     flagged:flagged,acceptedRows:acceptedRows,rare:rare,colorIdx:colorIdx};
   return S.result;
@@ -2452,7 +2512,7 @@ var SRVT=null;
    the server already holds in its own table). */
 var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule','hAllow',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','otRule','hAllow','openClash',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -4809,7 +4869,7 @@ var SET_LIST={mvYears:1,holidays:1,colorNames:1,paidVals:1,paidValsSet:1,paidR:1
               ot:1,rtmAdded:1,accepted:1};
 var SET_MAP={};
 DOC_BUCKETS.forEach(function(k){ SET_MAP[k]=1; });
-['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow'].forEach(
+['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow','openClash'].forEach(
   function(k){ SET_MAP[k]=1; });
 var MST_BLK=['Morning','Afternoon','Evening'];
 var MST_BLOCKS=[[0,1,2],[0,1,2],[0,1,2],[0,1,2],[0,1,2],[2],[1,2]];
@@ -5940,11 +6000,54 @@ function finRender(){
     finExport({y:F.y,m:F.m,month:F.month,hols:F.hols,unnamed:F.unnamed,rows:F.rows.filter(finPass)}); };
 }
 if(typeof document!=='undefined') document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&S&&S.fin&&!S.msOpen){ S.fin=null; finRender(); } });
+/* ---- an opening at the same hours as his clinic: counted once, you choose which ---- */
+var OC_PICK={roster:'Master schedule session',open:'Opened request'};
+function ocTime(a){ return clock12(a.f).replace(':00','').replace(' ','')+'–'+clock12(a.t).replace(':00','').replace(' ',''); }
+function ocBtns(c){
+  return '<div class="ot-pk oc-pk" role="radiogroup" aria-label="Count which one">'+['roster','open'].map(function(k){
+    var on=(c.pick||'')===k;
+    return '<button type="button" role="radio" aria-checked="'+on+'" class="'+(on?'on':'')+'" data-ocpk="'+esc(c.id)+'|'+k+'" '+
+      'title="'+(k==='roster'? 'Count the clinic in the master schedule; the opened request is set aside' : 'Count the opened request; the clinic comes out of Sessions')+'">'+OC_PICK[k]+'</button>'; }).join('')+'</div>';
+}
+function ocState(c){
+  if(c.pick==='open') return '<span class="ot-st y">counted as the opened request</span>';
+  if(c.pick==='roster') return '<span class="ot-st y">counted as the clinic</span>';
+  return '<span class="ot-st w">waiting \u2014 counted as the clinic for now</span>';
+}
+function ocRowHTML(c,withDoc){
+  var dt=new Date(Date.UTC(c.year,c.month,c.day));
+  return '<div class="oc-r'+(c.pick?'':' wait')+'">'+
+    (withDoc? '<div class="oc-doc"><b>'+esc(c.name)+'</b><span class="mt">'+esc(c.site)+'</span></div>' : '')+
+    '<div class="oc-when"><b>'+DPG_DAYN[c.wd].slice(0,3)+' '+c.day+' '+MONTHS_EN[c.month].slice(0,3)+'</b></div>'+
+    '<div class="oc-vs">'+
+      '<span class="oc-a" title="Clinic in the master schedule">\u25A6 Clinic '+(c.roster? c.roster.map(ocTime).join(', ') : '(time not set)')+'</span>'+
+      '<span class="oc-x" aria-hidden="true">=</span>'+
+      '<span class="oc-b" title="'+esc(c.reason)+(c.sheet?' \u00b7 '+esc(c.sheet)+' row '+c.row:'')+'">\u2795 Opened '+ocTime(c.open)+' \u00b7 '+esc(c.reason)+'</span>'+
+    '</div>'+ocBtns(c)+ocState(c)+'</div>';
+}
+function ocCardHTML(list,full){
+  if(!list||!list.length) return '';
+  var wait=list.filter(function(c){ return !c.pick; }).length;
+  var open=!full? true : (S.ocOpen===undefined)? wait>0 : S.ocOpen;
+  return '<details class="card oc-card'+(wait?' warn':'')+'" id="'+(full?'ocCard':'ocCardDw')+'"'+(open?' open':'')+'><summary>'+
+    '<span class="oc-ic" aria-hidden="true">\u26A0</span>'+
+    '<b>'+list.length+' opened request'+(list.length===1?'':'s')+' at the same time as a clinic</b>'+
+    ' <span class="hint">\u2014 one doctor can\'t run two sessions at once, so each is counted <b>once</b>. Choose which.</span>'+
+    (wait? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+wait+' waiting</span>' : ' <span class="tag">all decided</span>')+
+    '</summary><div class="cb">'+
+    (full&&wait>1? '<div class="oc-all"><span class="hint">Set every waiting one to:</span>'+
+       ['roster','open'].map(function(k){ return '<button type="button" class="btn sm" data-ocall="'+k+'">'+OC_PICK[k]+'</button>'; }).join('')+'</div>' : '')+
+    list.map(function(c){ return ocRowHTML(c,full); }).join('')+
+    '</div></details>';
+}
 function renderSummary(){
   dpnApply();
   if(!S.result){ el('pg-summary').innerHTML=emptyState(); return; }
   var R=S.result, rows=filtered(), M=months(), msel=selMonth();
   var h=railHTML(rows);
+  /* same-time openings for the doctors and month on view */
+  var keepK={}; rows.forEach(function(t){ keepK[t.key]=1; });
+  h+=ocCardHTML((R.openClash||[]).filter(function(c){ return keepK[c.key]&&(msel===null||c.month===msel); }),true);
 
   var dSites=uniq(R.rows.map(function(t){ return t.site; })).sort(), dSel=Object.keys(S.flt.siteM||{});
   h+='<div class="card">'+finBarHTML({attr:'dsite',sites:dSites,set:S.flt.siteM||{},
@@ -6257,6 +6360,16 @@ if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
     var n;
+    if((n=t.closest('[data-ocpk]'))){ var oq=n.getAttribute('data-ocpk'), oi=oq.lastIndexOf('|');
+      S.settings.openClash=S.settings.openClash||{};
+      var oid=oq.slice(0,oi), opk=oq.slice(oi+1);
+      if(S.settings.openClash[oid]===opk) delete S.settings.openClash[oid]; else S.settings.openClash[oid]=opk;
+      refreshSoon(n); return; }
+    if((n=t.closest('[data-ocall]'))){ var oa=n.getAttribute('data-ocall');
+      S.settings.openClash=S.settings.openClash||{};
+      ((S.result&&S.result.openClash)||[]).forEach(function(c){ if(!c.pick) S.settings.openClash[c.id]=oa; });
+      refresh(); toast('Every waiting one set to '+OC_PICK[oa]); return; }
+    if((n=t.closest('#ocCard>summary'))){ var oc=el('ocCard'); S.ocOpen=!(oc&&oc.open); }
     if((n=t.closest('[data-otrule]'))){ var rr=n.getAttribute('data-otrule'), ri=rr.lastIndexOf('|');
       S.settings.otRule=S.settings.otRule||{};
       var sid=rr.slice(0,ri), rp=rr.slice(ri+1);
@@ -7274,6 +7387,7 @@ function renderDrawer(){
       '<button class="btn sm" id="dwAllYear">Show the whole year instead</button></div>')+
     '</div>';
 
+  h+=ocCardHTML((t.openClash||[]).filter(function(c){ return dm===null||c.month===dm; }),false);
   var nowD=new Date(), wm=(dm!==null)? dm : (nowD.getFullYear()===year? nowD.getMonth() : null);
   if(t.fromMaster) h+=pdWeekHTML(t,year,wm);
   h+=otDrawerHTML(t,year,wm);
@@ -7512,7 +7626,8 @@ function renderDrawer(){
                       : '<span class="sp x">'+esc(r.status||'—')+'</span>')+'</td>'+
         '<td><div>'+esc(r.main)+' <span class="mt">›</span> '+esc(r.sub)+swatches(r.fills)+'</div>'+
           '<div class="mt">'+esc(r.type||'—')+
-          (r._used? '' : ' · <span style="color:var(--warn)">not counted: '+esc(r._why||'excluded')+'</span>')+
+          (r._openClash==='open'? ' · <span style="color:var(--teal)">same hours as his clinic \u2014 counted instead of the clinic</span>' :
+           r._used? '' : ' · <span style="color:var(--warn)">not counted: '+esc(r._why||'excluded')+'</span>')+
           '</div>'+
           (r._flags&&r._flags.length? '<div class="fl">'+r._flags.map(function(f){
             return '<div><span class="b '+f.lvl+'">'+(f.lvl==='err'?'✕':'!')+'</span><span>'+esc(f.msg)+'</span></div>';
@@ -9393,6 +9508,7 @@ function bkDayIndex(){
       var side=(st==='close'||st==='closed'||st==='block'||st==='blocked')? 'c'
              : (st==='open'||st==='opened')? 'o' : '';
       if(!side) return;
+      if(r._openClash==='roster') return;      /* the same session as his clinic: counted once */
       if(only!==null&&new Date(Date.UTC(r.date.y,r.date.m,r.date.d)).getUTCDay()!==only) return;
       var who=(nz(r.id)||'~'+nameKey(r.name))+'|'+nz(r.site);
       var k=who+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d;
@@ -12322,7 +12438,7 @@ function pdStamp(){
     st.paidRSet,JSON.stringify(st.paidR||{}),st.paidOpenOnly,st.paidByHours,
     st.otOn,st.otSheet,JSON.stringify(st.otMap||{}),st.otUnpaidCancels,st.otDedupe,S.dayFilter,
     (S.ot&&S.ot.rows.length)||0,(S.ot&&S.ot.sheet)||'',
-    JSON.stringify(st.ot||[]),JSON.stringify(st.otRule||{}),JSON.stringify(st.otClash||{}),
+    JSON.stringify(st.ot||[]),JSON.stringify(st.otRule||{}),JSON.stringify(st.otClash||{}),JSON.stringify(st.openClash||{}),
     /* the day and holiday indexes read these too; left out of the key, a
        holiday added after the index was first built was never seen */
     JSON.stringify(st.holidays||[]),st.weighted?1:0,st.schedApply?1:0,st.schedSrc||'',
@@ -16342,6 +16458,12 @@ function healthChecks(){
     desc:st.noDur?'Counted as one full session each, rather than dropped. A blank or broken Total Duration is the usual cause.':'Every counted row has a readable duration.',
     ex:((S.capacity&&S.capacity.rows)||[]).filter(function(r){return r._used&&(r.hours===null||r.hours<=0);})
       .slice(0,60).map(function(r){ return r.sheet+' row '+r.row+'  '+r.name+'  '+r.date.d+'/'+(r.date.m+1); })});
+
+  var ocw=(R.openClash||[]).filter(function(c){ return !c.pick; });
+  out.push({level:ocw.length?'warn':'ok',n:ocw.length,
+    title:'Openings at the same time as a clinic',
+    desc:ocw.length?'An opened request falls on the same hours as his master schedule clinic. Each is counted once, as the clinic, until you choose on the Doctors page.':'No opened request overlaps a clinic, or you have chosen for every one.',
+    ex:ocw.map(function(c){ return c.name+'  ['+c.site+']  '+c.day+'/'+(c.month+1)+'  opened '+ocTime(c.open)+'  '+c.reason; })});
 
   var dup=R.rows.filter(function(t){return t.lines>1;});
   out.push({level:dup.length?'warn':'ok',n:dup.length,
