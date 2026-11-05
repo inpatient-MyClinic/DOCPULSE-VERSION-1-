@@ -9,7 +9,7 @@ const problems=[]; const note=(k,m)=>{ problems.push(k+'  '+m); console.log('  â
 const ok=m=>console.log('  âœ“ '+m);
 (async()=>{
   const b=await chromium.launch({executablePath:T.chrome,args:['--no-sandbox']});
-  const ctx=await b.newContext({viewport:{width:1600,height:900}});
+  const ctx=await T.ctx(b,{viewport:{width:1600,height:900}});
   const p=await ctx.newPage(); p.on('dialog',d=>d.accept());
   let errs=[]; p.on('pageerror',e=>errs.push(e.message));
   await p.goto(T.base+'/login.html');

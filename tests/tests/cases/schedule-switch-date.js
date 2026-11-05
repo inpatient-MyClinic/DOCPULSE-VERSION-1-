@@ -8,6 +8,7 @@ const T=require('../lib/ctx');
   const {api,S,w}=await require('../lib/srv')(T.cookie);
   const doc=w.document, r=n=>Math.round((n||0)*1e4)/1e4, Y=+S.settings.year;
   const wait=ms=>new Promise(res=>setTimeout(res,ms));
+  S.fold={oc:true,sd:true,nt:true};   /* panels open: this test is about what is inside them */
   api.refresh();
   T.check('a saved schedule to compare with', !!(S.settings.schedSave&&S.settings.schedSave.lines.length));
   /* the saved (old) schedule had one more clinic: Wednesday 9–1 */

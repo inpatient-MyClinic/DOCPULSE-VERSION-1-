@@ -25,6 +25,13 @@ const T = {
   },
   /* page errors collected by a browser test: none allowed */
   noErrors(errs, where) { return T.check('no page errors' + (where ? ' (' + where + ')' : ''), !errs || !errs.length, errs); },
+  /* a browser context with the folding panels (clash warning, new-master
+     review, note dates) open, for tests about what is inside them */
+  async ctx(b, opts) {
+    const c = await b.newContext(opts || {});
+    await c.addInitScript(() => { try { ['oc', 'sd', 'nt', 'mv', 'pd'].forEach(k => localStorage.setItem('dp.fold.' + k, '1')); } catch (e) {} });
+    return c;
+  },
   /* sign a Playwright page in */
   async login(p) {
     await p.goto(T.base + '/login.html');

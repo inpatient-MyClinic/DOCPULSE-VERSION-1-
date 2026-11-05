@@ -5,7 +5,7 @@ const {chromium}=require('playwright-core');
 const SP=T.SP;
 (async()=>{
   const b=await chromium.launch({executablePath:T.chrome,args:['--no-sandbox']});
-  const ctx=await b.newContext({viewport:{width:1650,height:1000}});
+  const ctx=await T.ctx(b,{viewport:{width:1650,height:1000}});
   const p=await ctx.newPage(); const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('dialog',d=>d.accept());
   await p.goto(T.base+'/login.html');
   await p.fill('#email',T.email); await p.fill('#password',T.password); await p.click('#go'); await p.waitForURL('**/');
@@ -23,7 +23,7 @@ const SP=T.SP;
   const after=await state(); console.log('after reload :',(after.prog||'no panel').replace(/\s+/g,' ').slice(0,40),JSON.stringify(after.decided));
   console.log('same?',JSON.stringify(before.decided.sort())===JSON.stringify(after.decided.sort()));
   // a second browser (another person) sees the same decisions
-  const p2=await (await b.newContext({viewport:{width:1650,height:1000}})).newPage();
+  const p2=await (await T.ctx(b,{viewport:{width:1650,height:1000}})).newPage();
   await p2.goto(T.base+'/login.html'); await p2.fill('#email',T.email); await p2.fill('#password',T.password); await p2.click('#go'); await p2.waitForURL('**/');
   await p2.waitForTimeout(13000);
   await p2.evaluate(()=>{ [...document.querySelectorAll('#nav button')].find(x=>x.textContent.indexOf('Master')>=0).click(); }); await p2.waitForTimeout(2000);

@@ -6,7 +6,7 @@ const SP=T.SP;
 (async()=>{
   const b=await chromium.launch({executablePath:T.chrome,args:['--no-sandbox']});
   async function open(){
-    const ctx=await b.newContext({viewport:{width:1700,height:1000},deviceScaleFactor:1.2});
+    const ctx=await T.ctx(b,{viewport:{width:1700,height:1000},deviceScaleFactor:1.2});
     const p=await ctx.newPage(); p.on('dialog',d=>{ console.log('  dialog:',d.message().slice(0,90)); d.accept(); });
     await p.goto(T.base+'/login.html');
     await p.fill('#email',T.email); await p.fill('#password',T.password); await p.click('#go'); await p.waitForURL('**/');

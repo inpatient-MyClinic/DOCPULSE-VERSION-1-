@@ -5,7 +5,7 @@ const {chromium}=require('playwright-core');
 const SP=T.SP;
 (async()=>{
   const b=await chromium.launch({executablePath:T.chrome,args:['--no-sandbox']});
-  const p=await (await b.newContext({viewport:{width:1700,height:1000},deviceScaleFactor:1.2})).newPage();
+  const p=await (await T.ctx(b,{viewport:{width:1700,height:1000},deviceScaleFactor:1.2})).newPage();
   const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('dialog',d=>d.accept());
   await p.goto(T.base+'/login.html');
   await p.fill('#email',T.email); await p.fill('#password',T.password); await p.click('#go'); await p.waitForURL('**/');

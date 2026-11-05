@@ -31,6 +31,7 @@ module.exports = [
   { name: 'ot-choice-counts', quick: true },
   { name: 'open-clash', quick: true, golden: false },
   { name: 'schedule-switch-date', quick: true, golden: false },
+  { name: 'fold-panels', quick: true, golden: false },
   { name: 'ot-fixed-total', quick: true, golden: false },
   { name: 'card-ot-template', golden: false },
   { name: 'ot-page-browser' },

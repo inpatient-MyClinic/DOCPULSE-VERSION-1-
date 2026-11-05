@@ -6,7 +6,7 @@ const T=require('../lib/ctx');
 const {chromium}=require('playwright-core');
 (async()=>{
   const b=await chromium.launch({executablePath:T.chrome,args:['--no-sandbox']});
-  const p=await (await b.newContext()).newPage(); p.on('dialog',d=>d.accept());
+  const p=await (await T.ctx(b)).newPage(); p.on('dialog',d=>d.accept());
   await p.goto(T.base+'/login.html');
   await p.fill('#email',T.email); await p.fill('#password',T.password); await p.click('#go'); await p.waitForURL('**/');
   await p.waitForTimeout(12000);

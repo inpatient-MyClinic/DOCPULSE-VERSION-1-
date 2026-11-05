@@ -6,6 +6,7 @@ const T=require('../lib/ctx');
 (async()=>{
   const {api,S,w}=await require('../lib/srv')(T.cookie);
   const r=n=>Math.round((n||0)*1e4)/1e4;
+  S.fold={oc:true,sd:true,nt:true};   /* panels open: this test is about what is inside them */
   const Y=S.settings.year, m=9;
   const rows=S.capacity.rows;
   const tpl=rows.find(x=>x._used&&/open/i.test(x.status));
