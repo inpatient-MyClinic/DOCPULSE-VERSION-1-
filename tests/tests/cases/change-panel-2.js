@@ -13,7 +13,11 @@ const SP=T.SP;
   const nav=n=>p.evaluate(n=>{ [...document.querySelectorAll('#nav button')].find(x=>x.textContent.indexOf(n)>=0).click(); },n);
   await nav('Data'); await p.waitForTimeout(1200);
   await p.setInputFiles('input[data-file="m"]',SP+'back-new.xlsx');
-  for(let i=0;i<12;i++){ await p.waitForTimeout(800); const t=await p.evaluate(()=>document.getElementById('toast').textContent); if(t) console.log('toast',i,t); }
+  /* which toast is up first is a timing race (upload vs. parse), so only the
+     upload message is checked, not when it showed */
+  const seen=new Set();
+  for(let i=0;i<12;i++){ await p.waitForTimeout(800); const t=await p.evaluate(()=>document.getElementById('toast').textContent); if(t) seen.add(t); }
+  console.log('toast: new master taken in',[...seen].some(t=>/Master schedule loaded|stored on the server/.test(t)));
   console.log('files',await p.evaluate(async()=>JSON.stringify((await (await fetch('/api/files',{credentials:'same-origin'})).json()).master)));
   await nav('Master'); await p.waitForTimeout(1500);
   const fw=()=>p.evaluate(()=>{const r=[...document.querySelectorAll('#pg-master tbody tr')].find(x=>/Faeg/.test(x.innerText)); return r? r.innerText.replace(/\s+/g,' ').slice(0,120):'-';});
