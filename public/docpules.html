@@ -2226,6 +2226,28 @@ function compute(){
     t.edited=true;
   });
 
+  /* A parallel clinic is written in the file as a second line for the same
+     doctor (same ID and branch) named "… (1)". Once his fixed OT sessions carry
+     it (he is on the OT fixed session page), it is not a doctor of its own: the
+     line is not counted (the OT is), and requests filed under "(1)" go to the
+     main doctor — a closure there closes the parallel session (his OT), not
+     his main clinic. Without OT it stays a line of its own, flagged in Health. */
+  var PAR_RE=/\(\s*\d+\s*\)\s*$/, parName={}, parMerged=[], parOpen=[];
+  order.slice().forEach(function(k){
+    var t=byKey[k]; if(!t||!t.fromMaster||!PAR_RE.test(nz(t.name))) return;
+    var mainK=null;
+    order.forEach(function(k2){ var x=byKey[k2]; if(mainK||!x||x===t||nz(x.id)!==nz(t.id)||nz(x.site)!==nz(t.site)||PAR_RE.test(nz(x.name))) return; mainK=k2; });
+    if(!mainK) return;
+    var main=byKey[mainK];
+    /* his OT entry may be written under either name ("… (1)" included) */
+    var covered=otList().some(function(o){ return nz(o.id)===nz(t.id)&&nz(o.site).toUpperCase()===nz(t.site).toUpperCase(); });
+    var info={key:k,name:t.name,main:mainK,mainName:main.name,id:t.id,site:t.site,rows:(t.rows||[]).slice(),week:t.week.slice(),spans:t.spans.map(function(x){ return (x||[]).slice(); })};
+    if(!covered){ parOpen.push(info); t.parOf=mainK; t.parOpen=true; return; }
+    parMerged.push(info);
+    parName[nz(t.id)+'|'+nz(t.site)+'|'+nameKey(t.name)]=mainK;
+    (main.parLines=main.parLines||[]).push(info);
+    order.splice(order.indexOf(k),1); delete byKey[k];
+  });
   indexByBase();
   try{ pediaBuild(order.map(function(k){ return byKey[k]; })); }catch(e){ S.pediaRecs=null; S.pediaStamp=''; }
   try{ ntApply(order.map(function(k){ return byKey[k]; })); }catch(e){ S.ntStamp=''; }
@@ -2258,6 +2280,7 @@ function compute(){
   capRows.forEach(function(r){
     var k=ruleKey(r.main,r.sub), rule=S.rules[k];
     r._key=k; r._inc=false; r._used=false; r._w=0; r._why='';
+    r._par=!!parName[r.id+'|'+r.site+'|'+nameKey(r.name)];
     if(!rule||rule.include!=='Y'){ r._why='reason set to Skip'; return; }
     /* staff-type gate */
     /* several staff types can be picked at once (FT and PT, say): a row passes
@@ -2330,6 +2353,13 @@ function compute(){
        From and To — is counted once, whatever reason each copy was filed
        under. The first one counted stands; the copy is shown as a duplicate.
        A row with no times cannot be told apart from another, so it counts. */
+    /* filed under the parallel line: it closes the parallel session, which his
+       OT fixed session carries — the OT step cancels that; his main clinic is
+       not taken, and it is never a "duplicate" of a request for the main clinic */
+    if(r._par&&side==='c'){
+      r._used=false; r._tkey=kk; r._side=side; r._why='filed under the parallel line "'+r.name+'" — it closes his parallel session (the OT fixed session), not his main clinic';
+      stats.counted--; return;
+    }
     var rf=clockOf(r.from), rt=clockOf(r.to);
     if(rf!==null&&rt!==null){
       var dupK=kk+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d+'|'+side+'|'+rf+'|'+rt;
@@ -2579,7 +2609,7 @@ function compute(){
   });
 
   S.siteIdx=null;          /* rebuilt from the roster on next use */
-  S.result={year:year,rows:rows,grand:G,stats:stats,ruleHit:ruleHit,pairCount:pairCount,openClash:ocList,
+  S.result={parMerged:parMerged,parOpen:parOpen,year:year,rows:rows,grand:G,stats:stats,ruleHit:ruleHit,pairCount:pairCount,openClash:ocList,
     pairNew:pairNew,reasonAgg:reasonAgg,noId:noId,wc:wc,hybrid:hybrid,
     flagged:flagged,acceptedRows:acceptedRows,rare:rare,colorIdx:colorIdx};
   return S.result;
@@ -8032,6 +8062,12 @@ function renderDrawer(){
     ' of the master sheet). Parallel clinics are normal; a duplicate is not.</div>';
 
   h+=sdNoticeHTML(t,year);
+  if(t.parLines&&t.parLines.length) h+='<div class="note i par-note"><b>Parallel clinic</b> — '+t.parLines.map(function(p){
+      return '<b>'+esc(p.name)+'</b> (row'+(p.rows.length===1?' ':'s ')+esc(p.rows.join(', '))+')'; }).join(', ')+
+    ' is the same doctor. It is counted through his <b>OT fixed session</b>, not as a doctor of its own. '+
+    'A request filed under it comes here: a closure cancels the OT fixed session at that time and leaves his main clinic alone.</div>';
+  if(t.parOpen) h+='<div class="note w"><b>Parallel line of '+esc((R.rows.filter(function(x){ return x.key===t.parOf; })[0]||{}).name||'another doctor')+'</b> — '+
+    'add this clinic to his <b>OT fixed session</b> page and it is counted through him; until then it counts as a line of its own.</div>';
   /* every figure on the rail follows the month selected below */
   var dm=S.dw.month, span=(dm===null)? null : t.m[dm];
   var vS=span? span.s : t.ys, vC=span? span.c : t.yc, vO=span? span.o : t.yo,
@@ -10247,6 +10283,7 @@ function bkDayIndex(){
       if(!side) return;
       if(r._openClash==='roster') return;      /* the same session as his clinic: counted once */
       if(!brkOn(r)) return;                     /* switched off under Session breakdown rules */
+      if(r._par&&side==='c') return;           /* the parallel line's closure: its OT, not the clinic */
       if(only!==null&&new Date(Date.UTC(r.date.y,r.date.m,r.date.d)).getUTCDay()!==only) return;
       var who=(nz(r.id)||'~'+nameKey(r.name))+'|'+nz(r.site);
       var k=who+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d;
@@ -17302,6 +17339,11 @@ function healthChecks(){
     ex:((S.capacity&&S.capacity.rows)||[]).filter(function(r){return r._used&&(r.hours===null||r.hours<=0);})
       .slice(0,60).map(function(r){ return r.sheet+' row '+r.row+'  '+r.name+'  '+r.date.d+'/'+(r.date.m+1); })});
 
+  var po=R.parOpen||[];
+  out.push({level:po.length?'warn':'ok',n:po.length,
+    title:'Parallel clinics not on the OT fixed session page',
+    desc:po.length?'A second line for the same doctor, named "(1)", counts as a doctor of its own until his parallel clinic is added as an OT fixed session.':'Every parallel "(1)" line is counted through its doctor\'s OT fixed session.',
+    ex:po.map(function(p){ return p.name+'  ['+p.site+']  → '+p.mainName; })});
   var ocw=(R.openClash||[]).filter(function(c){ return !c.pick; });
   out.push({level:ocw.length?'warn':'ok',n:ocw.length,
     title:'Openings at the same time as a clinic',
