@@ -842,6 +842,7 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .chg-by{font-weight:700;color:#334155}.chg-meta .sd-undo{margin-left:auto}
 .chg-empty{padding:34px 18px;text-align:center;display:flex;flex-direction:column;gap:4px;color:#64748B}
 @media (max-width:760px){.chg-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}.chg-wk{margin-left:0}}
+.unp-f{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;margin:0 16px 14px;font-size:12px;color:#475569}
 .brk-also{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:0 16px 10px;padding:9px 12px;border-radius:10px;background:#F0FDFA;border:1px solid #CCFBF1;font-size:12px;color:#115E59}
 .brk-also b{flex-basis:100%;font-size:12px}
 .dsh-card.sm .sm-top{display:grid;grid-template-columns:repeat(3,minmax(0,150px)) minmax(0,1fr);gap:12px;align-items:stretch;margin-top:10px}
@@ -2284,6 +2285,9 @@ function compute(){
   /* one request per doctor, day, side and time: the same session filed twice
      is still one session */
   var seenReq={}, ocCands=[], ocClose={};
+  /* the log's Paid / Unpaid column (the one Paid extra uses): an opening marked
+     unpaid is not counted, unless Settings → Rules says otherwise */
+  var unpCol=unpaidOpenSkip()? pdCol() : '', unpVals=unpCol? pdVals() : null, unpN=0;
   var stats={inYear:0,offYear:0,noDur:0,unmatched:0,unmatchedRows:{},badStatus:{},counted:0,dupReq:0,dupRows:[]},
       ruleHit={}, reasonAgg={}, extras=[];
 
@@ -2324,6 +2328,11 @@ function compute(){
     else if(st==='open'||st==='opened') side='o';
     else { stats.badStatus[r.status||'(blank)']=(stats.badStatus[r.status||'(blank)']||0)+1;
            r._why='clinic status "'+(r.status||'blank')+'" is neither Open nor Close'; return; }
+    r._unpaid=false;
+    if(side==='o'&&unpCol&&ov!=='in'&&otPayMark(r,unpCol,unpVals)==='unpaid'){
+      r._unpaid=true; unpN++;
+      r._why='marked "'+nz((r.raw||{})[unpCol])+'" in the '+unpCol+' column — an unpaid opening is not counted (Settings → Rules)';
+      return; }
 
     if(S.dayFilter!==''&&S.dayFilter!==null&&r.date){
       /* a weekday filter has to hold on both sides, or the sessions and the
@@ -2624,7 +2633,7 @@ function compute(){
   });
 
   S.siteIdx=null;          /* rebuilt from the roster on next use */
-  S.result={parMerged:parMerged,parOpen:parOpen,year:year,rows:rows,grand:G,stats:stats,ruleHit:ruleHit,pairCount:pairCount,openClash:ocList,
+  S.result={unpaidOpen:unpN,unpaidCol:unpCol,parMerged:parMerged,parOpen:parOpen,year:year,rows:rows,grand:G,stats:stats,ruleHit:ruleHit,pairCount:pairCount,openClash:ocList,
     pairNew:pairNew,reasonAgg:reasonAgg,noId:noId,wc:wc,hybrid:hybrid,
     flagged:flagged,acceptedRows:acceptedRows,rare:rare,colorIdx:colorIdx};
   return S.result;
@@ -2672,7 +2681,7 @@ var SRVT=null;
    the server already holds in its own table). */
 var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','chgLog','brkRule','reqPick','otRule','hAllow','openClash',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','chgLog','brkRule','reqPick','unpaidOpen','otRule','hAllow','openClash',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -12233,6 +12242,7 @@ function otCancelByClosure(t,year,m,rows,proj,reasonAgg,stats){
   });
   return out;
 }
+function unpaidOpenSkip(){ return S.settings.unpaidOpen!=='count'; }
 function reqParMark(name){ var m=/\(\s*(\d+)\s*\)\s*$/.exec(nz(name)); return m? 'par'+m[1] : ''; }
 function reqId(r){ return nz(r.sheet)+'|'+r.row+'|'+nz(r.id)+'|'+(r.date? r.date.y+'-'+r.date.m+'-'+r.date.d : ''); }
 function otCutByClosure(t,year,m,pj,unused,otCl,rows){
@@ -16919,6 +16929,29 @@ function hSetCounted(rule,on){
    doctor's side. Per reason: is it counted for H doctors (the same switch as
    the H button above), and does a closure for it come out of the yearly
    allowance instead of the total. */
+function unpaidRuleCard(){
+  var col=pdCol(), vals=col? pdVals() : null, year=S.settings.year, skip=unpaidOpenSkip();
+  var rows=((S.capacity&&S.capacity.rows)||[]).filter(function(r){ return r.date&&r.date.y===year&&pdIsOpen(r); });
+  var un=col? rows.filter(function(r){ return otPayMark(r,col,vals)==='unpaid'; }) : [];
+  var docs={}, words={};
+  un.forEach(function(r){ docs[nz(r.id)+'|'+nz(r.site)]=1; var v=nz((r.raw||{})[col]); words[v]=(words[v]||0)+1; });
+  var h='<div class="card ru" id="unpaidRule"><div class="ru-hd"><div><h3 style="margin:0">Paid / Unpaid openings</h3>'+
+    '<p class="hint" style="margin:4px 0 0">An opened session the log marks <b>unpaid</b> in its '+(col? '<b>'+esc(col)+'</b>' : 'Paid / Unpaid')+' column is '+
+    (skip? '<b>not counted</b> on the Doctors page — it is left out of Opened and the Total.' : '<b>counted</b> like any other opening.')+
+    ' A single request can still be counted or left out from the doctor card.</p></div>'+
+    '<div class="ru-kpi"><div><b>'+un.length+'</b><span>unpaid openings in '+year+'</span></div><div><b>'+Object.keys(docs).length+'</b><span>doctors</span></div>'+
+      '<div><b>'+(skip? un.length : 0)+'</b><span>left out of the count</span></div></div></div>';
+  h+='<div class="ru-r'+(skip?' on':'')+'" style="margin:0 16px 12px">'+
+    '<button type="button" class="ru-sw'+(skip?' on':'')+'" id="unpaidSw" role="switch" aria-checked="'+skip+'" aria-label="Leave unpaid openings out of the count"><i></i></button>'+
+    '<div class="ru-nm"><div class="ru-t">Leave unpaid openings out of the count</div>'+
+      '<div class="ru-s">'+(skip? 'On — an opening marked unpaid adds nothing to Opened or the Total' : 'Off — unpaid openings count like paid ones')+'</div></div></div>';
+  h+='<div class="unp-f">'+(col? '<span>Column: <b>'+esc(col)+'</b></span>'+
+      '<span>Read as unpaid: '+(Object.keys(words).length? Object.keys(words).sort(function(a,b){ return words[b]-words[a]; }).map(function(w){ return '<span class="ru-tag">'+esc(w)+' · '+words[w]+'</span>'; }).join(' ')
+        : '<span class="hint">no opening is marked unpaid this year</span>')+'</span>'+
+      '<span class="hint">The column and which words mean paid are set under <b>Paid extra rules</b>.</span>'
+    : '<span class="hint">No Paid / Unpaid column found in the log. Choose it under <b>Paid extra rules</b>.</span>')+'</div>';
+  return h+'</div>';
+}
 function brkRulesCard(keys,sideOf){
   var rows={}, B=S.settings.brkRule||{}, off=0, offRows=0, year=S.settings.year;
   ((S.capacity&&S.capacity.rows)||[]).forEach(function(r){ if(!r.date||r.date.y!==year) return;
@@ -17162,6 +17195,7 @@ function renderRules(){
         '</div>'; });
     h+='</div>'; });
   h+='</div>';
+  h+=unpaidRuleCard();
   h+=hRulesCard(keys,sideOf);
   h+=brkRulesCard(keys,sideOf);
   var CI=R?R.colorIdx:{};
@@ -17281,6 +17315,8 @@ function renderRules(){
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-bruf]'),function(b){
     b.onclick=function(){ S.bruF=b.getAttribute('data-bruf'); renderRules(); }; });
   var brq=el('bruQ'); if(brq) brq.oninput=function(){ S.bruQ=this.value; renderRules(); };
+  var usw=el('unpaidSw'); if(usw) usw.onclick=function(){ S.settings.unpaidOpen=unpaidOpenSkip()? 'count' : 'skip'; refresh();
+    toast(unpaidOpenSkip()? 'Unpaid openings are left out of the count' : 'Unpaid openings count again'); };
   var brr=el('bruReset'); if(brr) brr.onclick=function(){ S.settings.brkRule={}; refresh(); toast('Every reason counts in the Session breakdown again'); };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hruf]'),function(b){
     b.onclick=function(){ S.hruF=b.getAttribute('data-hruf'); renderRules(); }; });
@@ -18069,7 +18105,7 @@ function liveRedraw(){
 
 /* expose pure functions for verification outside the browser */
 if(typeof module!=='undefined'&&module.exports)
-  module.exports={renderChgLog:renderChgLog,staffMove:staffMove,ntItems:ntItems,ntSaveDec:ntSaveDec,ntState:ntState,kpiRound:kpiRound,thApply:thApply,thMapRGB:thMapRGB,brkOn:brkOn,sdLoad:sdLoad,sdPut:sdPut,chgAll:chgAll,renderAnalysis:renderAnalysis,renderRules:renderRules,renderSettings:renderSettings,setSub:setSub,nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
+  module.exports={pdCol:pdCol,renderChgLog:renderChgLog,staffMove:staffMove,ntItems:ntItems,ntSaveDec:ntSaveDec,ntState:ntState,kpiRound:kpiRound,thApply:thApply,thMapRGB:thMapRGB,brkOn:brkOn,sdLoad:sdLoad,sdPut:sdPut,chgAll:chgAll,renderAnalysis:renderAnalysis,renderRules:renderRules,renderSettings:renderSettings,setSub:setSub,nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
     parseMaster:parseMaster,parseCapacity:parseCapacity,parseHybrid:parseHybrid,
     pickMasterSheet:pickMasterSheet,pickCapSheets:pickCapSheets,pickHybridSheet:pickHybridSheet,
     compute:compute,S:S,ensureRule:ensureRule,weekdayCounts:weekdayCounts,durHours:durHours,serialDate:serialDate,
