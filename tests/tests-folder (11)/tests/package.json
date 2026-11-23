@@ -1,0 +1,10 @@
+{
+  "name": "docpules-tests",
+  "private": true,
+  "description": "Tests for DocPules. Kept apart from the app so the deploy never installs them.",
+  "scripts": { "test": "node run.js" },
+  "dependencies": {
+    "jsdom": "29.1.1",
+    "playwright-core": "1.64.0"
+  }
+}
