@@ -863,6 +863,14 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .sm-p:hover{border-color:#94A3B8}.sm-p:focus-visible{outline:2px solid #2563EB;outline-offset:1px}.sm-p:disabled{cursor:default}
 .sm-none{font-size:12px;color:#94A3B8;padding:4px 0}
 @media (max-width:900px){.dsh-card.sm .sm-top{grid-template-columns:repeat(3,minmax(0,1fr))}.sm-ch{grid-column:1/-1}.sm-lists{grid-template-columns:1fr}}
+.rq-who{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
+.rq-nm{font-size:11.5px;font-weight:700;color:#334155}
+.rq-par{font-size:10.5px;font-weight:800;letter-spacing:.02em;padding:1px 8px;border-radius:999px;background:#EDE9FE;color:#5B21B6}
+.rq-pk{display:flex;gap:4px;justify-content:flex-end;align-items:center;margin-top:6px;flex-wrap:wrap}
+.rq-pk button{font:inherit;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid #CBD5E1;background:#fff;color:#475569;cursor:pointer;white-space:nowrap}
+.rq-pk button:hover{border-color:#64748B}.rq-pk button.add{border-color:#99F6E4;background:#F0FDFA;color:#0F766E}
+.rq-pk button:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
+.rq-mine{font-size:10.5px;font-weight:800;color:#7C3AED;text-transform:uppercase;letter-spacing:.04em}
 .oc-card{border-color:#E2E8F0}.oc-card.warn{border-color:#FCD34D;background:linear-gradient(180deg,#FFFBEB,#fff 60px)}
 .oc-card>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .oc-card>summary::-webkit-details-marker{display:none}
@@ -2140,13 +2148,15 @@ function compute(){
   capRows.forEach(function(r){
     r._flags=rowFlags(r,S.valid,rare);
     var dk=[r.id,r.site,r.date?r.date.y+'-'+r.date.m+'-'+r.date.d:'',low(r.status),
-            r.from,r.to,r.hours,low(r.main),low(r.sub),low(r.type)].join('|');
+            r.from,r.to,r.hours,low(r.main),low(r.sub),low(r.type),
+            /* the parallel clinic "Dr. X (1)" is a session of its own, not a double */
+            reqParMark(r.name)].join('|');
     if(r.date){
       if(dupSeen[dk]) r._flags.push({lvl:'warn',field:'Row',sig:'dup',
         msg:'identical to '+dupSeen[dk].sheet+' row '+dupSeen[dk].row+' — possible double entry',fix:''});
       else dupSeen[dk]=r;
     }
-    if(r.id&&r.name){ (idNames[r.id]=idNames[r.id]||{})[r.name]=1; }
+    if(r.id&&r.name){ (idNames[r.id]=idNames[r.id]||{})[r.name.replace(/\s*\(\s*\d+\s*\)\s*$/,'')]=1; }
   });
   var idClash={};
   Object.keys(idNames).forEach(function(id){
@@ -2281,7 +2291,11 @@ function compute(){
     var k=ruleKey(r.main,r.sub), rule=S.rules[k];
     r._key=k; r._inc=false; r._used=false; r._w=0; r._why='';
     r._par=!!parName[r.id+'|'+r.site+'|'+nameKey(r.name)];
-    if(!rule||rule.include!=='Y'){ r._why='reason set to Skip'; return; }
+    /* a request you set yourself on the doctor card: "in" counts it whatever the
+       Rules say, "out" leaves it out */
+    var ov=(S.settings.reqPick||{})[reqId(r)]||''; r._pick=ov;
+    if(ov==='out'){ r._why='left out by you'; return; }
+    if(ov!=='in'&&(!rule||rule.include!=='Y')){ r._why='reason set to Skip'; return; }
     /* staff-type gate */
     /* several staff types can be picked at once (FT and PT, say): a row passes
        when it matches any of them — "FT,PT" used to match nobody. An H doctor
@@ -2290,6 +2304,7 @@ function compute(){
     if(rule.noH&&hyb) pass=false;
     else if(!ftys.length) pass=true;
     else pass=ftys.some(function(x){ return x==='H'? hyb : nz(r.empStatus).toUpperCase()===x; });
+    if(ov==='in') pass=true;
     if(!pass){ r._why=(rule.noH&&hyb)? 'reason is not counted for H doctors' : 'rule is '+ftys.join(' / ')+' only, this row is '+(nz(r.empStatus)||'untagged'); return; }
     r._inc=true;
     ruleHit[k]=(ruleHit[k]||0)+1;
@@ -2356,14 +2371,14 @@ function compute(){
     /* filed under the parallel line: it closes the parallel session, which his
        OT fixed session carries — the OT step cancels that; his main clinic is
        not taken, and it is never a "duplicate" of a request for the main clinic */
-    if(r._par&&side==='c'){
+    if(r._par&&side==='c'&&ov!=='in'){
       r._used=false; r._tkey=kk; r._side=side; r._why='filed under the parallel line "'+r.name+'" — it closes his parallel session (the OT fixed session), not his main clinic';
       stats.counted--; return;
     }
     var rf=clockOf(r.from), rt=clockOf(r.to);
     if(rf!==null&&rt!==null){
-      var dupK=kk+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d+'|'+side+'|'+rf+'|'+rt;
-      var first=seenReq[dupK];
+      var dupK=kk+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d+'|'+side+'|'+rf+'|'+rt+'|'+reqParMark(r.name);   /* the parallel "(1)" session is its own */
+      var first=ov==='in'? null : seenReq[dupK];
       if(first){
         r._used=false; r._dupOf=first;
         r._why='duplicate of '+first.sheet+' row '+first.row+' — same doctor, day and time, counted once';
@@ -2657,7 +2672,7 @@ var SRVT=null;
    the server already holds in its own table). */
 var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','chgLog','brkRule','otRule','hAllow','openClash',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','chgLog','brkRule','reqPick','otRule','hAllow','openClash',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -5211,7 +5226,7 @@ var SET_LIST={mvYears:1,holidays:1,colorNames:1,paidVals:1,paidValsSet:1,paidR:1
               ot:1,rtmAdded:1,accepted:1};
 var SET_MAP={};
 DOC_BUCKETS.forEach(function(k){ SET_MAP[k]=1; });
-['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow','openClash','chgLog','brkRule'].forEach(
+['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow','openClash','chgLog','brkRule','reqPick'].forEach(
   function(k){ SET_MAP[k]=1; });
 var MST_BLK=['Morning','Afternoon','Evening'];
 var MST_BLOCKS=[[0,1,2],[0,1,2],[0,1,2],[0,1,2],[0,1,2],[2],[1,2]];
@@ -6723,6 +6738,10 @@ if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
     var n;
+    if((n=t.closest('[data-rqpk]'))){ var rq=n.getAttribute('data-rqpk'), ri=rq.lastIndexOf('|'), rid=rq.slice(0,ri), rv=rq.slice(ri+1);
+      S.settings.reqPick=S.settings.reqPick||{};
+      if(rv==='clear') delete S.settings.reqPick[rid]; else S.settings.reqPick[rid]=rv;
+      refreshSoon(n); toast(rv==='in'? 'Request added to the count' : rv==='out'? 'Request left out of the count' : 'The Rules decide this request again'); return; }
     if((n=t.closest('[data-dshdoc]'))){ openDrawer(n.getAttribute('data-dshdoc')); return; }
     if((n=t.closest('[data-ocpk]'))){ var oq=n.getAttribute('data-ocpk'), oi=oq.lastIndexOf('|');
       S.settings.openClash=S.settings.openClash||{};
@@ -8333,7 +8352,7 @@ function renderDrawer(){
           '<div class="mt">row '+r.row+'</div></td>'+
         '<td>'+(r._used? '<span class="sp '+(isC?'c':'o')+'">'+esc(r.status)+'</span>'
                       : '<span class="sp x">'+esc(r.status||'—')+'</span>')+'</td>'+
-        '<td><div>'+esc(r.main)+' <span class="mt">›</span> '+esc(r.sub)+swatches(r.fills)+'</div>'+
+        '<td>'+rqWhoHTML(r,t)+'<div>'+esc(r.main)+' <span class="mt">›</span> '+esc(r.sub)+swatches(r.fills)+'</div>'+
           '<div class="mt">'+esc(r.type||'—')+
           (r._openClash==='open'? ' · <span style="color:var(--teal)">same hours as his clinic \u2014 counted instead of the clinic</span>' :
            r._used? '' : ' · <span style="color:var(--warn)">not counted: '+esc(r._why||'excluded')+'</span>')+
@@ -8346,7 +8365,7 @@ function renderDrawer(){
         '</td>'+
         '<td class="n">'+(r._used? '<b style="color:'+(isC?'var(--loss)':'var(--gain)')+'">'+
             (isC?'−':'+')+fmt(r._w)+'</b>' : '<span class="mt">—</span>')+
-          '<div class="mt">'+(r.hours!==null&&r.hours>0? fmt(r.hours)+'h':'no duration')+'</div></td>'+
+          '<div class="mt">'+(r.hours!==null&&r.hours>0? fmt(r.hours)+'h':'no duration')+'</div>'+rqPickHTML(r)+'</td>'+
         '</tr>';
     });
     h+='</tbody></table></div>';
@@ -12214,6 +12233,8 @@ function otCancelByClosure(t,year,m,rows,proj,reasonAgg,stats){
   });
   return out;
 }
+function reqParMark(name){ var m=/\(\s*(\d+)\s*\)\s*$/.exec(nz(name)); return m? 'par'+m[1] : ''; }
+function reqId(r){ return nz(r.sheet)+'|'+r.row+'|'+nz(r.id)+'|'+(r.date? r.date.y+'-'+r.date.m+'-'+r.date.d : ''); }
 function otCutByClosure(t,year,m,pj,unused,otCl,rows){
   var F=otForMonth(t.key,year,m,rows), total=0, base=(nz(t.id)||'~'+nameKey(t.name))+'|'+m+'|';
   var hyb=!!t.hybrid;   /* an H doctor's closures may already sit in his allowance: leave them */
@@ -12264,6 +12285,24 @@ function otUncount(t,r,why){
   var ra=S._reasonAgg&&S._reasonAgg[r._key]; if(ra){ ra.c-=w; ra.n--; }
   if(S._stats) S._stats.counted--;
   r._used=false; r._otCancel=true; r._why=why;
+}
+/* who the request was logged for: the name as written, and "Parallel" for a
+   "(1)" line — so a parallel session is never mistaken for a double entry */
+function rqWhoHTML(r,t){
+  var par=reqParMark(r.name), other=nameKey(r.name)!==nameKey(t&&t.name);
+  if(!par&&!other) return '';
+  return '<div class="rq-who"><span class="rq-nm">'+esc(r.name||'(no name)')+'</span>'+
+    (par? '<span class="rq-par" title="Logged for his parallel clinic — a session of its own, beside the main clinic">\u2225 Parallel ('+par.slice(3)+')</span>' : '')+'</div>';
+}
+/* count it / leave it out, by you, for this one request */
+function rqPickHTML(r){
+  var id=esc(reqId(r)), on=!!r._used, mine=r._pick;
+  return '<div class="rq-pk" role="group" aria-label="Count this request">'+
+    (mine? '<span class="rq-mine" title="You set this one; the Rules no longer decide it">by you</span>'+
+        '<button type="button" data-rqpk="'+id+'|clear" title="Let the Rules decide again">\u21BA Rules</button>'
+      : on? '<button type="button" data-rqpk="'+id+'|out" title="Leave this request out of the count">Leave out</button>'
+          : '<button type="button" class="add" data-rqpk="'+id+'|in" title="Add this request to the count, whatever the Rules say">+ Count it</button>')+
+    '</div>';
 }
 function otCalendarTable(){
   var V=valBuild(); if(!V||V.needMonth) return null;
