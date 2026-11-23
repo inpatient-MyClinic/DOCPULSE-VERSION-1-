@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DocPules — My Clinic</title>
+<script>(function(){try{var v=localStorage.getItem('dp-theme');var d=v==='dark'||(v!=='light'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light');}catch(e){}})();</script>
+<style>html[data-theme="dark"]{color-scheme:dark;background:#10182A}html[data-theme="dark"] body{background:#131C2E;color:#DCE3EE}</style>
 <!-- Webfonts if the machine is online; the fallback stack below is used otherwise -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -579,6 +581,11 @@ body.dpn .dwb tbody tr.mrow:hover td{background:#F1F5FB}
 .co-none{background:#fff;border:1px dashed #DCE3ED;border-radius:14px;padding:14px 18px;font-size:13px;color:#475569;margin-bottom:16px}
 /* ---- new sidebar (body.sbn); "Classic menu" at the foot puts the old one back ---- */
 .nv-grp{display:none}
+.th-sw{display:flex;gap:2px;margin:0 18px 14px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.th-sw button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:4px;font:inherit;font-size:11px;font-weight:700;color:#9FB0CC;background:transparent;border:0;border-radius:999px;padding:5px 4px;cursor:pointer;white-space:nowrap}
+.th-sw button:hover{color:#fff}.th-sw button[aria-checked="true"]{background:#fff;color:#16244A;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.th-sw button:focus-visible{outline:2px solid #93C5FD;outline-offset:1px}
+html[data-theme="dark"] .th-sw button[aria-checked="true"]{background:#2DD4BF;color:#0B1324}
 .sb-sw{display:block;width:calc(100% - 36px);margin:0 18px 14px;font:inherit;font-size:11px;font-weight:600;color:#9FB0CC;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 10px;cursor:pointer}
 .sb-sw:hover{color:#fff;border-color:rgba(255,255,255,.3)}
 body.sbn .side{width:232px;flex-basis:232px;background:linear-gradient(180deg,#0E1830 0%,#16244A 55%,#1B2C57 100%);box-shadow:inset -1px 0 0 rgba(255,255,255,.06)}
@@ -805,6 +812,57 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .fold-b:focus-visible{outline:2px solid #2563EB;outline-offset:2px}
 .oc-card>.oc-hd{cursor:pointer;padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .oc-card:not(.warn).folded{background:#fff}
+.chg-clk{display:inline-block;margin-left:6px;font-size:11px;font-weight:600;color:#64748B;background:#F1F5F9;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.chg{padding:0;overflow:hidden}.chg-top{display:flex;align-items:flex-start;gap:16px;padding:16px 18px 12px}.chg-top>div{flex:1}
+.chg-kpi{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:0 18px 12px}
+.chg-kpi>div{background:#F8FAFC;border:1px solid #EEF1F6;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.chg-kpi b{font-size:20px;line-height:1.1}.chg-kpi span{font-size:11.5px;color:#64748B}
+.chg-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 18px;border-top:1px solid #EEF1F6;border-bottom:1px solid #EEF1F6;background:#FBFCFE}
+.chg-f input[type=search]{flex:1;min-width:200px;padding:7px 11px;border:1px solid #CBD5E1;border-radius:9px;background:#fff}
+.chg-f select{padding:7px 10px;border:1px solid #CBD5E1;border-radius:9px;background:#fff}
+.chg-f input:focus-visible,.chg-f select:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
+.chg-g{padding:4px 18px 8px}.chg-gh{position:sticky;top:0;z-index:1;background:#fff;font-size:12px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#334155;padding:12px 0 6px}
+.chg-gh span{font-weight:600;color:#94A3B8;text-transform:none;letter-spacing:0;margin-left:6px}
+.chg-e{display:flex;gap:12px;padding:12px;border:1px solid #EEF1F6;border-radius:12px;margin-bottom:8px;background:#fff}
+.chg-e.note{box-shadow:inset 3px 0 0 #0EA5E9}.chg-e.master{box-shadow:inset 3px 0 0 #0F766E}
+.chg-av{width:34px;height:34px;flex:none;border-radius:50%;background:#E0F2FE;color:#075985;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.chg-b{flex:1;min-width:0}.chg-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.chg-h b{font-size:13.5px}
+.chg-d{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px}
+.chg-d.y{background:#CCFBF1;color:#115E59}.chg-d.k{background:#FEF3C7;color:#92400E}.chg-d.s{background:#E0F2FE;color:#075985}.chg-d.n{background:#F1F5F9;color:#475569}
+.chg-wk{margin-left:auto;font-size:12px;color:#64748B;display:inline-flex;gap:5px;align-items:baseline}.chg-wk s{color:#94A3B8}.chg-wk b{font-size:16px;color:#0F172A}.chg-wk i{font-style:normal}
+.chg-days{margin-top:6px;display:flex;flex-direction:column;gap:4px}
+.chg-day{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
+.chg-dn{width:40px;font-weight:800;color:#334155}.chg-a{color:#94A3B8;text-decoration:line-through}.chg-a i,.chg-n i{font-style:normal;text-decoration:none;color:#94A3B8}
+.chg-n{font-weight:700;color:#0F766E}.chg-x{color:#94A3B8}
+.chg-ev{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}.chg-evc{font-size:12px;font-weight:700;background:#E0F2FE;color:#075985;border-radius:999px;padding:2px 10px}
+.chg-note{margin-top:6px;font-size:12px;color:#475569;font-style:italic}
+.chg-dt{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;font-weight:700;color:#334155}
+.chg-dt input{font:inherit;padding:3px 8px;border:1px solid #CBD5E1;border-radius:8px}
+.chg-meta{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:#64748B}
+.chg-by{font-weight:700;color:#334155}.chg-meta .sd-undo{margin-left:auto}
+.chg-empty{padding:34px 18px;text-align:center;display:flex;flex-direction:column;gap:4px;color:#64748B}
+@media (max-width:760px){.chg-kpi{grid-template-columns:repeat(2,minmax(0,1fr))}.chg-wk{margin-left:0}}
+.brk-also{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:0 16px 10px;padding:9px 12px;border-radius:10px;background:#F0FDFA;border:1px solid #CCFBF1;font-size:12px;color:#115E59}
+.brk-also b{flex-basis:100%;font-size:12px}
+.dsh-card.sm .sm-top{display:grid;grid-template-columns:repeat(3,minmax(0,150px)) minmax(0,1fr);gap:12px;align-items:stretch;margin-top:10px}
+.sm-k{border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;border:1px solid #EEF1F6}
+.sm-k span{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#64748B}
+.sm-k b{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}.sm-k em{font-style:normal;font-size:11.5px;color:#94A3B8}
+.sm-k.n{background:#F0FDFA}.sm-k.n b{color:#0F766E}.sm-k.l{background:#FFF1F2}.sm-k.l b{color:#BE123C}.sm-k.t{background:#F8FAFC}.sm-k.t b{color:#1E293B}
+.sm-ch{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;align-items:stretch;min-height:110px;padding:6px 4px;border:1px solid #EEF1F6;border-radius:14px}
+.sm-m{display:grid;grid-template-rows:1fr 1fr auto;min-width:0}
+.sm-u,.sm-d{display:flex;justify-content:center}.sm-u{align-items:flex-end;border-bottom:1px solid #CBD5E1}.sm-d{align-items:flex-start}
+.sm-u i,.sm-d i{display:block;width:62%;max-width:16px;border-radius:4px 4px 0 0;background:#14B8A6;min-height:3px}.sm-d i{border-radius:0 0 4px 4px;background:#F43F5E}
+.sm-ml{text-align:center;font-size:10.5px;color:#94A3B8;font-weight:700;padding-top:3px}
+.sm-lists{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.sm-lh{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}.sm-lh.n{color:#0F766E}.sm-lh.l{color:#BE123C}
+.sm-lh b{color:#fff;border-radius:999px;padding:0 7px;margin-left:4px;font-size:11px}.sm-lh.n b{background:#0F766E}.sm-lh.l b{background:#BE123C}
+.sm-p{display:inline-flex;align-items:center;gap:6px;margin:0 6px 6px 0;padding:5px 10px;border-radius:999px;border:1px solid #E2E8F0;background:#fff;font:inherit;font-size:12px;cursor:pointer;max-width:100%}
+.sm-p b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}.sm-p span{color:#64748B;font-size:11px;white-space:nowrap}
+.sm-p.n{box-shadow:inset 3px 0 0 #14B8A6}.sm-p.l{box-shadow:inset 3px 0 0 #F43F5E}.sm-p.pend{border-style:dashed}
+.sm-p:hover{border-color:#94A3B8}.sm-p:focus-visible{outline:2px solid #2563EB;outline-offset:1px}.sm-p:disabled{cursor:default}
+.sm-none{font-size:12px;color:#94A3B8;padding:4px 0}
+@media (max-width:900px){.dsh-card.sm .sm-top{grid-template-columns:repeat(3,minmax(0,1fr))}.sm-ch{grid-column:1/-1}.sm-lists{grid-template-columns:1fr}}
 .oc-card{border-color:#E2E8F0}.oc-card.warn{border-color:#FCD34D;background:linear-gradient(180deg,#FFFBEB,#fff 60px)}
 .oc-card>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .oc-card>summary::-webkit-details-marker{display:none}
@@ -1077,6 +1135,7 @@ div.dpg{min-width:0;width:auto}
         <section class="pg" id="pg-rules"></section>
         <section class="pg" id="pg-health"></section>
         <section class="pg" id="pg-paidset"></section>
+        <section class="pg" id="pg-chglog"></section>
       </section>
 
 
@@ -2284,7 +2343,7 @@ function compute(){
       seenReq[dupK]=r;
     }
     if(!t.fromMaster) stats.unmatchedRows[kk]=(stats.unmatchedRows[kk]||0)+1;
-    t.m[r.date.m][side]+=w; r._used=true; r._openClash='';
+    t.m[r.date.m][side]+=w; r._used=true; r._openClash=''; r._tkey=kk; r._side=side; r._otHit=null;
     /* kept for the same-time check below: an opening at the hours of a clinic
        he already has that day, and the closures that would explain it */
     if(rf!==null&&rt!==null){
@@ -2426,9 +2485,22 @@ function compute(){
     otKeys={};
     otList().forEach(function(o){ var k=otKeyOf(o,rows); if(k) otKeys[k]=1; });
   }
+  /* Every closure in the log, by doctor ID and day, whatever its reason or
+     branch: a doctor who closed that time was not there, so a fixed OT session
+     at that time did not happen. The same closures Paid extra cuts with. A
+     closure with no times is not matched here (Paid extra only flags it). */
+  var otCl={}; S._reasonAgg=reasonAgg; S._stats=stats;
+  capRows.forEach(function(r){
+    r._otHit=null; r._otCancel=false;
+    if(!otKeys||!r.date||r.date.y!==year||!otClosed(r)) return;
+    var f=clockOf(r.from), tt=clockOf(r.to); if(f===null||tt===null) return;
+    if(tt<=f) tt+=1440;
+    var k=(nz(r.id)||'~'+nameKey(r.name))+'|'+r.date.m+'|'+r.date.d;
+    (otCl[k]=otCl[k]||[]).push({r:r,f:f,t:tt});
+  });
   rows.forEach(function(t){
-    t.yfri=0; t.yhol=0; t.yot=0; t.yotHeld=0;
-    t.otFixM=[]; t.otHeldM=[]; t.otClashes=[];
+    t.yfri=0; t.yhol=0; t.yot=0; t.yotHeld=0; t.yotCut=0;
+    t.otFixM=[]; t.otHeldM=[]; t.otClashes=[]; t.otCuts=[];
     for(var mf=0;mf<12;mf++){
       /* the same plan map Sessions was summed from, counted again for Fridays
          alone — so the two can never disagree */
@@ -2460,6 +2532,16 @@ function compute(){
           if(new Date(Date.UTC(year,mf,c.day)).getUTCDay()===5){ t.m[mf].fri-=sub; t.yfri-=sub; }
         });
         t.otSkip=t.otSkip||{}; t.otSkip[mf]=sk; t.otSkipY=year;
+        /* A closure at the time of a fixed OT session cancels it.
+             Both / no clash: the OT goes whatever the closure's reason; the
+               clinic at that time follows the Rules as always (an FT Business
+               Need closure still leaves the clinic paid). A closure with no
+               clinic under it was only about the OT, so it is not taken twice.
+             OT fixed session: the OT stands in for his clinic, so it follows
+               the Rules like the clinic would: it goes only if the closure
+               counts, and that closure is not taken a second time. */
+        var cut=otCutByClosure(t,year,mf,pj,otCl[(nz(t.id)||'~'+nameKey(t.name))+'|'+mf],otCl,rows);
+        if(cut>0){ ov=Math.max(0,ov-cut); t.m[mf].otCut=cut; t.yotCut+=cut; }
       }
       t.otFixM[mf]=ov; t.otHeldM[mf]=hd; t.m[mf].ot=ov;
       t.yot+=ov; t.yotHeld+=hd;
@@ -2480,6 +2562,9 @@ function compute(){
     else {
       var df=snapshotDiff(schedIndex((S.settings.schedSave.lines||[]).map(schedLineToRow)),
                           schedIndex(S.master.rows));
+      /* a doctor decided more than 24 hours ago is saved and leaves the review */
+      if(sdSweep(df)) df=snapshotDiff(schedIndex((S.settings.schedSave.lines||[]).map(schedLineToRow)),
+                                      schedIndex(S.master.rows));
       S.pendingDiff=(df.added.length||df.removed.length||df.changed.length)? df : null;
     }
   }catch(e){ S.pendingDiff=null; }
@@ -2542,7 +2627,7 @@ var SRVT=null;
    the server already holds in its own table). */
 var SRV_KEYS=['year','hrs','weighted','colorNames','holidays','paidMode','paidCol','paidVals',
      'paidValsSet','paidR','paidRSet','paidOpenOnly','paidByHours','paidRate','paidUnit',
-     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','otRule','hAllow','openClash',
+     'otOn','otSheet','otMap','otUnpaidCancels','otDedupe','pediaOn','noteDec','sdDec','sdPrev','sdDated','sdLog','chgLog','brkRule','otRule','hAllow','openClash',
      /* the fixed OT sessions themselves, and which a clashing day actually was */
      'ot','otClash',
      'accepted','hybAllow','mstAdded','schedSrc','schedApply','dpmKept',
@@ -2666,6 +2751,20 @@ function keepPlace(root,fn){
     }
   }
 }
+/* The statistics strip at the top of every page shows whole numbers; the exact
+   figure is one hover away. The Dashboard keeps its decimals. Tables, the
+   doctor card and exports are untouched. */
+var KPI_SEL='.rail .st .v, .ot-kpi .ot-v, .fx-kpi .ot-v, .fin-kpi b, .rt-kpi b';
+function kpiRound(root){
+  if(!root||!root.querySelectorAll) return;
+  Array.prototype.forEach.call(root.querySelectorAll(KPI_SEL),function(v){
+    if(v.children.length) return;
+    var t=v.textContent, m=/^\s*([+\u2212-]?)\s*([\d,]*\.\d+)\s*(.*)$/.exec(t); if(!m) return;
+    var n=Math.round(parseFloat(m[2].replace(/,/g,'')));
+    v.textContent=(n===0? '' : m[1])+n.toLocaleString('en-US')+(m[3]? ' '+m[3] : '');
+    if(!v.title) v.title='Exactly '+t.trim();
+    v.classList.add('kpi-r'); });
+}
 function paint(id,html,after){
   var body=document.querySelector('.body');
   var scroll=body?body.scrollTop:0;
@@ -2673,6 +2772,7 @@ function paint(id,html,after){
   try{ if(act&&act.selectionStart!==undefined){ selS=act.selectionStart; selE=act.selectionEnd; } }catch(e){}
   var root=el(id), snap=scrollSnap(root);
   root.innerHTML=html;
+  if(id!=='pg-analysis') kpiRound(root);
   if(after) after();
   scrollRestore(root,snap);
   if(body) body.scrollTop=scroll;
@@ -2699,7 +2799,188 @@ var PAGES=[
  {id:'rtm',     i:'nRtm',   ic:'◈'},
  {id:'settings',i:'nSet',   ic:'⚙'},
 ];
-function sbnOn(){ var v=null; try{ v=localStorage.getItem('dp-side'); }catch(e){} return v!=='classic'; }
+function sbnOn(){ return true; }   /* the new menu is the only menu */
+/* ---- light and dark ----
+   Dark is made from the light design, not kept beside it: every colour in the
+   stylesheets and in the inline styles the pages write is moved to its dark
+   counterpart (same hue, lightness turned over: white surfaces become dark,
+   dark text becomes light, accents brighten). A page added later is dark with
+   no extra work. The menu is already dark and is left alone. Light / Auto /
+   Dark sits at the foot of the menu and is remembered on this browser; Auto
+   follows the computer. */
+var TH={map:{},css:null,obs:null,on:false};
+function thPref(){ var v=null; try{ v=localStorage.getItem('dp-theme'); }catch(e){} return (v==='light'||v==='dark')? v : 'auto'; }
+function thDark(){ var p=thPref(); if(p!=='auto') return p==='dark';
+  try{ return !!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches); }catch(e){ return false; } }
+function thLin(c){ c/=255; return c<=0.04045? c/12.92 : Math.pow((c+0.055)/1.055,2.4); }
+function thGam(c){ c=c<=0.0031308? 12.92*c : 1.055*Math.pow(c,1/2.4)-0.055; return Math.max(0,Math.min(255,Math.round(c*255))); }
+function thMapRGB(r,g,b,kind){
+  r=thLin(r); g=thLin(g); b=thLin(b);
+  var l=Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b), m=Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b),
+      s=Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
+  var L=0.2104542553*l+0.7936177850*m-0.0040720468*s, A=1.9779984951*l-2.4285922050*m+0.4505937099*s, B=0.0259040371*l+0.7827717662*m-0.8086757660*s;
+  var C=Math.sqrt(A*A+B*B), h=Math.atan2(B,A), L2;
+  /* an SVG fill: near-black grey is text, anything else is a mark or a surface */
+  if(kind==='fill') kind=(C<0.05&&L<0.5)? 'fg' : 'bg';
+  if(kind==='bg'&&L<0.62){
+    /* a coloured or dark surface (a navy header, a teal button, a badge) stays
+       what it is, a shade deeper so its white text reads at 4.5:1 */
+    L2=L<0.34? 0.34+(L-0.2)*0.2 : Math.min(L,0.5);
+  } else if(kind==='bg'&&L<0.8&&C>0.04){
+    L2=0.44-(L-0.62)*0.6;                             /* a mid-tone badge: a deep tint of its colour */
+  } else if(kind==='fg'&&L>=0.7&&C>0.05){
+    L2=Math.max(L,0.78);                              /* pastel text on a coloured panel: as designed */
+  } else if(kind==='fg'&&L>=0.8){
+    L2=Math.min(0.95,L+0.02);                         /* light text sat on a dark surface: keep it light */
+  } else if(L>=0.95) L2=0.205+(L-0.95)/0.05*0.035;   /* surfaces: the whitest is the raised one */
+  else if(L>=0.80) L2=0.42-(L-0.80)/0.15*0.17;       /* lines and pale tints */
+  else L2=0.52+0.43*Math.pow((0.80-L)/0.80,0.6);     /* text and accents, brighter */
+  var C2=C*(L2<0.35? 0.72 : 1.0);
+  if(C2<0.02&&L2<0.5){ C2=0.025; h=-1.85; }          /* greys get the navy cast of the menu */
+  A=C2*Math.cos(h); B=C2*Math.sin(h);
+  l=L2+0.3963377774*A+0.2158037573*B; m=L2-0.1055613458*A-0.0638541728*B; s=L2-0.0894841775*A-1.2914855480*B;
+  l=l*l*l; m=m*m*m; s=s*s*s;
+  return [thGam(4.0767416621*l-3.3077115913*m+0.2309699292*s),thGam(-1.2684380046*l+2.6097574011*m-0.3413193965*s),thGam(-0.0041960863*l-0.7034186147*m+1.7076147010*s)];
+}
+function thCol(r,g,b,a,kind){ var k=r+','+g+','+b+(kind||''), v=TH.map[k]||(TH.map[k]=thMapRGB(r,g,b,kind));
+  return (a===undefined||a===null||a>=1)? '#'+v.map(function(x){ return (x<16?'0':'')+x.toString(16); }).join('') : 'rgba('+v.join(',')+','+a+')'; }
+function thKind(pr){ pr=low(pr||'');
+  return /^color$|^-webkit-text-fill|caret|text-decoration/.test(pr)? 'fg' : /^fill$/.test(pr)? 'fill' : /background|border|outline|stop-color|^bgcolor$/.test(pr)? 'bg' : ''; }
+/* the colour variables of :root, light values, so a variable used as a surface
+   can be given its surface colour (the variable itself carries the text one) */
+function thRootVars(){
+  if(TH.vars) return TH.vars; var V={};
+  Array.prototype.forEach.call(document.styleSheets,function(sh){ var rs=null; try{ rs=sh.cssRules; }catch(e){ return; }
+    Array.prototype.forEach.call(rs||[],function(r){ if(!r.style||r.selectorText!==':root') return;
+      for(var i=0;i<r.style.length;i++){ var pr=r.style[i]; if(pr.indexOf('--')!==0) continue;
+        var v=r.style.getPropertyValue(pr).trim(); if(/^#[0-9a-f]{3,8}$|^rgba?\(/i.test(v)) V[pr]=v; } }); });
+  return (TH.vars=V);
+}
+function thVarSub(v,kind){ var V=thRootVars();
+  return String(v).replace(/var\((--[\w-]+)\)/g,function(all,n){ return V[n]? thVal(V[n],kind) : all; }); }
+function thVal(v,kind){
+  return String(v).replace(/#([0-9a-fA-F]{3,8})\b/g,function(all,hx){
+    if(hx.length===3) hx=hx[0]+hx[0]+hx[1]+hx[1]+hx[2]+hx[2]; else if(hx.length===4) hx=hx[0]+hx[0]+hx[1]+hx[1]+hx[2]+hx[2]+hx[3]+hx[3];
+    if(hx.length!==6&&hx.length!==8) return all;
+    var a=hx.length===8? Math.round(parseInt(hx.slice(6),16)/255*100)/100 : undefined;
+    return thCol(parseInt(hx.slice(0,2),16),parseInt(hx.slice(2,4),16),parseInt(hx.slice(4,6),16),a,kind); })
+    .replace(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)(?:[\s,\/]+([\d.]+%?))?\s*\)/g,function(all,r,g,b,a){
+      if(a!==undefined&&/%$/.test(a)) a=parseFloat(a)/100; else if(a!==undefined) a=parseFloat(a);
+      return thCol(+r,+g,+b,a,kind); })
+    .replace(/(^|[\s,:(])(white|black)(?=$|[\s,;)!])/gi,function(all,pre,w){ return pre+(low(w)==='white'? thCol(255,255,255,undefined,kind) : thCol(0,0,0,undefined,kind)); });
+}
+var TH_SIDE=/(^|[\s>+~(])(\.side|\.brand|#nav|\.nv|\.sb-|\.th-sw|\.mark\b)/;
+function thSel(sel){
+  return sel.split(',').map(function(x){ return x.trim(); }).filter(function(x){ return x&&!TH_SIDE.test(x)&&x.indexOf('data-theme')<0; }).map(function(x){
+    if(/^:root\b/.test(x)) return 'html[data-theme="dark"]'+x.slice(5);
+    if(/^html\b/.test(x)) return 'html[data-theme="dark"]'+x.slice(4);
+    return 'html[data-theme="dark"] '+x; }).join(',');
+}
+function thDecls(txt){
+  var out=[], depth=0, cur='';
+  for(var i=0;i<txt.length;i++){ var ch=txt[i];
+    if(ch==='(') depth++; else if(ch===')') depth--;
+    if(ch===';'&&depth===0){ out.push(cur); cur=''; } else cur+=ch; }
+  if(cur.trim()) out.push(cur);
+  return out.map(function(d){ var i=d.indexOf(':'); if(i<0) return null;
+    var pr=d.slice(0,i).trim(), v=d.slice(i+1).trim(), imp=/!\s*important\s*$/i.test(v);
+    if(imp) v=v.replace(/!\s*important\s*$/i,'').trim();
+    return [pr.indexOf('--')===0? pr : low(pr),v,imp]; }).filter(Boolean);
+}
+function thRules(list,out){
+  Array.prototype.forEach.call(list||[],function(r){
+    if(r.cssRules&&r.media){ var inner=[]; thRules(r.cssRules,inner); if(inner.length) out.push('@media '+r.media.mediaText+'{'+inner.join('')+'}'); return; }
+    if(!r.style||!r.selectorText) return;
+    var decl=[];
+    /* read the rule as written: a shorthand holding var() has empty longhands */
+    thDecls(r.style.cssText).forEach(function(d){ var pr=d[0], v=d[1], imp=d[2];
+      if(/shadow/.test(pr)) return;
+      var kd=pr.indexOf('--')===0? (/bg|panel|line|flat|-w$/.test(pr)? 'bg' : 'fg') : thKind(pr);
+      if(kd==='bg'&&/var\(--/.test(v)){ var v2=thVarSub(v,kd); if(v2!==v){ decl.push(pr+':'+v2+(imp? '!important' : '')); return; } }
+      if(!/#[0-9a-f]{3}|rgba?\(|\bwhite\b|\bblack\b/i.test(v)) return;
+      decl.push(pr+':'+thVal(v,kd)+(imp? '!important' : '')); });
+    if(!decl.length) return;
+    var sel=thSel(r.selectorText); if(!sel) return;
+    out.push(sel+'{'+decl.join(';')+'}');
+  });
+}
+function thBuild(force){
+  if(TH.css&&!force) return;
+  var out=[];
+  Array.prototype.forEach.call(document.styleSheets,function(sh){
+    if(sh.ownerNode&&sh.ownerNode.id==='thDark') return;
+    var rs=null; try{ rs=sh.cssRules; }catch(e){ return; }   /* a web font sheet from another site */
+    thRules(rs,out); });
+  /* hand-set where the automatic turn would be dull or wrong */
+  out.push('html[data-theme="dark"]{color-scheme:dark;--bg:#10182A;--panel:#172238;--ink:#E3E9F2;--muted:#A6B3C7;--faint:#7E8CA3;--line:#2A3852;--line-s:#22304A;'+
+    '--sh:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.25)}');
+  out.push('html[data-theme="dark"] body{background:#10182A;color:var(--ink)}');
+  out.push('html[data-theme="dark"] img,html[data-theme="dark"] video{filter:none}');
+  out.push('html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#33415C}');
+  var st=TH.css||document.createElement('style'); st.id='thDark'; st.textContent=out.join('\n');
+  if(!TH.css){ document.head.appendChild(st); TH.css=st; }
+  TH.nSheets=document.styleSheets.length;
+}
+/* inline colours the pages write: moved over when they arrive, put back for light */
+var TH_ATTR=['fill','stroke','stop-color','color','bgcolor'];
+function thEl(e){
+  if(!e||e.nodeType!==1||(e.closest&&e.closest('.side'))) return;
+  var st=e.getAttribute('style');
+  if(st&&/#[0-9a-f]{3}|rgba?\(|\bwhite\b|\bblack\b|(background|border)[\w-]*:[^;]*var\(--/i.test(st)&&!e.hasAttribute('data-tho')){
+    e.setAttribute('data-tho',st);
+    e.setAttribute('style',st.split(';').map(function(d){ var i=d.indexOf(':'); if(i<0) return d;
+      var pr=d.slice(0,i).trim().toLowerCase(), kd=thKind(pr), v=d.slice(i+1);
+      if(/shadow/.test(pr)) return d; if(kd==='bg'&&/var\(--/.test(v)){ var v2=thVarSub(v,kd); if(v2!==v) return d.slice(0,i+1)+v2; }
+      return d.slice(0,i+1)+thVal(v,kd); }).join(';')); }
+  TH_ATTR.forEach(function(a){ var v=e.getAttribute(a);
+    if(v&&/#[0-9a-f]{3}|rgba?\(|^white$|^black$/i.test(v)&&!e.hasAttribute('data-th'+a)){ e.setAttribute('data-th'+a,v); e.setAttribute(a,thVal(v,thKind(a))); } });
+}
+function thWalk(root){
+  if(!root||!root.querySelectorAll) return;
+  thEl(root);
+  Array.prototype.forEach.call(root.querySelectorAll('[style],[fill],[stroke],[stop-color],[color],[bgcolor]'),thEl);
+}
+function thUnwalk(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tho]'),function(e){ e.setAttribute('style',e.getAttribute('data-tho')); e.removeAttribute('data-tho'); });
+  TH_ATTR.forEach(function(a){ Array.prototype.forEach.call(document.querySelectorAll('[data-th'+a+']'),function(e){
+    e.setAttribute(a,e.getAttribute('data-th'+a)); e.removeAttribute('data-th'+a); }); });
+}
+function thObserve(on){
+  if(typeof MutationObserver==='undefined') return;
+  if(on&&!TH.obs){ TH.obs=new MutationObserver(function(ms){ var css=false;
+      ms.forEach(function(m){ Array.prototype.forEach.call(m.addedNodes,function(n){
+        if(n.nodeType!==1) return;
+        if(n.tagName==='STYLE'||n.tagName==='LINK'){ if(n.id!=='thDark') css=true; return; }
+        thWalk(n); if(n.querySelector&&n.querySelector('style')) css=true; }); });
+      if(css) thBuild(true); });
+    TH.obs.observe(document.documentElement,{childList:true,subtree:true}); }
+  if(!on&&TH.obs){ TH.obs.disconnect(); TH.obs=null; }
+}
+function thApply(){
+  var d=thDark();
+  document.documentElement.setAttribute('data-theme',d?'dark':'light');
+  if(d){ thBuild(); if(TH.css) TH.css.disabled=false; thWalk(document.body); thObserve(true); }
+  else { thObserve(false); thUnwalk(); if(TH.css) TH.css.disabled=true; }
+  TH.on=d; thSideSwitch();
+}
+function thSet(v){ try{ localStorage.setItem('dp-theme',v); }catch(e){} thApply();
+  toast(v==='auto'? 'Theme follows your computer ('+(thDark()?'dark':'light')+' now)' : (v==='dark'? 'Dark mode on' : 'Light mode on')); }
+function thSideSwitch(){
+  var side=document.querySelector('.side'); if(!side) return;
+  var sw=el('thSw'), p=thPref();
+  if(!sw){ sw=document.createElement('div'); sw.id='thSw'; sw.className='th-sw'; sw.setAttribute('role','radiogroup'); sw.setAttribute('aria-label','Theme');
+    side.appendChild(sw);
+    sw.addEventListener('click',function(ev){ var b=ev.target.closest&&ev.target.closest('[data-th]'); if(b) thSet(b.getAttribute('data-th')); });
+    try{ var mq=matchMedia('(prefers-color-scheme: dark)'); var f=function(){ if(thPref()==='auto') thApply(); };
+      if(mq.addEventListener) mq.addEventListener('change',f); else if(mq.addListener) mq.addListener(f); }catch(e){} }
+  var IC={light:'<circle cx="8" cy="8" r="3.2"/><path d="M8 1.2v1.6M8 13.2v1.6M1.2 8h1.6M13.2 8h1.6M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1"/>',
+          auto:'<circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor" stroke="none"/>',
+          dark:'<path d="M13.5 9.8A5.8 5.8 0 0 1 6.2 2.5a5.8 5.8 0 1 0 7.3 7.3z"/>'};
+  var html=[['light','Light'],['auto','Auto'],['dark','Dark']].map(function(o){
+    return '<button type="button" role="radio" data-th="'+o[0]+'" aria-checked="'+(p===o[0])+'" title="'+(o[0]==='auto'? 'Follow the computer' : o[1]+' mode')+'">'+
+      '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">'+IC[o[0]]+'</svg>'+o[1]+'</button>'; }).join('');
+  if(sw.innerHTML!==html) sw.innerHTML=html;
+}
 /* the menu in three groups when the new look is on; the classic list otherwise */
 var NAV_GRP={data:'Setup',summary:'Work',master:'Work',sched:'Work',ot:'Work',rtm:'Work',
   analysis:'Insight',brk:'Insight',paid:'Insight',users:'Setup',settings:'Setup'};
@@ -2735,10 +3016,7 @@ function renderNav(){
   try{ mvAlarm();
     if(mvUnsaved()){ var mb=n.querySelector('[data-go="master"]');
       if(mb&&!mb.querySelector('.bdg')) mb.insertAdjacentHTML('beforeend','<span class="bdg" title="Changes not saved as a version">!</span>'); } }catch(e){}
-  var side=document.querySelector('.side'), sw=el('sbSw');
-  if(side&&!sw){ sw=document.createElement('button'); sw.type='button'; sw.id='sbSw'; sw.className='sb-sw'; side.appendChild(sw); }
-  if(sw){ sw.textContent=sbnOn()? 'Classic menu' : 'Try the new menu';
-    sw.onclick=function(){ try{ localStorage.setItem('dp-side',sbnOn()?'classic':'new'); }catch(e){} renderNav(); }; }
+  thSideSwitch();
   Array.prototype.forEach.call(n.querySelectorAll('[data-go]'),function(b){
     b.onclick=function(){ go(b.getAttribute('data-go')); };
   });
@@ -2752,7 +3030,8 @@ function go(id){ S.page=id; PAGES.forEach(function(p){ el('pg-'+p.id).classList.
 var SETTABS=[{id:'health',t:'Data check-up',d:'is the data clean enough to trust'},
              {id:'rules', t:'Rules',        d:'which entries count, and how'},
              {id:'fix',   t:'Fix list',     d:'rows that need a decision'},
-             {id:'paidset',t:'Paid extra rules',d:'what counts as paid, and what it is worth'}];
+             {id:'paidset',t:'Paid extra rules',d:'what counts as paid, and what it is worth'},
+             {id:'chglog', t:'Change history',d:'schedule decisions, their dates and who made them'}];
 function setSub(id){ S.setTab=id; renderSettings(); }
 function renderSettings(){
   var tab=S.setTab||'health';
@@ -2772,7 +3051,7 @@ function renderSettings(){
     b.onclick=function(){ setSub(b.getAttribute('data-set')); };
   });
   SETTABS.forEach(function(x){ el('pg-'+x.id).classList.toggle('on',x.id===tab); });
-  ({health:renderHealth,rules:renderRules,fix:renderFix,paidset:renderPaidRules})[tab]();
+  ({health:renderHealth,rules:renderRules,fix:renderFix,paidset:renderPaidRules,chglog:renderChgLog})[tab]();
 }
 
 function renderPage(){
@@ -4902,7 +5181,7 @@ var SET_LIST={mvYears:1,holidays:1,colorNames:1,paidVals:1,paidValsSet:1,paidR:1
               ot:1,rtmAdded:1,accepted:1};
 var SET_MAP={};
 DOC_BUCKETS.forEach(function(k){ SET_MAP[k]=1; });
-['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow','openClash'].forEach(
+['colorRules','colorRulesV','rtmAlias','rtmCode','rtmDiff','mstRename','otMap','dpmKept','mvTrash','hAllow','openClash','chgLog','brkRule'].forEach(
   function(k){ SET_MAP[k]=1; });
 var MST_BLK=['Morning','Afternoon','Evening'];
 var MST_BLOCKS=[[0,1,2],[0,1,2],[0,1,2],[0,1,2],[0,1,2],[2],[1,2]];
@@ -5060,13 +5339,14 @@ function setHybAllowance(key,v){
 }
 /* The schedule is kept in full, not as a summary, so it can be rebuilt without
    the workbook. One record per master line, which keeps parallel clinics apart. */
+function schedRowToLine(r){
+  return {i:r.id,n:r.name,s:r.site,d:r.dept,p:r.spec,t:r.status,o:r.notes||'',
+    fn:r.fName||'',fd:r.fDept||'',fp:r.fSpec||'',r:r.row,
+    c:(r.cells||[]).map(function(day){
+      return (day||[]).map(function(x){ return [x.f,x.t,x.fill||'']; }); })};
+}
 function saveSchedule(){
-  var lines=(S.master&&S.master.rows||[]).map(function(r){
-    return {i:r.id,n:r.name,s:r.site,d:r.dept,p:r.spec,t:r.status,o:r.notes||'',
-      fn:r.fName||'',fd:r.fDept||'',fp:r.fSpec||'',r:r.row,
-      c:(r.cells||[]).map(function(day){
-        return (day||[]).map(function(x){ return [x.f,x.t,x.fill||'']; }); })};
-  });
+  var lines=(S.master&&S.master.rows||[]).map(schedRowToLine);
   S.settings.schedSave={at:(new Date()).toISOString(),file:S.files.m||'',
     legend:S.legend||[],lines:lines};
   saveConfig();
@@ -5789,12 +6069,9 @@ function xlsDownload(name,tables){
   document.body.appendChild(a); a.click();
   setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); },200);
 }
-function dpnOn(){ var v=null; try{ v=localStorage.getItem('dp-look'); }catch(e){} return v!=='classic'; }
+function dpnOn(){ return true; }   /* the new look is the only look */
 function dpnApply(){ if(document.body) document.body.classList.toggle('dpn',dpnOn()); }
-function dpnSwitch(){
-  return '<div class="dpn-sw"><div class="seg2" role="group" aria-label="Look">'+
-    '<button type="button" data-dpn="new" aria-pressed="'+dpnOn()+'">New look</button>'+
-    '<button type="button" data-dpn="classic" aria-pressed="'+(!dpnOn())+'">Classic</button></div></div>'; }
+function dpnSwitch(){ return ''; }
 function dpnWire(){
   Array.prototype.forEach.call(document.querySelectorAll('[data-dpn]'),function(b){
     b.onclick=function(){ try{ localStorage.setItem('dp-look',b.getAttribute('data-dpn')); }catch(e){}
@@ -6416,6 +6693,7 @@ if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
     var n;
+    if((n=t.closest('[data-dshdoc]'))){ openDrawer(n.getAttribute('data-dshdoc')); return; }
     if((n=t.closest('[data-ocpk]'))){ var oq=n.getAttribute('data-ocpk'), oi=oq.lastIndexOf('|');
       S.settings.openClash=S.settings.openClash||{};
       var oid=oq.slice(0,oi), opk=oq.slice(oi+1);
@@ -6592,7 +6870,7 @@ function sdPanelHTML(D){
       '</div>'+
       (d? '<div class="sd-res '+d+'">'+((sdDatedOf(c.key)||{}).side===d? '<b>Old schedule until '+esc(ntFmt(sdIsoAdd(sdDatedOf(c.key).from,-1)))+'</b> ('+c.wa+' a week), then <b>the new file from '+esc(ntFmt(sdDatedOf(c.key).from))+'</b> ('+c.wb+' a week).'
           : d==='keep'? '<b>Keeping the old schedule</b> — the new file is ignored for this doctor ('+c.wa+' a week stays).'
-                      : '<b>Using the new file</b> — '+c.wb+' a week from now on.')+'</div>'+sdWhenHTML(c,d) : '');
+                      : '<b>Using the new file</b> — '+c.wb+' a week from now on.')+chgClock(((S.settings.sdDec||{})[c.key]||{}).at)+'</div>'+sdWhenHTML(c,d) : '');
     h+='<div class="sd-days'+(d?' '+d:'')+'">'+c.dd.map(function(x){
       var k=sdDayKind(x), w=sdWhy(x);
       return '<div class="sd-day"><div class="sd-dn">'+SD_DAY[x.d].slice(0,3)+'</div>'+
@@ -6641,6 +6919,61 @@ function sdClearDated(k){ if(S.settings.sdDated) delete S.settings.sdDated[k]; }
 /* back to whatever he had before Keep old was pressed, still remembering it */
 function sdPrevBack(k){ var P=S.settings.sdPrev||{}, prev=(k in P)? P[k] : null;
   S.settings.mstEdit=S.settings.mstEdit||{}; if(prev) S.settings.mstEdit[k]=prev; else delete S.settings.mstEdit[k]; }
+/* ---- a decision stays in its list for 24 hours (to undo or switch), then it
+   is saved for good and moves to Settings → Change history, with the date, the
+   hours and who decided ---- */
+var CHG_HOLD=24*3600*1000;
+function chgLeft(at){ var t=Date.parse(at||''); return (t>0)? Math.max(0,CHG_HOLD-(Date.now()-t)) : CHG_HOLD; }
+function chgLeftTxt(at){ var ms=chgLeft(at), h=Math.floor(ms/3600000), m=Math.round((ms%3600000)/60000);
+  return ms<=0? 'moving to history' : 'moves to history in '+(h? h+'h ' : '')+(h<2? m+'m' : ''); }
+function chgSpanTxt(list){ return (list||[]).map(function(x){
+  return (x.f===null||x.f===undefined)? 'time not set' : clock12(x.f).replace(':00','').replace(' ','')+'–'+clock12(x.t).replace(':00','').replace(' ',''); }).join(' · '); }
+function chgDaysOf(c){ return (c.dd||[]).map(function(x){ var k=sdDayKind(x);
+  return {d:SD_DAY[x.d].slice(0,3),a:chgSpanTxt(x.a),b:chgSpanTxt(x.b),k:k.t,kc:k.k}; }); }
+function chgAdd(e){ S.settings.chgLog=S.settings.chgLog||{}; if(S.settings.chgLog[e.id]) return false; S.settings.chgLog[e.id]=e; return true; }
+function chgMaster(c,x,done){
+  var dt=sdDatedOf(c.key);
+  chgAdd({id:'m|'+c.key+'|'+sdHash(c),kind:'master',key:c.key,n:c.name,s:c.site,d:x.d,at:x.at||done,by:x.by||schedWho(),done:done,
+    from:dt? dt.from : (x.at||done).slice(0,10),dated:!!dt,wa:c.wa,wb:c.wb,days:chgDaysOf(c),
+    spec:(c.specA!==c.specB&&(c.specA||c.specB))? [c.specA,c.specB] : null,file:(S.files&&S.files.m)||''});
+}
+function sdSweep(D){
+  if(!D||!D.changed||!D.changed.length) return false;
+  var save=S.settings.schedSave; if(!save||!save.lines) return false;
+  var dec=S.settings.sdDec||{}, due={}, n=0, now=new Date().toISOString();
+  D.changed.forEach(function(c){ var x=dec[c.key];
+    if(!x||x.h!==sdHash(c)||!x.at||chgLeft(x.at)>0) return; due[c.key]={c:c,x:x}; n++; });
+  if(!n) return false;
+  function lk(i,st,nm){ return i+'|'+st+'|'+nameKey(nm); }
+  save.lines=save.lines.filter(function(l){ return !due[lk(l.i,l.s,l.n)]; })
+    .concat(((S.master&&S.master.rows)||[]).filter(function(r){ return due[lk(r.id,r.site,r.name)]; }).map(schedRowToLine));
+  S.settings.sdKept=S.settings.sdKept||{};
+  Object.keys(due).forEach(function(k){ var c=due[k].c, x=due[k].x;
+    if(x.d==='keep'&&!sdDatedOf(k)) S.settings.sdKept[k]={n:c.name,s:c.site,at:x.at};
+    sdLogPut(c,x.d);
+    var L=S.settings.sdLog[k]; if(L){ L.at=x.at; L.by=x.by||L.by; if(!L.dated) L.from=x.at.slice(0,10); }
+    chgMaster(c,x,now);
+    delete dec[k]; if(S.settings.sdPrev) delete S.settings.sdPrev[k];
+  });
+  saveConfig();
+  try{ Srv.putSchedule(S.settings.year,save,n+' decision'+(n===1?'':'s')+' saved after 24 hours'); }catch(e){}
+  return true;
+}
+/* confirmed or skipped note dates: kept in the list for 24 hours, then history */
+function ntGone(it){ var x=ntDec(it.key);
+  return !!(x&&(x.st==='ok'||x.st==='skip')&&x.sig===it.sig&&x.at&&chgLeft(x.at)<=0); }
+function ntSweep(){
+  if(!S.result) return 0;
+  var D=S.settings.noteDec||{}, n=0, now=new Date().toISOString(), by={};
+  S.result.rows.forEach(function(t){ by[t.key]=t; });
+  Object.keys(D).forEach(function(k){ var x=D[k];
+    if(!x||(x.st!=='ok'&&x.st!=='skip')||!x.at||chgLeft(x.at)>0) return;
+    var id='n|'+k+'|'+x.sig+'|'+x.at; if(S.settings.chgLog&&S.settings.chgLog[id]) return;
+    var t=by[k]; if(!t) return;
+    if(chgAdd({id:id,kind:'note',key:k,n:t.name,s:t.site,d:x.st,at:x.at,by:x.by||'',done:now,
+      ev:(x.ev||[]).slice(),note:(t.notes||[]).join(' | ').slice(0,400)})) n++; });
+  return n;
+}
 function sdLogPut(c,d){
   var x=sdDatedOf(c.key);
   S.settings.sdLog=S.settings.sdLog||{};
@@ -6735,6 +7068,114 @@ function sdNoticeHTML(t,year){
     (c.kind==='pending'? '<button type="button" class="btn sm" id="sdGoReview">Open the review on the Master schedule page</button>' : '')+
     '</div></details>';
 }
+function chgClock(at){ return at? ' <span class="chg-clk" title="Decided '+esc(new Date(at).toLocaleString())+' — after 24 hours it is saved for good and moves to Settings → Change history">\u23F2 '+esc(chgLeftTxt(at))+'</span>' : ''; }
+/* ---- Settings → Change history ---- */
+function chgAll(){ var L=S.settings.chgLog||{};
+  return Object.keys(L).map(function(k){ return L[k]; }).filter(function(e){ return e&&e.id; })
+    .sort(function(a,b){ return (b.at||'')<(a.at||'')? -1 : (b.at||'')>(a.at||'')? 1 : 0; }); }
+function chgWhen(at){ var d=new Date(at); if(isNaN(d)) return '—';
+  return d.getDate()+' '+MONTHS_EN[d.getMonth()]+' '+d.getFullYear()+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function chgDayHead(at){ var d=new Date(at); if(isNaN(d)) return 'No date';
+  return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+' '+d.getDate()+' '+MONTHS_EN[d.getMonth()]+' '+d.getFullYear(); }
+function chgIni(n){ return nz(n).replace(/^dr\.?\s+/i,'').split(/\s+/).filter(Boolean).slice(0,2).map(function(w){ return w[0]; }).join('').toUpperCase()||'?'; }
+function chgDecTxt(e){
+  if(e.kind==='join') return 'New in the master file';
+  if(e.kind==='gone') return 'Gone from the master file';
+  if(e.kind==='note') return e.d==='skip'? 'Note skipped' : 'Note date confirmed';
+  if(e.dated) return (e.d==='keep'? 'Old until '+ntFmt(sdIsoAdd(e.from,-1)) : 'New from '+ntFmt(e.from));
+  return e.d==='keep'? 'Kept the old schedule' : 'Took the new file'; }
+function chgEntryHTML(e){
+  var cls=e.kind==='join'? 's' : e.kind==='gone'? 'n' : e.kind==='note'? (e.d==='skip'? 'n' : 'y') : e.dated? 's' : e.d==='keep'? 'k' : 'y';
+  var h='<div class="chg-e '+e.kind+'"><div class="chg-av" aria-hidden="true">'+esc(chgIni(e.n))+'</div><div class="chg-b">'+
+    '<div class="chg-h"><b>'+esc(e.n)+'</b> '+finSiteTag(e.s)+
+      ' <span class="chg-d '+cls+'">'+esc(chgDecTxt(e))+'</span>'+
+      (e.kind==='master'? '<span class="chg-wk" title="Sessions a week"><s>'+e.wa+'</s><i aria-hidden="true">→</i><b>'+(e.d==='keep'&&!e.dated? e.wa : e.wb)+'</b> a week</span>' : '')+
+    '</div>';
+  if(e.kind==='join'||e.kind==='gone'){ /* nothing more to show */ }
+  else if(e.kind==='master'){
+    h+='<div class="chg-days">'+((e.days||[]).length? (e.days||[]).map(function(x){
+        return '<div class="chg-day"><span class="chg-dn">'+esc(x.d)+'</span><span class="chg-a">'+(x.a? esc(x.a) : '<i>no session</i>')+'</span>'+
+          '<span class="chg-x" aria-hidden="true">→</span><span class="chg-n">'+(x.b? esc(x.b) : '<i>no session</i>')+'</span>'+
+          '<span class="sd-k '+esc(x.kc||'')+'">'+esc(x.k||'')+'</span></div>'; }).join('')
+        : '<div class="chg-day"><span class="hint">Only the colour or the specialty changed.</span></div>')+
+      (e.spec? '<div class="chg-day"><span class="chg-dn">Spec</span><span class="chg-a">'+esc(e.spec[0]||'—')+'</span><span class="chg-x">→</span><span class="chg-n">'+esc(e.spec[1]||'—')+'</span></div>' : '')+
+      '</div>';
+    var dt=sdDatedOf(e.key);
+    if(e.dated&&dt) h+='<label class="chg-dt">'+(dt.side==='keep'? 'Old schedule until' : 'New schedule from')+
+      ' <input type="date" data-chgdt="'+esc(e.key)+'" value="'+esc(dt.side==='keep'? sdIsoAdd(dt.from,-1) : dt.from)+'" aria-label="Change the date for '+esc(e.n)+'"></label>';
+  } else {
+    h+='<div class="chg-ev">'+((e.ev||[]).length? e.ev.map(function(v){
+        return '<span class="chg-evc">'+esc(NT_LAB[v.kind]||v.kind)+' '+esc(ntFmt(v.kind==='stop'? v.to : v.from))+(v.kind==='temp'&&v.to? ' to '+esc(ntFmt(v.to)) : '')+'</span>'; }).join('')
+      : '<span class="hint">No date taken from this note.</span>')+'</div>'+
+      (e.note? '<div class="chg-note">“'+esc(e.note)+'”</div>' : '');
+  }
+  h+='<div class="chg-meta"><span class="chg-by" title="Who decided">\u{1F464} '+esc(e.by||'unknown')+'</span>'+
+    '<span>decided '+esc(chgWhen(e.at))+'</span>'+
+    (e.kind==='master'&&e.from&&!e.dated? '<span>counted from '+esc(ntFmt(e.from))+'</span>' : '')+
+    '<span>saved '+esc(chgWhen(e.done))+'</span>'+
+    (e.file? '<span class="mt">'+esc(e.file)+'</span>' : '')+
+    (e.kind==='note'? '<button type="button" class="sd-undo" data-chgre="'+esc(e.id)+'" title="Put it back in the review on the Master schedule page">↺ Reopen</button>' : '')+
+    '</div></div></div>';
+  return h;
+}
+function renderChgLog(){
+  try{ if(ntSweep()) saveConfig(); }catch(e){}
+  var all=chgAll(), F=S.chF||'', U=S.chU||'', Q=low(S.chQ||''), users={}, nM=0, nN=0, nMon=0, now=new Date();
+  all.forEach(function(e){ users[e.by||'unknown']=(users[e.by||'unknown']||0)+1; if(e.kind==='note') nN++; else nM++;
+    var d=new Date(e.at); if(d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()) nMon++; });
+  var list=all.filter(function(e){
+    if(F&&e.kind!==F&&!(F==='master'&&(e.kind==='join'||e.kind==='gone'))) return false; if(U&&(e.by||'unknown')!==U) return false;
+    if(Q&&low(e.n+' '+e.s+' '+(e.by||'')).indexOf(Q)<0) return false; return true; });
+  var uk=Object.keys(users).sort(function(a,b){ return users[b]-users[a]; });
+  var h='<div class="card chg"><div class="chg-top"><div><h3 style="margin:0">Change history</h3>'+
+    '<p class="hint" style="margin:4px 0 0">A schedule decision stays in its list on the Master schedule page for <b>24 hours</b> so you can switch or undo it. '+
+    'After that it is saved for good and listed here — what changed, the hours, from when it counts, and who decided.</p></div>'+
+    '<button type="button" class="btn" id="chgXls"'+(list.length? '' : ' disabled')+'>\u2193 Export Excel</button></div>'+
+    '<div class="chg-kpi"><div><b>'+all.length+'</b><span>decisions</span></div><div><b>'+nM+'</b><span>new master file</span></div>'+
+      '<div><b>'+nN+'</b><span>note dates</span></div><div><b>'+nMon+'</b><span>this month</span></div><div><b>'+uk.length+'</b><span>user'+(uk.length===1?'':'s')+'</span></div></div>'+
+    '<div class="chg-f"><input type="search" id="chgQ" placeholder="Search a doctor, branch or user" value="'+esc(S.chQ||'')+'" aria-label="Search the history">'+
+      [['','All',all.length],['master','New master file',nM],['note','Note dates',nN]].map(function(o){
+        return '<button type="button" class="db2-fc'+(F===o[0]?' on':'')+'" data-chf="'+o[0]+'">'+o[1]+' <b>'+o[2]+'</b></button>'; }).join('')+
+      '<select id="chgU" aria-label="Decided by"><option value="">Everyone</option>'+uk.map(function(u){
+        return '<option value="'+esc(u)+'"'+(U===u?' selected':'')+'>'+esc(u)+' ('+users[u]+')</option>'; }).join('')+'</select></div>';
+  if(!all.length) h+='<div class="chg-empty"><b>Nothing here yet.</b><span>Decisions on the Master schedule page arrive here 24 hours after they are made.</span></div>';
+  else if(!list.length) h+='<div class="chg-empty"><b>No decision matches.</b></div>';
+  else {
+    var day='';
+    list.slice(0,400).forEach(function(e){ var dh=chgDayHead(e.at);
+      if(dh!==day){ if(day) h+='</div>'; day=dh; var nD=list.filter(function(x){ return chgDayHead(x.at)===dh; }).length;
+        h+='<div class="chg-g"><div class="chg-gh">'+esc(dh)+' <span>'+nD+' decision'+(nD===1?'':'s')+'</span></div>'; }
+      h+=chgEntryHTML(e); });
+    h+='</div>';
+    if(list.length>400) h+='<p class="hint" style="margin:10px 16px">Showing the 400 most recent — search or filter to see older ones.</p>';
+  }
+  h+='</div>';
+  paint('pg-chglog',h,function(){
+    Array.prototype.forEach.call(document.querySelectorAll('#pg-chglog [data-chf]'),function(b){
+      b.onclick=function(){ S.chF=b.getAttribute('data-chf'); renderChgLog(); }; });
+    var q=el('chgQ'); if(q) q.oninput=function(){ S.chQ=this.value; renderChgLog(); };
+    var u=el('chgU'); if(u) u.onchange=function(){ S.chU=this.value; renderChgLog(); };
+    Array.prototype.forEach.call(document.querySelectorAll('#pg-chglog [data-chgdt]'),function(x){
+      x.onchange=function(){ var k=x.getAttribute('data-chgdt'), d=sdDatedOf(k), v=x.value; if(!d||ntMs(v)===null) return;
+        d.from=d.side==='keep'? sdIsoAdd(v,1) : v; d.at=new Date().toISOString(); d.by=schedWho();
+        Object.keys(S.settings.chgLog||{}).forEach(function(id){ var e=S.settings.chgLog[id]; if(e.kind==='master'&&e.key===k&&e.dated) e.from=d.from; });
+        refresh(); toast('Date changed — counted from '+ntFmt(d.from)); }; });
+    Array.prototype.forEach.call(document.querySelectorAll('#pg-chglog [data-chgre]'),function(b){
+      b.onclick=function(){ var id=b.getAttribute('data-chgre'), e=(S.settings.chgLog||{})[id]; if(!e) return;
+        if(S.settings.noteDec) delete S.settings.noteDec[e.key]; delete S.settings.chgLog[id];
+        refresh(); toast(e.n+' is back in the review on the Master schedule page'); }; });
+    var xb=el('chgXls'); if(xb) xb.onclick=function(){
+      var t='<table><tr><th>Decided</th><th>By</th><th>Type</th><th>Doctor</th><th>Branch</th><th>Decision</th><th>Counted from</th>'+
+        '<th>Sessions a week before</th><th>Sessions a week after</th><th>What changed</th><th>Saved</th></tr>';
+      list.forEach(function(e){
+        var what=e.kind==='master'? (e.days||[]).map(function(x){ return x.d+': '+(x.a||'no session')+' → '+(x.b||'no session')+' ('+x.k+')'; }).join('; ')
+          : (e.ev||[]).map(function(v){ return (NT_LAB[v.kind]||v.kind)+' '+ntFmt(v.kind==='stop'? v.to : v.from); }).join('; ');
+        t+='<tr><td>'+esc(chgWhen(e.at))+'</td><td>'+esc(e.by||'')+'</td><td>'+(e.kind==='note'? 'Note date' : 'New master file')+'</td><td>'+esc(e.n)+'</td><td>'+esc(e.s)+'</td>'+
+          '<td>'+esc(chgDecTxt(e))+'</td><td>'+esc(e.kind==='master'&&e.from? ntFmt(e.from) : '')+'</td><td>'+(e.kind==='master'? e.wa : '')+'</td><td>'+(e.kind==='master'? (e.d==='keep'&&!e.dated? e.wa : e.wb) : '')+'</td>'+
+          '<td>'+esc(what)+'</td><td>'+esc(chgWhen(e.done))+'</td></tr>'; });
+      xlsDownload('DocPules change history.xls',[t+'</table>']); toast('Change history exported'); };
+  });
+}
 function sdKeptHTML(){
   var K=S.settings.sdKept||{}, E=S.settings.mstEdit||{};
   var ks=Object.keys(K).filter(function(k){ return E[k]; });
@@ -6786,7 +7227,10 @@ function sdFinish(){
   if(D.changed.some(function(c){ return !st[c.key]; })) return false;
   S.settings.sdKept=S.settings.sdKept||{};
   D.changed.forEach(function(c){ if(st[c.key]==='keep'&&!sdDatedOf(c.key)) S.settings.sdKept[c.key]={n:c.name,s:c.site,at:(new Date()).toISOString()}; });
-  D.changed.forEach(function(c){ sdLogPut(c,st[c.key]); });
+  var nowF=new Date().toISOString(), decF=S.settings.sdDec||{};
+  D.changed.forEach(function(c){ sdLogPut(c,st[c.key]); chgMaster(c,decF[c.key]||{d:st[c.key]},nowF); });
+  (D.added||[]).forEach(function(c){ chgAdd({id:'j|'+c.key+'|'+nowF.slice(0,10),kind:'join',key:c.key,n:c.name,s:c.site,d:'join',at:nowF,by:schedWho(),done:nowF,file:(S.files&&S.files.m)||''}); });
+  (D.removed||[]).forEach(function(c){ chgAdd({id:'g|'+c.key+'|'+nowF.slice(0,10),kind:'gone',key:c.key,n:c.name,s:c.site,d:'gone',at:nowF,by:schedWho(),done:nowF,file:(S.files&&S.files.m)||''}); });
   D.changed.forEach(function(c){ if(S.settings.sdDec) delete S.settings.sdDec[c.key]; if(S.settings.sdPrev) delete S.settings.sdPrev[c.key]; });
   saveSchedule(); S.pendingDiff=null; S.settled={};
   toast('All decided — the new file is saved as your schedule');
@@ -7269,7 +7713,7 @@ function ntMark(note,phr){
   return h; }
 function ntCardHTML(){
   if(!S.result) return '';
-  var all=ntItems().filter(function(it){ return it.ev.length; });
+  var all=ntItems().filter(function(it){ return it.ev.length&&!ntGone(it); });
   if(!all.length) return '';
   var cnt={todo:0,check:0,ok:0,skip:0,old:0,changed:0};
   all.forEach(function(it){ var st=ntState(it); cnt[st]=(cnt[st]||0)+1; if((st==='todo'||st==='changed')&&ntEvOf(it).some(function(e){ return !e.sure; })) cnt.check++; });
@@ -7295,7 +7739,7 @@ function ntCardHTML(){
   list.forEach(function(it){
     var st=ntState(it), ev=ntEvOf(it), lock=(st==='ok'||st==='skip'), k=esc(it.key);
     h+='<div class="nt-row '+st+'"><div class="nt-hd"><div class="nt-nm"><b>'+esc(it.t.name)+'</b> '+finSiteTag(it.t.site)+' '+finStTag(it.t)+
-        (st==='changed'? ' <span class="nt-chip w">note changed — check again</span>' : st==='ok'? ' <span class="nt-chip y">✓ confirmed</span>' : st==='skip'? ' <span class="nt-chip n">skipped</span>' : st==='old'? ' <span class="nt-chip n">before '+S.settings.year+'</span>' : '')+'</div>'+
+        (st==='changed'? ' <span class="nt-chip w">note changed — check again</span>' : st==='ok'? ' <span class="nt-chip y">✓ confirmed</span>'+chgClock((ntDec(it.key)||{}).at) : st==='skip'? ' <span class="nt-chip n">skipped</span>'+chgClock((ntDec(it.key)||{}).at) : st==='old'? ' <span class="nt-chip n">before '+S.settings.year+'</span>' : '')+'</div>'+
       '<div class="nt-btns">'+(lock? '<button type="button" class="sd-undo" data-ntundo="'+k+'">↺ Undo</button>'
         : '<button type="button" class="sd-btn ghost sm" data-ntskip="'+k+'">Skip</button><button type="button" class="sd-btn pri sm" data-ntok="'+k+'">✓ Confirm</button>')+'</div></div>'+
       '<div class="nt-note">“'+ntMark(it.note,it.phrases)+'”</div>';
@@ -7555,7 +7999,8 @@ function renderDrawer(){
     return hit.key===t.key;
   });
   all.sort(function(a,b){ return (a.date.m-b.date.m)||(a.date.d-b.date.d); });
-  var pool=(S.dw.mode==='counted')? all.filter(function(r){return r._used;}) : all;
+  /* "counted" keeps a closure that only cancelled his OT fixed session: it moved a number */
+  var pool=(S.dw.mode==='counted')? all.filter(function(r){return r._used||(r._otHit&&r._otHit.length);}) : all;
   var perMonth=[0,0,0,0,0,0,0,0,0,0,0,0];
   pool.forEach(function(r){ perMonth[r.date.m]++; });
   var sel=(S.dw.month===null)? pool : pool.filter(function(r){ return r.date.m===S.dw.month; });
@@ -7582,7 +8027,7 @@ function renderDrawer(){
   var dm=S.dw.month, span=(dm===null)? null : t.m[dm];
   var vS=span? span.s : t.ys, vC=span? span.c : t.yc, vO=span? span.o : t.yo,
       vT=span? span.t : t.yt, vE=vS+vO, vW=span? owedIn(span) : owedYear(t);
-  var vF=span? (span.ot||0) : (t.yot||0), vH=(dm===null)? (t.yotHeld||0) : ((t.otHeldM||[])[dm]||0),
+  var vF=span? (span.ot||0) : (t.yot||0), vX=span? (span.otCut||0) : (t.yotCut||0), vH=(dm===null)? (t.yotHeld||0) : ((t.otHeldM||[])[dm]||0),
       hasOT=(t.yot||0)>0||(t.yotHeld||0)>0;
   var scope=(dm===null)? ('all of '+year) : (M[dm]+' '+year);
   h+='<div class="rail" style="grid-template-columns:repeat(7,minmax(0,1fr))">'+
@@ -7591,7 +8036,8 @@ function renderDrawer(){
     '<div class="st"><div class="k">'+esc(T('closed'))+'</div><div class="v" style="color:var(--loss)">'+fmt(vC)+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('opened'))+'</div><div class="v" style="color:var(--gain)">'+fmt(vO)+'</div></div>'+
     '<div class="st"><div class="k">OT Fixed</div><div class="v" style="color:var(--teal)">'+fmt(vF)+'</div>'+
-      '<div class="d">'+(hasOT? 'extra sessions' : 'no fixed OT')+(vH>0.001? ' · <span style="color:var(--warn)">'+fmt(vH)+' waiting for a choice</span>' : '')+'</div></div>'+
+      '<div class="d">'+(hasOT? 'extra sessions' : 'no fixed OT')+(vH>0.001? ' · <span style="color:var(--warn)">'+fmt(vH)+' waiting for a choice</span>' : '')+
+        (vX>0.001? ' · <span style="color:var(--loss)" title="A closure at the same time: he was not there">'+fmt(vX)+' cancelled by a closure</span>' : '')+'</div></div>'+
     '<div class="st"><div class="k">'+esc(T('net'))+'</div><div class="v" style="color:var(--purple)">'+fmt(vT)+'</div>'+
       '<div class="d">sessions − closed + opened + OT fixed</div></div>'+
     '<div class="st"><div class="k">Expected</div><div class="v">'+fmt(vE)+'</div>'+
@@ -7846,6 +8292,8 @@ function renderDrawer(){
           '<div class="mt">'+esc(r.type||'—')+
           (r._openClash==='open'? ' · <span style="color:var(--teal)">same hours as his clinic \u2014 counted instead of the clinic</span>' :
            r._used? '' : ' · <span style="color:var(--warn)">not counted: '+esc(r._why||'excluded')+'</span>')+
+          (r._otHit&&r._otHit.length? ' · <span style="color:var(--loss)">cancels his OT fixed session at '+
+             esc(r._otHit.map(function(x){ return x.ot? clock12(x.ot.f).replace(':00','')+'\u2013'+clock12(x.ot.t).replace(':00','') : 'that day'; }).join(', '))+'</span>' : '')+
           '</div>'+
           (r._flags&&r._flags.length? '<div class="fl">'+r._flags.map(function(f){
             return '<div><span class="b '+f.lvl+'">'+(f.lvl==='err'?'✕':'!')+'</span><span>'+esc(f.msg)+'</span></div>';
@@ -7927,6 +8375,63 @@ function dbHeat(p){ /* delivery against plan, as a diverging tint around 0% */
   for(var i=0;i<steps.length;i++) if(p<steps[i][0]) return {bg:steps[i][1],tx:steps[i][2]};
   return {bg:'#0D9488',tx:'#fff'};
 }
+/* ---- who joined and who left this year ----
+   New: a confirmed "Starts on" date in the notes, a doctor saved as new in a
+   master file, or one waiting in the new file now. Left: a confirmed "Last day",
+   a red name in the master file (or marked inactive), or gone from the new file. */
+function staffMove(rows,year,site,dept){
+  var y0=Date.UTC(year,0,1), y1=Date.UTC(year+1,0,1), N={}, L={}, D=S.pendingDiff, chg=S.settings.chgLog||{};
+  function inY(ms){ return ms!==null&&ms!==undefined&&ms>=y0&&ms<y1; }
+  function keep(x){ return (!site||x.site===site)&&(!dept||x.dept===dept||x.dept===undefined); }
+  rows.forEach(function(t){
+    var x=ntDec(t.key);
+    if(x&&x.st==='ok') (x.ev||[]).forEach(function(e){
+      if(e.kind==='start'&&inY(ntMs(e.from))&&!N[t.key]) N[t.key]={t:t,name:t.name,site:t.site,ms:ntMs(e.from),why:'start date confirmed in the notes'};
+      if(e.kind==='stop'&&inY(ntMs(e.to))&&!L[t.key]) L[t.key]={t:t,name:t.name,site:t.site,ms:ntMs(e.to),why:'last day confirmed in the notes'}; });
+    if(!L[t.key]&&hasLeft(t)) L[t.key]={t:t,name:t.name,site:t.site,ms:null,why:hasLeftFile(t)? 'red name in the master file' : 'marked inactive'};
+  });
+  var byKey={}; rows.forEach(function(t){ byKey[t.key]=t; });
+  Object.keys(chg).forEach(function(id){ var e=chg[id]; if(!e||(e.kind!=='join'&&e.kind!=='gone')) return;
+    var ms=Date.parse(e.at); if(!inY(ms)) return; var t=byKey[e.key];
+    if(e.kind==='join'&&t&&!N[e.key]) N[e.key]={t:t,name:e.n,site:e.s,ms:ms,why:'new in the master file saved by '+(e.by||'someone')};
+    if(e.kind==='gone'&&keep({site:e.s})&&!L[e.key]) L[e.key]={t:t||null,name:e.n,site:e.s,ms:ms,why:'gone from the master file saved by '+(e.by||'someone')}; });
+  if(D){
+    (D.added||[]).forEach(function(c){ var t=byKey[c.key]; if(t&&!N[c.key]) N[c.key]={t:t,name:c.name,site:c.site,ms:null,pend:true,why:'in the new master file — waiting for your review'}; });
+    (D.removed||[]).forEach(function(c){ if(keep({site:c.site})&&!L[c.key]) L[c.key]={t:byKey[c.key]||null,name:c.name,site:c.site,ms:null,pend:true,why:'not in the new master file — waiting for your review'}; });
+  }
+  function arr(o){ return Object.keys(o).map(function(k){ o[k].key=k; return o[k]; })
+    .sort(function(a,b){ return (b.ms||9e15)-(a.ms||9e15)||(a.name<b.name?-1:1); }); }
+  return {n:arr(N),l:arr(L)};
+}
+function staffMoveHTML(rows,year,site,dept){
+  var M=staffMove(rows,year,site,dept), active=rows.filter(function(t){ return !hasLeft(t); }).length;
+  var by=[]; for(var i=0;i<12;i++) by.push({n:0,l:0});
+  var nU=0, lU=0;
+  M.n.forEach(function(x){ if(x.ms===null) nU++; else by[new Date(x.ms).getUTCMonth()].n++; });
+  M.l.forEach(function(x){ if(x.ms===null) lU++; else by[new Date(x.ms).getUTCMonth()].l++; });
+  var mx=Math.max(1,Math.max.apply(null,by.map(function(v){ return Math.max(v.n,v.l); })));
+  var net=M.n.length-M.l.length;
+  function who(x,k){ var d=x.ms===null? (x.pend? 'waiting' : 'date not known') : ntFmt(new Date(x.ms).toISOString().slice(0,10));
+    return '<button type="button" class="sm-p '+k+(x.pend?' pend':'')+'"'+(x.t? ' data-dshdoc="'+esc(x.t.key)+'"' : ' disabled')+' title="'+esc(x.why)+'">'+
+      '<b>'+esc(x.name)+'</b>'+finSiteTag(x.site)+'<span>'+esc(d)+'</span></button>'; }
+  var h='<div class="dsh-card sm"><div class="dsh-h"><div><h3>Staff movement in '+year+'</h3>'+
+    '<div class="dsh-hs">doctors who joined and who left · hover a name for how we know · click to open the doctor</div></div></div>'+
+    '<div class="sm-top">'+
+      '<div class="sm-k n"><span>New doctors</span><b>+'+M.n.length+'</b><em>'+(nU? nU+' waiting or without a date' : 'all dated')+'</em></div>'+
+      '<div class="sm-k l"><span>Doctors who left</span><b>\u2212'+M.l.length+'</b><em>'+(lU? lU+' without a date' : 'all dated')+'</em></div>'+
+      '<div class="sm-k t"><span>Net change</span><b>'+(net>0?'+':net<0?'\u2212':'')+Math.abs(net)+'</b><em>'+active+' active doctors now</em></div>'+
+      '<div class="sm-ch" role="img" aria-label="Joined and left by month">'+by.map(function(v,i){
+        return '<div class="sm-m" title="'+esc(MONTHS_EN[i]+': '+v.n+' joined, '+v.l+' left')+'">'+
+          '<span class="sm-u">'+(v.n? '<i style="height:'+(v.n/mx*100).toFixed(0)+'%"></i>' : '')+'</span>'+
+          '<span class="sm-d">'+(v.l? '<i style="height:'+(v.l/mx*100).toFixed(0)+'%"></i>' : '')+'</span>'+
+          '<span class="sm-ml">'+MONTHS_EN[i].slice(0,1)+'</span></div>'; }).join('')+'</div>'+
+    '</div>'+
+    '<div class="sm-lists"><div><div class="sm-lh n">Joined <b>'+M.n.length+'</b></div>'+(M.n.length? M.n.slice(0,40).map(function(x){ return who(x,'n'); }).join('') : '<div class="sm-none">No new doctors found for '+year+'.</div>')+
+      (M.n.length>40? '<div class="sm-none">and '+(M.n.length-40)+' more</div>' : '')+'</div>'+
+    '<div><div class="sm-lh l">Left <b>'+M.l.length+'</b></div>'+(M.l.length? M.l.slice(0,40).map(function(x){ return who(x,'l'); }).join('') : '<div class="sm-none">No one has left in '+year+'.</div>')+
+      (M.l.length>40? '<div class="sm-none">and '+(M.l.length-40)+' more</div>' : '')+'</div></div></div>';
+  return h;
+}
 function renderAnalysis(){
   if(!S.result){ el('pg-analysis').innerHTML=emptyState(); return; }
   var R=S.result, M=months(), f=S.an, msel=(f.month===''? null : parseInt(f.month,10));
@@ -8005,6 +8510,7 @@ function renderAnalysis(){
        '<div class="dsh-d">'+(GT.t-GT.s>=0?'+':'')+nf(GT.t-GT.s)+' sessions</div></div>'+
      '</div>';
 
+  h+=staffMoveHTML(rows,R.year,f.site,f.dept);
   /* ---- the year: closures down, openings up, per month ---- */
   var mt=[]; for(var m=0;m<12;m++) mt.push({s:0,c:0,o:0,t:0});
   rows.forEach(function(t){ for(var m=0;m<12;m++){ var v=t.m[m]; mt[m].s+=v.s;mt[m].c+=v.c;mt[m].o+=v.o;mt[m].t+=v.t; } });
@@ -9716,6 +10222,10 @@ function bkRowW(r){
    page goes on obeying the Rules. Each day carries both the weighted figure and
    the plain row count, so a doctor counted by the session rather than by the
    hour can be served from the same index. */
+/* Session breakdown rules: every reason counts in the breakdown unless it is
+   switched off there (settings.brkRule[key]===false). Separate from the
+   Counting rules, which the breakdown does not read. */
+function brkOn(r){ var B=S.settings.brkRule; return !(B&&B[ruleKey(r.main,r.sub)]===false); }
 function bkDayIndex(){
   return pdCache('bkday',function(){
     var ix={}, year=S.settings.year;
@@ -9727,6 +10237,7 @@ function bkDayIndex(){
              : (st==='open'||st==='opened')? 'o' : '';
       if(!side) return;
       if(r._openClash==='roster') return;      /* the same session as his clinic: counted once */
+      if(!brkOn(r)) return;                     /* switched off under Session breakdown rules */
       if(only!==null&&new Date(Date.UTC(r.date.y,r.date.m,r.date.d)).getUTCDay()!==only) return;
       var who=(nz(r.id)||'~'+nameKey(r.name))+'|'+nz(r.site);
       var k=who+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d;
@@ -9760,6 +10271,7 @@ function bkSwaps(){
              : (st==='open'||st==='opened')? 'o' : '';
       if(!side) return;
       if(holDay[r.date.y+'-'+r.date.m+'-'+r.date.d]) return;   /* a holiday is never a swap */
+      if(!brkOn(r)) return;
       var w=1; if(weighted&&r.hours>0) w=r.hours/hrs;
       var k=(nz(r.id)||'~'+nameKey(r.name))+'|'+nz(r.site)+'|'+r.date.y+'-'+r.date.m+'-'+r.date.d;
       var e=day[k]||(day[k]={c:0,o:0,m:r.date.m,rows:[]});
@@ -11656,6 +12168,57 @@ function otCancelByClosure(t,year,m,rows,proj,reasonAgg,stats){
   });
   return out;
 }
+function otCutByClosure(t,year,m,pj,unused,otCl,rows){
+  var F=otForMonth(t.key,year,m,rows), total=0, base=(nz(t.id)||'~'+nameKey(t.name))+'|'+m+'|';
+  var hyb=!!t.hybrid;   /* an H doctor's closures may already sit in his allowance: leave them */
+  Object.keys(pj.days).forEach(function(d){
+    var day=+d, n=pj.days[d]; if(!(n>0)) return;
+    var cl=otCl[base+day]; if(!cl||!cl.length) return;
+    var times=(F.times[d]||[]).length? F.times[d] : [null], share=n/times.length;
+    var wd=new Date(Date.UTC(year,m,day)).getUTCDay(), rost=(t.spans&&t.spans[wd])||[];
+    times.forEach(function(a){
+      var cc=(pj.clashes||[]).filter(function(c){ return c.day===day&&otOverlap(c.otTime,a); })[0], pick=cc? cc.pick : '';
+      var hits=cl.filter(function(c){ return otOverlap(a,{f:c.f,t:c.t}); });
+      if(pick==='fixed') hits=hits.filter(function(c){ return c.r._used&&c.r._tkey===t.key; });
+      if(!hits.length) return;
+      /* how much of the OT time the closures cover */
+      var cov=1;
+      if(a&&a.t>a.f&&!wholeSession(t.key)){
+        var iv=hits.map(function(c){ return [Math.max(a.f,c.f),Math.min(a.t,c.t)]; })
+          .filter(function(x){ return x[1]>x[0]; }).sort(function(x,y){ return x[0]-y[0]; });
+        var got=0, lo=null, hi=null;
+        iv.forEach(function(x){ if(hi===null||x[0]>hi){ if(hi!==null) got+=hi-lo; lo=x[0]; hi=x[1]; } else hi=Math.max(hi,x[1]); });
+        if(hi!==null) got+=hi-lo;
+        cov=Math.min(1,got/(a.t-a.f));
+      }
+      var cut=share*cov; if(!(cut>0)) return;
+      total+=cut; pj.days[day]=Math.max(0,pj.days[day]-cut);
+      var lead=hits[0].r;
+      t.otCuts.push({month:m,day:day,wd:wd,ot:a,cut:cut,pick:pick,
+        reason:nz(lead.main)+(lead.sub? ' \u203a '+nz(lead.sub) : ''),row:lead.row,sheet:lead.sheet,
+        site:lead.site,away:nz(lead.site)!==nz(t.site),
+        close:{f:hits[0].f,t:hits[0].t}});
+      hits.forEach(function(c){
+        var r=c.r; r._otHit=r._otHit||[]; r._otHit.push({t:t.key,day:day,ot:a,cut:cut});
+        if(!r._used||r._tkey!==t.key||hyb) return;
+        /* a closure whose only session at that time was the OT is not taken twice */
+        var onClinic=rost.some(function(b){ return otOverlap({f:c.f,t:c.t},b); });
+        if(pick==='fixed'||!onClinic) otUncount(t,r,pick==='fixed'
+          ? 'it cancelled his OT fixed session, which stood in for his clinic that day \u2014 counted once'
+          : 'it cancelled his OT fixed session (no clinic at that time) \u2014 counted once, as the OT');
+      });
+    });
+  });
+  return total;
+}
+/* take a counted closure back out of Closed (it already came off as the OT) */
+function otUncount(t,r,why){
+  var w=r._w||0, m=r.date.m;
+  t.m[m].c-=w; t.m[m].t+=w; t.yc-=w; t.yt+=w;
+  var ra=S._reasonAgg&&S._reasonAgg[r._key]; if(ra){ ra.c-=w; ra.n--; }
+  if(S._stats) S._stats.counted--;
+  r._used=false; r._otCancel=true; r._why=why;
+}
 function otCalendarTable(){
   var V=valBuild(); if(!V||V.needMonth) return null;
   var keys=otDoctorKeys();
@@ -12656,7 +13219,7 @@ function pdStamp(){
     st.paidRSet,JSON.stringify(st.paidR||{}),st.paidOpenOnly,st.paidByHours,
     st.otOn,st.otSheet,JSON.stringify(st.otMap||{}),st.otUnpaidCancels,st.otDedupe,S.dayFilter,
     (S.ot&&S.ot.rows.length)||0,(S.ot&&S.ot.sheet)||'',
-    JSON.stringify(st.ot||[]),JSON.stringify(st.otRule||{}),JSON.stringify(st.otClash||{}),JSON.stringify(st.openClash||{}),
+    JSON.stringify(st.ot||[]),JSON.stringify(st.otRule||{}),JSON.stringify(st.otClash||{}),JSON.stringify(st.openClash||{}),JSON.stringify(st.brkRule||{}),
     /* the day and holiday indexes read these too; left out of the key, a
        holiday added after the index was first built was never seen */
     JSON.stringify(st.holidays||[]),st.weighted?1:0,st.schedApply?1:0,st.schedSrc||'',
@@ -16271,6 +16834,49 @@ function hSetCounted(rule,on){
    doctor's side. Per reason: is it counted for H doctors (the same switch as
    the H button above), and does a closure for it come out of the yearly
    allowance instead of the total. */
+function brkRulesCard(keys,sideOf){
+  var rows={}, B=S.settings.brkRule||{}, off=0, offRows=0, year=S.settings.year;
+  ((S.capacity&&S.capacity.rows)||[]).forEach(function(r){ if(!r.date||r.date.y!==year) return;
+    var k=ruleKey(r.main,r.sub); rows[k]=(rows[k]||0)+1; });
+  keys.forEach(function(k){ if(B[k]===false){ off++; offRows+=rows[k]||0; } });
+  var F=S.bruF||'', Q=low(S.bruQ||'');
+  var list=keys.filter(function(k){ var r=S.rules[k], on=B[k]!==false, sd=sideOf(k);
+    if(F==='c'&&sd!=='c') return false; if(F==='o'&&sd!=='o') return false; if(F==='off'&&on) return false;
+    if(Q&&low(r.main+' '+r.sub).indexOf(Q)<0) return false; return true; });
+  var h='<div class="card ru" id="brkRules"><div class="ru-hd"><div><h3 style="margin:0">Session breakdown rules</h3>'+
+    '<p class="hint" style="margin:4px 0 0">The Session breakdown asks <b>whether the clinic ran</b>, so it does not read the Counting rules: '+
+    'every closure blocks the session and every opening counts as worked. Switch a reason off to leave it out of the <b>breakdown only</b> '+
+    '(and the PDT sheet made from it) — the Doctors page is not touched.</p></div>'+
+    '<div class="ru-kpi"><div><b>'+(keys.length-off)+'</b><span>reasons in the breakdown</span></div>'+
+      '<div><b>'+off+'</b><span>switched off</span></div><div><b>'+fmt(offRows,0)+'</b><span>rows left out in '+year+'</span></div></div></div>'+
+    '<div class="brk-also"><b>Also applied in the breakdown, the same as the Doctors page:</b>'+
+      '<span>\u2713 an OT fixed session is cancelled by a closure at its time</span>'+
+      '<span>\u2713 an opening at the same time as his clinic counts once</span>'+
+      '<span>\u2713 "OT fixed session" takes the clinic out of the plan</span>'+
+      '<span>\u2713 a new schedule counts from the date you chose</span>'+
+      '<span>\u2713 public holidays are taken once</span></div>'+
+    '<div class="ru-f"><input type="search" id="bruQ" placeholder="Search a reason" value="'+esc(S.bruQ||'')+'" aria-label="Search a reason">'+
+      [['','All'],['c','Closes sessions'],['o','Opens sessions'],['off','Switched off']].map(function(o){
+        return '<button type="button" class="db2-fc'+(F===o[0]?' on':'')+'" data-bruf="'+o[0]+'">'+o[1]+'</button>'; }).join('')+
+      (off? '<button type="button" class="dchip" id="bruReset">Count every reason again</button>' : '')+'</div>';
+  if(!list.length) h+='<div class="hc-none" style="margin:14px">No reason matches.</div>';
+  var groups={}, order=[];
+  list.forEach(function(k){ var g=S.rules[k].main||'(blank)'; if(!groups[g]){ groups[g]=[]; order.push(g); } groups[g].push(k); });
+  order.sort().forEach(function(g){
+    h+='<div class="ru-g"><div class="ru-gh">'+esc(g)+' <span>'+groups[g].length+'</span></div>';
+    groups[g].forEach(function(k){ var r=S.rules[k], on=B[k]!==false, sd=sideOf(k), n=rows[k]||0;
+      h+='<div class="ru-r'+(on?' on':'')+'">'+
+        '<button type="button" class="ru-sw'+(on?' on':'')+'" data-brk="'+esc(k)+'" role="switch" aria-checked="'+on+'" aria-label="'+esc((r.sub||r.main)+' in the Session breakdown')+'"><i></i></button>'+
+        '<div class="ru-nm"><div class="ru-t">'+esc(r.sub||'(blank)')+
+          (sd? '<span class="ru-side '+sd+'">'+(sd==='o'?'opens sessions':'closes sessions')+'</span>' : '')+
+          (S.rules[k].include==='Y'? '' : '<span class="ru-tag">skipped on the Doctors page</span>')+'</div>'+
+          '<div class="ru-s">'+(!on? 'Left out of the Session breakdown — its rows change nothing there'
+            : sd==='o'? 'In the breakdown · an opening counts as a session worked'
+            : 'In the breakdown · a closure blocks the session the doctor had')+'</div></div>'+
+        '<div class="ru-cap"><div class="ru-n"><b>'+fmt(n,0)+'</b> rows</div></div></div>'; });
+    h+='</div>'; });
+  return h+'</div>';
+}
 function hRulesCard(keys,sideOf){
   var R=S.result, hRows={}, hDocs={}, nH=0, hIds={};
   (R? R.rows : []).forEach(function(t){ if(t.hybrid) hIds[nz(t.id)+'|'+nz(t.site)]=1; });
@@ -16472,6 +17078,7 @@ function renderRules(){
     h+='</div>'; });
   h+='</div>';
   h+=hRulesCard(keys,sideOf);
+  h+=brkRulesCard(keys,sideOf);
   var CI=R?R.colorIdx:{};
   var cks=Object.keys(CI).sort(function(a,b){ return CI[b].n-CI[a].n; });
   var mf={};
@@ -16581,6 +17188,15 @@ function renderRules(){
       var on=!hUsesAllow(r.main,r.sub);
       if(on===hAllowDefault(r.main,r.sub)) delete S.settings.hAllow[k]; else S.settings.hAllow[k]=on;
       refresh(); toast((r.sub||r.main)+(on?' now uses the H allowance':' no longer uses the H allowance')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-brk]'),function(b){
+    b.onclick=function(){ var k=b.getAttribute('data-brk'), r=S.rules[k]; if(!r) return;
+      S.settings.brkRule=S.settings.brkRule||{};
+      var on=S.settings.brkRule[k]===false; if(on) delete S.settings.brkRule[k]; else S.settings.brkRule[k]=false;
+      refresh(); toast((r.sub||r.main)+(on? ' is back in the Session breakdown' : ' is now left out of the Session breakdown')); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-bruf]'),function(b){
+    b.onclick=function(){ S.bruF=b.getAttribute('data-bruf'); renderRules(); }; });
+  var brq=el('bruQ'); if(brq) brq.oninput=function(){ S.bruQ=this.value; renderRules(); };
+  var brr=el('bruReset'); if(brr) brr.onclick=function(){ S.settings.brkRule={}; refresh(); toast('Every reason counts in the Session breakdown again'); };
   Array.prototype.forEach.call(document.querySelectorAll('#pg-rules [data-hruf]'),function(b){
     b.onclick=function(){ S.hruF=b.getAttribute('data-hruf'); renderRules(); }; });
   var hrq=el('hruQ'); if(hrq) hrq.oninput=function(){ S.hruQ=this.value; renderRules(); };
@@ -17112,7 +17728,7 @@ function syncControls(){
   Array.prototype.forEach.call(document.querySelectorAll('[data-i]'),function(n){
     n.textContent=T(n.getAttribute('data-i')); });
 }
-function refresh(){ compute(); saveConfig(); renderNav();
+function refresh(){ compute(); try{ ntSweep(); }catch(e){} saveConfig(); renderNav();
   var dw=el('drawer');
   if(S.dw&&dw&&dw.classList.contains('on')){ S._behind=true; renderDrawer(); return; }
   renderPage(); }
@@ -17125,6 +17741,7 @@ function init(){
   try{ if(!S.master&&restoreSchedule()) compute(); }catch(e){}
   var mk=el('mark'); SQ.forEach(function(c){ var i=document.createElement('i'); i.style.background=c; mk.appendChild(i); });
   syncControls(); renderNav(); renderPage();
+  try{ thApply(); }catch(e){}
   el('fYear').onchange=function(){ var v=parseInt(this.value,10); if(v>1900&&v<2200){ S.settings.year=v; refresh(); } };
   el('fHrs').onchange=function(){ var v=parseFloat(this.value); if(v>0){ S.settings.hrs=v; refresh(); } };
   el('fWeight').onchange=function(){ S.settings.weighted=this.value==='1'; refresh(); };
@@ -17362,7 +17979,7 @@ function liveRedraw(){
 
 /* expose pure functions for verification outside the browser */
 if(typeof module!=='undefined'&&module.exports)
-  module.exports={nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
+  module.exports={renderChgLog:renderChgLog,staffMove:staffMove,ntItems:ntItems,ntSaveDec:ntSaveDec,ntState:ntState,kpiRound:kpiRound,thApply:thApply,thMapRGB:thMapRGB,brkOn:brkOn,sdLoad:sdLoad,sdPut:sdPut,chgAll:chgAll,renderAnalysis:renderAnalysis,renderRules:renderRules,renderSettings:renderSettings,setSub:setSub,nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
     parseMaster:parseMaster,parseCapacity:parseCapacity,parseHybrid:parseHybrid,
     pickMasterSheet:pickMasterSheet,pickCapSheets:pickCapSheets,pickHybridSheet:pickHybridSheet,
     compute:compute,S:S,ensureRule:ensureRule,weekdayCounts:weekdayCounts,durHours:durHours,serialDate:serialDate,
