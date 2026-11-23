@@ -7341,9 +7341,9 @@ function otMonthRows(t,y,m){
   return list.map(function(x){
     var clash=!!x.roster, st, cls;
     if(clash&&!x.pick){ st='Waiting — choose'; cls='w'; }
-    else if(clash&&x.pick==='master'){ st='Not counted (it was the clinic)'; cls='n'; }
-    else if(clash&&x.pick==='fixed'){ st='Counted as fixed OT · clinic not counted'; cls='y'; }
-    else if(clash){ st='Counted as fixed OT · clinic counted too'; cls='y'; }
+    else if(clash&&x.pick==='master'){ st='Clinic counted · fixed OT not'; cls='n'; }
+    else if(clash&&x.pick==='fixed'){ st='Fixed OT counted · clinic taken out'; cls='y'; }
+    else if(clash){ st='2 sessions counted · clinic + fixed OT'; cls='y'; }
     else { st='Counted as fixed OT'; cls='y'; }
     return {day:x.day,wd:x.wd,ot:x.ot,roster:x.roster,open:x.open,pick:x.pick,pickFrom:x.pickFrom,clash:clash,st:st,cls:cls,id:t.key+'|'+y+'-'+m+'-'+x.day,slot:otSlotId(t.key,x.wd,x.ot)};
   });
@@ -7373,9 +7373,10 @@ function otTableHead(showName){
 function otSlotRows(t,y,m){
   var by={}, out=[];
   otMonthRows(t,y,m).forEach(function(r){
-    var k=r.slot; var g=by[k]||(by[k]={slot:k,t:t,wd:r.wd,ot:r.ot,roster:r.roster,days:[],clash:0,waiting:0,counted:0,notc:0,dayOv:0});
+    var k=r.slot; var g=by[k]||(by[k]={slot:k,t:t,wd:r.wd,ot:r.ot,roster:r.roster,days:[],clash:0,waiting:0,counted:0,notc:0,dayOv:0,both:0,fixed:0,master:0,free:0});
     if(!by[k].roster&&r.roster) by[k].roster=r.roster;
     g.days.push(r.day); if(r.clash) g.clash++; if(r.cls==='w') g.waiting++; else if(r.cls==='y') g.counted++; else g.notc++;
+    if(!r.clash) g.free++; else if(r.pick==='both') g.both++; else if(r.pick==='fixed') g.fixed++; else if(r.pick==='master') g.master++;
     if(r.clash&&r.pickFrom==='day') g.dayOv++;
     if(!by[k].__in){ by[k].__in=1; out.push(by[k]); } });
   return out;
@@ -7390,7 +7391,11 @@ function otSlotTableHTML(list,y,m,showName){
   if(!list.length) return '';
   return '<table class="ot-mt"><thead><tr>'+(showName?'<th>Doctor</th>':'')+'<th>OT slot</th><th>Days in '+MONTHS_EN[m].slice(0,3)+'</th><th>Master schedule that time</th><th>What did he work? <span class="hint">(all days)</span></th><th>Result this month</th></tr></thead><tbody>'+
     list.map(function(g){ var t=g.t;
-      var res=(g.waiting? '<span class="ot-st w">'+g.waiting+' waiting</span> ' : '')+(g.counted? '<span class="ot-st y">'+g.counted+' counted</span> ' : '')+(g.notc? '<span class="ot-st n">'+g.notc+' not counted</span>' : '');
+      var res=(g.waiting? '<span class="ot-st w">'+g.waiting+' waiting</span> ' : '')+
+        (g.both? '<span class="ot-st y" title="Both: the clinic stays in Sessions and the fixed OT is added on top">'+g.both+' clinic + '+g.both+' OT = '+(2*g.both)+' counted</span> ' : '')+
+        (g.fixed? '<span class="ot-st y" title="OT fixed session: the clinic comes out of Sessions, the fixed OT is counted instead">'+g.fixed+' OT counted · clinic out</span> ' : '')+
+        (g.master? '<span class="ot-st n" title="Master schedule: the clinic is counted, the fixed OT is not">'+g.master+' clinic counted · OT not</span> ' : '')+
+        (g.free? '<span class="ot-st y">'+g.free+' OT counted</span>' : '');
       return '<tr>'+(showName? '<td><b>'+esc(t.name)+'</b><div class="dpg-sub">'+esc(t.site)+' · '+esc(t.id)+'</div></td>' : '')+
         '<td><b>'+DPG_DAYN[g.wd]+'</b> <span class="ot-tm">'+esc(otTime(g.ot))+'</span></td>'+
         '<td>'+g.days.length+' day'+(g.days.length===1?'':'s')+'<div class="dpg-sub">'+g.days.join(', ')+'</div></td>'+
@@ -7403,8 +7408,9 @@ function otDrawerHTML(t,y,m){
   if(!otList().some(function(o){ return otKeyOf(o)===t.key; })) return '';
   if(m===null||m===undefined) return '<div class="card"><h3>Fixed OT sessions</h3><div class="cb"><p class="hint">Choose a month to see this doctor\'s fixed OT day by day.</p></div></div>';
   var P=otMonthFor(t,y,m,S.result.rows), days=!!S.otDwDays, body=days? otDoctorTableHTML(t,y,m,false) : '', slots=otSlotTableHTML(otSlotRows(t,y,m),y,m,false);
+  var kept=otMonthRows(t,y,m).filter(function(r){ return r.clash&&r.pick==='both'; }).length;
   return '<div class="card"><h3>Fixed OT sessions · '+MONTHS_EN[m]+' '+y+
-    ' <span class="tag">'+fmt(P.total)+' counted</span>'+(P.held? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(P.held)+' waiting</span>' : '')+'</h3>'+
+    ' <span class="tag">'+fmt(P.total)+' OT counted</span>'+(kept? ' <span class="tag" title="Clinic sessions at the same time, kept in Sessions because you chose Both">+ '+kept+' clinic kept (Both)</span>' : '')+(P.held? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(P.held)+' waiting</span>' : '')+'</h3>'+
     (slots? '<div class="tw">'+slots+'</div>' : '<div class="cb"><p class="hint">No fixed OT this month.</p></div>')+
     (slots? '<div class="cb" style="padding-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button type="button" class="btn sm" id="otDwDays">'+(days?'Hide the days':'Show day by day')+'</button><span class="hint">One choice covers every day of that slot. Set a single day only if it was different. Same choice as on the <b>OT fixed session</b> page.</span></div>' : '')+
     (body? '<div class="tw"><table class="ot-mt">'+otTableHead(false)+'<tbody>'+body+'</tbody></table></div>' : '')+'</div>';
@@ -7417,14 +7423,17 @@ function otMonthCheckHTML(){
   var docs=S.result.rows.filter(function(t){ return keys[t.key]; }).sort(function(a,b){ return low(a.name)<low(b.name)?-1:1; });
   var waiting=0, counted=0, body='', fl=S.otFl||'';
   var view=S.otView||'doc', slots=[];
+  var keptAll=0;
   docs.forEach(function(t){ var P=otMonthFor(t,y,m,S.result.rows); waiting+=P.held; counted+=P.total;
+    keptAll+=otMonthRows(t,y,m).filter(function(r){ return r.clash&&r.pick==='both'; }).length;
     if(view==='doc'){ otSlotRows(t,y,m).forEach(function(g){ if(fl==='wait'&&!g.waiting) return; if(fl==='clash'&&!g.clash) return; slots.push(g); }); return; }
     if(fl==='wait'&&!(P.held>0)) return;
     if(fl==='clash'&&!otMonthRows(t,y,m).some(function(r){ return r.clash; })) return;
     body+=otDoctorTableHTML(t,y,m,true); });
   if(view==='doc') body=otSlotTableHTML(slots,y,m,true);
   return '<div class="card ot-chk"><h3>Month check · '+(view==='doc'? 'by doctor' : 'day by day')+
-      ' <span class="tag">'+fmt(counted)+' counted</span>'+(waiting? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(waiting)+' waiting for you</span>' : '')+'</h3>'+
+      ' <span class="tag">'+fmt(counted)+' OT counted</span>'+(keptAll? ' <span class="tag" title="Clinic sessions at the same time, kept in Sessions because of Both">+ '+keptAll+' clinic kept (Both)</span>' : '')+
+      (waiting? ' <span class="tag" style="background:var(--warn-bg);color:var(--warn)">'+fmt(waiting)+' waiting for you</span>' : '')+'</h3>'+
     '<div class="cb" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
       '<select id="otMonthSel">'+MONTHS_EN.map(function(mn,i){ return '<option value="'+i+'"'+(i===m?' selected':'')+'>'+mn+' '+y+'</option>'; }).join('')+'</select>'+
       '<div class="seg2" role="group">'+[['doc','By doctor (all days)'],['day','Day by day']].map(function(x){ return '<button type="button" data-otview="'+x[0]+'" aria-pressed="'+(view===x[0])+'" style="font-size:12px;padding:5px 11px">'+x[1]+'</button>'; }).join('')+'</div>'+
