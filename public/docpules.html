@@ -13451,33 +13451,38 @@ function pdOne(r){
    same way the Paid extra page does. */
 function dwExtraIs(r){ return !!r.ot||(pdIsOpen(r)&&/extra|coverage/i.test(nz(r.sub))); }
 function dwExtra(t){
-  return pdCache('dwx:'+t.key,function(){
+  /* the logged part (paid Extra / Coverage) comes from the Paid extra lists */
+  var lg=pdCache('dwx:'+t.key,function(){
     var H=num(S.settings.hrs)||4, out=[];
-    for(var m=0;m<12;m++) out.push({n:0,log:0,ot:0,cut:0,cutN:0,rows:0});
+    for(var m=0;m<12;m++) out.push({log:0,cut:0,rows:0});
     var mine=function(r){ return r.date&&r.date.y===+S.settings.year&&(nz(t.id)? nz(r.id)===nz(t.id)&&nz(r.site)===nz(t.site) : nameKey(r.name)===nameKey(t.name)); };
-    /* entries, the ones a closure took off whole (Paid extra's dropped list), and fixed OT */
-    pdEntries().concat(pdDropped(),otItems()).forEach(function(r){
-      if(!mine(r)||r.dup||!dwExtraIs(r)) return;
+    /* entries, and the ones a closure took off whole (Paid extra's dropped list) */
+    pdEntries().concat(pdDropped()).forEach(function(r){
+      if(r.ot||!mine(r)||r.dup||!dwExtraIs(r)) return;
       var o=out[r.date.m], full=pdByHours()? ((r.hours>0? r.hours : H)/H) : 1;
       o.rows++;
-      if(r.blocked){ if(!r.ot){ o.cut+=full; o.cutN++; } return; }   /* an OT one is in otCut below */
+      if(r.blocked){ o.cut+=full; return; }
       var v=pdN(pdOne(r));
-      o.n+=v; if(r.ot) o.ot+=v; else o.log+=v;
-      if(full-v>0.0001){ o.cut+=full-v; o.cutN++; }
+      o.log+=v;
+      if(full-v>0.0001) o.cut+=full-v;
     });
-    /* fixed OT a closure cancelled: the count already took it off (OT Fixed column) */
-    out.forEach(function(o,m){ var c=(t.m&&t.m[m]&&t.m[m].otCut)||0; if(c>0){ o.cut+=c; o.cutN+=Math.ceil(c); } });
-    var y={n:0,log:0,ot:0,cut:0,cutN:0,rows:0};
-    out.forEach(function(o){ Object.keys(y).forEach(function(k){ y[k]+=o[k]; }); });
-    out.year=y;
     return out;
   });
+  /* the fixed OT part is exactly the OT Fixed column (and what a closure cancelled there) */
+  var out=[];
+  for(var m=0;m<12;m++){ var a=lg[m], mm=(t.m&&t.m[m])||{}, ot=mm.ot||0, oc=mm.otCut||0;
+    out.push({log:a.log,ot:ot,n:a.log+ot,cut:a.cut+oc,rows:a.rows}); }
+  var y={n:0,log:0,ot:0,cut:0,rows:0};
+  out.forEach(function(o){ Object.keys(y).forEach(function(k){ y[k]+=o[k]; }); });
+  out.year=y;
+  return out;
 }
+function dwX2(v){ return fmt(Math.round(v*100)/100); }
 function dwExtraCell(o){
   if(!o||(!o.n&&!o.cut)) return '<td class="n">·</td>';
-  var tip=fmt(o.log)+' paid Extra / Coverage + '+fmt(o.ot)+' OT fixed'+(o.cut? ' · '+fmt(o.cut)+' taken off by a closure or an unpaid mark' : '');
-  return '<td class="n" title="'+esc(tip)+'"><b style="color:var(--gain)">'+fmt(o.n)+'</b>'+
-    (o.cut>0.0001? '<div class="mt" style="color:var(--loss)">\u2212'+fmt(o.cut)+' closed</div>' : '')+'</td>';
+  var tip=fmt(o.log)+' paid Extra / Coverage + '+fmt(o.ot)+' OT fixed (the OT Fixed column)'+(o.cut? ' · '+fmt(o.cut)+' taken off by a closure or an unpaid mark' : '');
+  return '<td class="n" title="'+esc(tip)+'"><b style="color:var(--gain)">'+dwX2(o.n)+'</b>'+
+    (o.cut>0.0001? '<div class="mt" style="color:var(--loss)">−'+dwX2(o.cut)+' closed</div>' : '')+'</td>';
 }
 function pdItems(){
   var src=S.pd.src||'all', out=[];
