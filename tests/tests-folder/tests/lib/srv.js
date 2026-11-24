@@ -1,0 +1,81 @@
+/* Boot the served page in jsdom against the running server, so the whole path
+   is exercised: fetch -> API -> SQLite -> the portal's figures. */
+const {JSDOM,VirtualConsole}=require('jsdom');
+const http=require('http');
+const BASE=process.env.DP_BASE || 'http://localhost:3112';
+/* a fresh connection per request: a reused keep-alive socket the server has
+   already closed gave "socket hang up" on a busy machine */
+const AGENT=new http.Agent({keepAlive:false});
+function req1(path,opt){
+  return new Promise((res,rej)=>{
+    const u=new URL(BASE+path);
+    const r=http.request({hostname:u.hostname,port:u.port,path:u.pathname+u.search,agent:AGENT,
+      method:(opt&&opt.method)||'GET',headers:(opt&&opt.headers)||{}},(resp)=>{
+      const chunks=[]; resp.on('data',c=>chunks.push(c)); resp.on('error',rej);
+      resp.on('end',()=>res({status:resp.statusCode,headers:resp.headers,body:Buffer.concat(chunks)}));
+    });
+    r.on('error',rej);
+    if(opt&&opt.body) r.write(opt.body);
+    r.end();
+  });
+}
+/* a dropped connection is tried again (reads only — a write could land twice) */
+async function req(path,opt){
+  const get=!(opt&&opt.method)||opt.method==='GET';
+  for(let i=0;;i++){
+    try{ return await req1(path,opt); }
+    catch(e){ if(!get||i>=3||!/ECONNRESET|socket hang up|EPIPE/.test(String(e&&(e.code||e.message)))) throw e;
+      await new Promise(r=>setTimeout(r,300*(i+1))); }
+  }
+}
+module.exports=async function boot(cookie){
+  const page=await req('/',{headers:{Cookie:cookie}});
+  let html=page.body.toString('utf8');
+  const GUARD="if(typeof module!=='undefined'&&module.exports)\n  module.exports={";
+  if(html.indexOf(GUARD)>=0) html=html.replace(GUARD,"window.__api={");
+  const vc=new VirtualConsole();
+  vc.on('jsdomError',e=>console.log('JSDOM ERROR:',e.message.slice(0,300)));
+  if(process.env.DP_JSDOM_LOG) ['error','warn','log'].forEach(k=>vc.on(k,(...a)=>console.log('page '+k+':',a.map(String).join(' ').slice(0,300))));
+  const dom=new JSDOM(html,{runScripts:'dangerously',pretendToBeVisual:true,url:BASE+'/',
+    virtualConsole:vc,
+    beforeParse(w){
+      w.alert=m=>{ (w.__alerts=w.__alerts||[]).push(String(m)); };
+      w.Blob=function(parts,o){ this.__parts=parts; this.__type=o&&o.type; };
+      w.URL.createObjectURL=function(b){ w.__lastBlob=b; return 'blob:x'; };
+      w.URL.revokeObjectURL=function(){};
+      /* jsdom has no fetch to a live server with cookies, so route it ourselves */
+      w.fetch=function(path,opt){
+        opt=opt||{};
+        const headers=Object.assign({},opt.headers||{},{Cookie:cookie});
+        let body=opt.body;
+        if(body&&typeof body!=='string'&&!(body instanceof Buffer)){
+          try{ body=Buffer.from(body); }catch(e){}
+        }
+        return req(String(path).replace(BASE,''),{method:opt.method||'GET',headers,body})
+          .then(r=>({
+            ok:r.status>=200&&r.status<300, status:r.status,
+            json:()=>Promise.resolve(JSON.parse(r.body.toString('utf8')||'{}')),
+            text:()=>Promise.resolve(r.body.toString('utf8')),
+            arrayBuffer:()=>Promise.resolve(r.body.buffer.slice(r.body.byteOffset,r.body.byteOffset+r.body.byteLength))
+          }));
+      };
+    }});
+  const w=dom.window;
+  await new Promise(r=>w.addEventListener('load',r));
+  /* capture downloads instead of navigating */
+  w.HTMLAnchorElement.prototype.click=function(){ w.__dl={name:this.download,blob:w.__lastBlob}; };
+  /* the boot chain is async: wait for the roster to appear */
+  /* up to a minute: a loaded machine running several tests at once is slow */
+  for(let i=0;i<600;i++){
+    const S0=w.__api&&w.__api.S;
+    /* both workbooks read, not just a first count from the saved schedule */
+    if(S0&&S0.result&&S0.master&&S0.capacity&&S0.capacity.rows&&S0.capacity.rows.length) break;
+    await new Promise(r=>setTimeout(r,100));
+  }
+  { const S0=w.__api&&w.__api.S;
+    if(!(S0&&S0.result&&S0.master&&S0.capacity&&S0.capacity.rows&&S0.capacity.rows.length)){
+      const rb=await req('/api/bootstrap?year=2026',{headers:{Cookie:cookie}});
+      console.log('JSDOM BOOT INCOMPLETE:',JSON.stringify({result:!!(S0&&S0.result),master:!!(S0&&S0.master),cap:S0&&S0.capacity?S0.capacity.rows.length:null,files:S0&&S0.srvFiles?Object.keys(S0.srvFiles):null}),'| bootstrap now:',rb.status,rb.body.toString().slice(0,100));
+    } }
+  return {w,api:w.__api,S:w.__api&&w.__api.S,req};
+};
