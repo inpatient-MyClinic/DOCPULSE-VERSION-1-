@@ -8170,8 +8170,10 @@ function renderDrawer(){
      '<div class="tw" style="max-height:none"><table><thead><tr>'+
      '<th>Month</th><th class="n">Sessions</th><th class="n">Closed</th><th class="n">Opened</th>'+
      '<th class="n">OT Fixed</th>'+
+     '<th class="n" title="Paid Extra and Coverage sessions plus fixed OT, less any a closure took off">Extra (paid)</th>'+
      '<th class="n">Expected</th><th class="n">Total</th><th class="n">Not replaced</th>'+
      '<th class="n">Requests</th></tr></thead><tbody>';
+  var dwX=dwExtra(t);
   for(var m=0;m<12;m++)
     h+='<tr class="mrow'+(S.dw.month===m?' on':'')+'" data-m="'+m+'"><td>'+esc(M[m])+'</td>'+
       '<td class="n">'+fmt(t.m[m].s)+'</td>'+
@@ -8179,6 +8181,7 @@ function renderDrawer(){
       '<td class="n"'+(t.m[m].o?' style="color:var(--gain)"':'')+'>'+(t.m[m].o?fmt(t.m[m].o):'·')+'</td>'+
       '<td class="n"'+(t.m[m].ot?' style="color:var(--teal);font-weight:650"':'')+'>'+(t.m[m].ot?fmt(t.m[m].ot):'·')+
         (((t.otHeldM||[])[m]||0)>0.001? '<div class="mt" style="color:var(--warn)">'+fmt(t.otHeldM[m])+' waiting</div>' : '')+'</td>'+
+      dwExtraCell(dwX[m])+
       '<td class="n">'+fmt(expectedIn(t.m[m]))+'</td>'+
       '<td class="n"><b>'+fmt(t.m[m].t)+'</b></td>'+
       '<td class="n"'+(owedIn(t.m[m])>0.001?' style="color:var(--loss);font-weight:700"':'')+'>'+
@@ -8190,13 +8193,15 @@ function renderDrawer(){
      '<td class="n">'+fmt(t.yc)+'</td>'+
      '<td class="n">'+fmt(t.yo)+'</td>'+
      '<td class="n">'+fmt(t.yot||0)+'</td>'+
+     dwExtraCell(dwX.year)+
      '<td class="n">'+fmt(t.ys+t.yo)+'</td>'+
      '<td class="n">'+fmt(t.yt)+'</td>'+
      '<td class="n"'+(owedYear(t)>0.001?' style="color:var(--loss)"':'')+'>'+
        (owedYear(t)>0.001? fmt(owedYear(t))+' <span class="mt">('+fmt(hoursOf(owedYear(t)))+' h)</span>':'·')+'</td>'+
      '<td class="n mt">'+(Object.keys(perMonth).reduce(function(a,k){return a+perMonth[k];},0)||'·')+'</td>'+
      '</tr></tfoot></table></div>'+
-     '<div class="cb hint">A closure is expected to be matched by an opening of the same size in the same '+
+     '<div class="cb hint"><b>Extra (paid)</b> is his paid Extra and Coverage sessions plus his fixed OT; a closure at the time of one of them takes it off, the same way the Paid extra page does. '+
+     'A closure is expected to be matched by an opening of the same size in the same '+
      'month. <b>Not replaced</b> is what was closed and never made up — the part that would come off the '+
      'salary. It is measured per month, so a closure in one month is not cancelled by extra work in '+
      'another.</div></div>';
@@ -13440,6 +13445,40 @@ function pdOne(r){
   return {n:1, s:h>0? h/hrs : 1, h:h>0? h : hrs, guess:h>0?0:1};
 }
 /* the log's paid rows and the master file's fixed OT, as one list */
+/* The doctor card's Extra column: paid Extra and Coverage sessions plus his
+   fixed OT, month by month — the Paid extra rules decide what is paid, and a
+   closure (or an unpaid mark) at the time of one of them takes it off, the
+   same way the Paid extra page does. */
+function dwExtraIs(r){ return !!r.ot||(pdIsOpen(r)&&/extra|coverage/i.test(nz(r.sub))); }
+function dwExtra(t){
+  return pdCache('dwx:'+t.key,function(){
+    var H=num(S.settings.hrs)||4, out=[];
+    for(var m=0;m<12;m++) out.push({n:0,log:0,ot:0,cut:0,cutN:0,rows:0});
+    var mine=function(r){ return r.date&&r.date.y===+S.settings.year&&(nz(t.id)? nz(r.id)===nz(t.id)&&nz(r.site)===nz(t.site) : nameKey(r.name)===nameKey(t.name)); };
+    /* entries, the ones a closure took off whole (Paid extra's dropped list), and fixed OT */
+    pdEntries().concat(pdDropped(),otItems()).forEach(function(r){
+      if(!mine(r)||r.dup||!dwExtraIs(r)) return;
+      var o=out[r.date.m], full=pdByHours()? ((r.hours>0? r.hours : H)/H) : 1;
+      o.rows++;
+      if(r.blocked){ if(!r.ot){ o.cut+=full; o.cutN++; } return; }   /* an OT one is in otCut below */
+      var v=pdN(pdOne(r));
+      o.n+=v; if(r.ot) o.ot+=v; else o.log+=v;
+      if(full-v>0.0001){ o.cut+=full-v; o.cutN++; }
+    });
+    /* fixed OT a closure cancelled: the count already took it off (OT Fixed column) */
+    out.forEach(function(o,m){ var c=(t.m&&t.m[m]&&t.m[m].otCut)||0; if(c>0){ o.cut+=c; o.cutN+=Math.ceil(c); } });
+    var y={n:0,log:0,ot:0,cut:0,cutN:0,rows:0};
+    out.forEach(function(o){ Object.keys(y).forEach(function(k){ y[k]+=o[k]; }); });
+    out.year=y;
+    return out;
+  });
+}
+function dwExtraCell(o){
+  if(!o||(!o.n&&!o.cut)) return '<td class="n">·</td>';
+  var tip=fmt(o.log)+' paid Extra / Coverage + '+fmt(o.ot)+' OT fixed'+(o.cut? ' · '+fmt(o.cut)+' taken off by a closure or an unpaid mark' : '');
+  return '<td class="n" title="'+esc(tip)+'"><b style="color:var(--gain)">'+fmt(o.n)+'</b>'+
+    (o.cut>0.0001? '<div class="mt" style="color:var(--loss)">\u2212'+fmt(o.cut)+' closed</div>' : '')+'</td>';
+}
 function pdItems(){
   var src=S.pd.src||'all', out=[];
   if(src!=='ot') out=out.concat(pdEntries());
@@ -18105,7 +18144,7 @@ function liveRedraw(){
 
 /* expose pure functions for verification outside the browser */
 if(typeof module!=='undefined'&&module.exports)
-  module.exports={pdCol:pdCol,renderChgLog:renderChgLog,staffMove:staffMove,ntItems:ntItems,ntSaveDec:ntSaveDec,ntState:ntState,kpiRound:kpiRound,thApply:thApply,thMapRGB:thMapRGB,brkOn:brkOn,sdLoad:sdLoad,sdPut:sdPut,chgAll:chgAll,renderAnalysis:renderAnalysis,renderRules:renderRules,renderSettings:renderSettings,setSub:setSub,nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
+  module.exports={dwExtra:dwExtra,pdCol:pdCol,renderChgLog:renderChgLog,staffMove:staffMove,ntItems:ntItems,ntSaveDec:ntSaveDec,ntState:ntState,kpiRound:kpiRound,thApply:thApply,thMapRGB:thMapRGB,brkOn:brkOn,sdLoad:sdLoad,sdPut:sdPut,chgAll:chgAll,renderAnalysis:renderAnalysis,renderRules:renderRules,renderSettings:renderSettings,setSub:setSub,nameKey:nameKey,mvHash:mvHash,sdDatedOf:sdDatedOf,sdChangeOf:sdChangeOf,sdSetDated:sdSetDated,sdNoticeHTML:sdNoticeHTML,sdFinish:sdFinish,sdLoad:sdLoad,snapshotDiff:snapshotDiff,pdWeekOf:pdWeekOf,dpgRows:dpgRows,dpgSet:dpgSet,dpgSave:dpgSave,dpgRender:dpgRender,dpmSave:dpmSave,dpmCreate:dpmCreate,dpmApplySource:dpmApplySource,dpmDiff:dpmDiff,dpmApprove:dpmApprove,dpmLoad:dpmLoad,dpmHere:dpmHere,dpmInUse:dpmInUse,dpmNoteDate:dpmNoteDate,dpmExport:dpmExport,dpmAddDoctor:dpmAddDoctor,dpmGroup:dpmGroup,dpmCard:dpmCard,dpmSourceCard:dpmSourceCard,renderData:renderData,go:go,
     parseMaster:parseMaster,parseCapacity:parseCapacity,parseHybrid:parseHybrid,
     pickMasterSheet:pickMasterSheet,pickCapSheets:pickCapSheets,pickHybridSheet:pickHybridSheet,
     compute:compute,S:S,ensureRule:ensureRule,weekdayCounts:weekdayCounts,durHours:durHours,serialDate:serialDate,
