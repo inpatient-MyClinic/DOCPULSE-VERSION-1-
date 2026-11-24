@@ -344,6 +344,30 @@ td.day .altn{margin-top:2px;font-size:9.5px;font-weight:700;color:var(--purple)}
 .db2-tm .t2.ex{background:#E6F6F4;color:#0E7C72}
 .db2-tm .t2.ck{background:#FEF3C7;color:#92400E}
 .db2-f{display:flex;flex-direction:column;gap:8px}
+.dbf-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dbf-ic{width:30px;height:30px;border-radius:9px;background:#EEF2F8;color:#334155;display:inline-flex;align-items:center;justify-content:center}
+.dbf-b{font:inherit;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:10px;border:1px solid #DCE3ED;background:#fff;cursor:pointer;max-width:320px}
+.dbf-b:hover{border-color:#94A3B8}.dbf-b:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
+.dbf-t{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#7A8699}
+.dbf-v{font-size:13px;font-weight:650;color:#1E293B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbf-n{font-size:10.5px;font-weight:800;color:#64748B;background:#F1F5F9;border-radius:999px;padding:0 6px}
+.dbf-b i{font-style:normal;font-size:10px;color:#94A3B8}
+.dbf-b.on{background:#1B2A4A;border-color:#1B2A4A}.dbf-b.on .dbf-t{color:#9FB0CC}.dbf-b.on .dbf-v{color:#fff}.dbf-b.on i{color:#9FB0CC}
+.dbf-b.open{box-shadow:0 0 0 3px rgba(37,99,235,.18);border-color:#2563EB}
+.dbf-clr{font:inherit;font-size:12px;font-weight:700;color:#B42318;background:none;border:0;cursor:pointer;padding:6px 4px}
+.dbf-clr:hover{text-decoration:underline}
+.dbf-cnt{margin-left:auto;font-size:12.5px;color:#64748B}.dbf-cnt b{color:#1E293B;font-size:14px}
+.dbf-p{margin-top:10px;padding:12px 14px;border:1px solid #DCE3ED;border-radius:12px;background:#FBFCFE;box-shadow:0 6px 18px rgba(18,32,58,.06)}
+.dbf-g{display:flex;flex-wrap:wrap;gap:6px}
+.dbf-sp{max-height:240px;overflow:auto;padding:2px}
+.dbf-q{width:100%;max-width:320px;margin-bottom:10px;padding:7px 11px;border:1px solid #CBD5E1;border-radius:9px;font:inherit;font-size:13px;background:#fff}
+.dbf-q:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
+.dbf-cols{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:10px 18px;align-items:start}
+.dbf-col{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.dbf-ch{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748B;margin-bottom:2px}
+.dbf-ch b{margin-left:4px;color:#94A3B8}.dbf-ch.closed{color:#B42318}.dbf-ch.extra{color:#0F766E}.dbf-ch.check{color:#B45309}
+.dbf-pf{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid #EEF1F6}
+@media (max-width:900px){.dbf-cols{grid-template-columns:1fr}.dbf-cnt{margin-left:0;flex-basis:100%}}
 .db2-fr{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .db2-fl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7A8699;width:68px}
 .db2-fc{font:inherit;font-size:12.5px;padding:5px 11px;border-radius:999px;border:1px solid #DCE3ED;background:#fff;color:#334155;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
@@ -3349,7 +3373,7 @@ function dayBoard(rows){
 
   var out=[], nIn=0,nCl=0,nEx=0,nCk=0,docs=0;
   /* counts for the filter chips: every doctor that day, and every request type */
-  var stc={'':0,'in':0,closed:0,extra:0,check:0}, why={}, nsc={'':0,'0':0,'1':0,'2':0,'3':0};
+  var stc={'':0,'in':0,closed:0,extra:0,check:0}, why={}, nsc={'':0,'0':0,'1':0,'2':0,'3':0}, spc={};
   function wkey(p){
     if(p.state==='bad') return 'check|Times need checking';
     if(p.orphan) return 'check|'+(p.why||'No reason given')+' — nothing rostered';
@@ -3371,6 +3395,8 @@ function dayBoard(rows){
     var nb=String(Math.min(nw,3));
     nsc['']++; nsc[nb]++;
     if(S.mf.nses&&S.mf.nses!==nb) return;
+    var sp=nz(t.spec)||'(no specialty)'; spc[sp]=(spc[sp]||0)+1;
+    if(S.mf.dspec&&S.mf.dspec!==sp) return;
     out.push({t:t,plan:plan});
     var work=false;
     plan.forEach(function(p){
@@ -3399,26 +3425,59 @@ function dayBoard(rows){
       (nCk?'var(--warn)':'var(--muted)')+'">'+fmt(nCk,0)+'</div></div>'+
     '</div></div>';
 
-  /* filters: what happened, then each request type the log holds for this day */
+  /* filters: four buttons — Show, Request, Sessions, Specialty. Pressing one
+     opens its choices just below; what is chosen stays visible as a chip. */
   var ST=[['','All'],['in','Working'],['closed','Closed'],['extra','Extra'],['check','To check']];
+  var NS=[['','Any'],['1','1 session'],['2','2 sessions'],['3','3 or more'],['0','None (all closed)']];
   var wk=Object.keys(why).sort(function(a,b){ return why[b]-why[a] || (a<b?-1:1); });
   if(S.mf.why&&!why[S.mf.why]) wk.unshift(S.mf.why);
-  h+='<div class="cb db2-f" style="border-bottom:1px solid var(--line-s)">'+
-     '<div class="db2-fr"><span class="db2-fl">Show</span>'+ST.map(function(o){
-        return '<button type="button" class="db2-fc'+((S.mf.state||'')===o[0]?' on':'')+(o[0]?' '+o[0]:'')+'" data-dbst="'+o[0]+'">'+
-          o[1]+' <b>'+fmt(stc[o[0]],0)+'</b></button>'; }).join('')+'</div>'+
-     (wk.length? '<div class="db2-fr"><span class="db2-fl">Request</span>'+
-        '<button type="button" class="db2-fc'+(S.mf.why?'':' on')+'" data-dbwhy="">Any</button>'+
-        wk.map(function(k){ var p=k.split('|');
-          return '<button type="button" class="db2-fc '+p[0]+(S.mf.why===k?' on':'')+'" data-dbwhy="'+esc(k)+'" title="'+
-            esc((p[0]==='closed'?'Closed: ':p[0]==='extra'?'Extra: ':'Check: ')+p.slice(1).join('|'))+'">'+
-            '<i></i>'+esc(p.slice(1).join('|'))+' <b>'+fmt(why[k]||0,0)+'</b></button>'; }).join('')+'</div>'
-      : '<div class="db2-fr"><span class="db2-fl">Request</span><span class="hint">No closures or extra sessions on this day.</span></div>')+
-     '<div class="db2-fr"><span class="db2-fl">Sessions</span>'+
-       [['','Any'],['1','1 session'],['2','2 sessions'],['3','3 or more'],['0','None (all closed)']].map(function(o){
-         return '<button type="button" class="db2-fc'+((S.mf.nses||'')===o[0]?' on':'')+'" data-dbns="'+o[0]+'">'+
-           o[1]+' <b>'+fmt(nsc[o[0]],0)+'</b></button>'; }).join('')+'</div>'+
-     '</div>';
+  var spk=Object.keys(spc).sort(function(a,b){ return spc[b]-spc[a] || (a<b?-1:1); });
+  if(S.mf.dspec&&!spc[S.mf.dspec]) spk.unshift(S.mf.dspec);
+  var lab=function(list,v){ var o=list.filter(function(x){ return x[0]===(v||''); })[0]; return o? o[1] : v; };
+  var whyLab=function(k){ return k.split('|').slice(1).join('|'); };
+  var open=S.dbOpen||'';
+  var FB=[
+    {k:'st',t:'Show',v:lab(ST,S.mf.state),on:!!S.mf.state,clr:'state'},
+    {k:'why',t:'Request',v:S.mf.why? whyLab(S.mf.why) : 'Any',on:!!S.mf.why,clr:'why',n:wk.length},
+    {k:'ns',t:'Sessions',v:lab(NS,S.mf.nses),on:!!S.mf.nses,clr:'nses'},
+    {k:'spec',t:'Specialty',v:S.mf.dspec||'Any',on:!!S.mf.dspec,clr:'dspec',n:spk.length}];
+  var nOn=FB.filter(function(f){ return f.on; }).length;
+  h+='<div class="cb dbf-wrap" style="border-bottom:1px solid var(--line-s)"><div class="dbf-bar" role="toolbar" aria-label="Filters for this day">'+
+    '<span class="dbf-ic" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3.5h12M4.5 8h7M7 12.5h2"/></svg></span>'+
+    FB.map(function(f){
+      return '<button type="button" class="dbf-b'+(f.on?' on':'')+(open===f.k?' open':'')+'" data-dbopen="'+f.k+'" aria-expanded="'+(open===f.k)+'" aria-controls="dbfPanel">'+
+        '<span class="dbf-t">'+f.t+'</span><span class="dbf-v">'+esc(f.v)+'</span>'+
+        (f.n&&!f.on? '<span class="dbf-n">'+f.n+'</span>' : '')+
+        '<i aria-hidden="true">'+(open===f.k?'▴':'▾')+'</i></button>'; }).join('')+
+    (nOn? '<button type="button" class="dbf-clr" data-dbclr="all">Clear '+(nOn>1? 'all '+nOn : 'filter')+'</button>' : '')+
+    '<span class="dbf-cnt"><b>'+fmt(out.length,0)+'</b> of '+fmt(stc[''],0)+' doctors</span>'+
+    '</div>';
+  if(open){
+    h+='<div class="dbf-p" id="dbfPanel" role="group" aria-label="'+esc((FB.filter(function(f){ return f.k===open; })[0]||{}).t||'')+'">';
+    if(open==='st') h+='<div class="dbf-g">'+ST.map(function(o){
+        return '<button type="button" class="db2-fc'+((S.mf.state||'')===o[0]?' on':'')+(o[0]?' '+o[0]:'')+'" data-dbst="'+o[0]+'">'+(o[0]&&o[0]!=='in'?'<i></i>':'')+
+          o[1]+' <b>'+fmt(stc[o[0]],0)+'</b></button>'; }).join('')+'</div>';
+    if(open==='ns') h+='<div class="dbf-g">'+NS.map(function(o){
+        return '<button type="button" class="db2-fc'+((S.mf.nses||'')===o[0]?' on':'')+'" data-dbns="'+o[0]+'">'+
+          o[1]+' <b>'+fmt(nsc[o[0]],0)+'</b></button>'; }).join('')+'</div>';
+    if(open==='why'){
+      if(!wk.length) h+='<span class="hint">No closures or extra sessions on this day.</span>';
+      else {
+        var grp=[['closed','Closed for'],['extra','Extra opened for'],['check','To check']];
+        h+='<div class="dbf-cols"><div class="dbf-col"><button type="button" class="db2-fc'+(S.mf.why?'':' on')+'" data-dbwhy="">Any request</button></div>'+
+          grp.map(function(g){ var ks=wk.filter(function(k){ return k.split('|')[0]===g[0]; }); if(!ks.length) return '';
+            return '<div class="dbf-col"><div class="dbf-ch '+g[0]+'">'+g[1]+' <b>'+ks.reduce(function(a,k){ return a+(why[k]||0); },0)+'</b></div>'+
+              ks.map(function(k){ return '<button type="button" class="db2-fc '+g[0]+(S.mf.why===k?' on':'')+'" data-dbwhy="'+esc(k)+'"><i></i>'+esc(whyLab(k))+' <b>'+fmt(why[k]||0,0)+'</b></button>'; }).join('')+'</div>'; }).join('')+'</div>';
+      }
+    }
+    if(open==='spec'){
+      h+='<input type="search" class="dbf-q" id="dbfSpecQ" placeholder="Find a specialty" aria-label="Find a specialty" autocomplete="off">'+
+        '<div class="dbf-g dbf-sp"><button type="button" class="db2-fc'+(S.mf.dspec?'':' on')+'" data-dbsp="">Any specialty <b>'+fmt(spk.reduce(function(a,k){ return a+(spc[k]||0); },0),0)+'</b></button>'+
+        spk.map(function(k){ return '<button type="button" class="db2-fc'+(S.mf.dspec===k?' on':'')+'" data-dbsp="'+esc(k)+'">'+esc(k)+' <b>'+fmt(spc[k]||0,0)+'</b></button>'; }).join('')+'</div>';
+    }
+    h+='<div class="dbf-pf"><span class="hint">Counts are for this day with the other filters applied.</span><button type="button" class="btn sm" data-dbopen="'+open+'">Done</button></div></div>';
+  }
+  h+='</div>';
   if(!out.length) return h+'<div class="empty">Nobody matches these filters on this day.</div>';
   h+= (S.mf.group==='dept') ? dbByDept(out) : dbBySession(out);
   h+='<div class="cb hint">The master schedule gives the plan; the daily capacity log closes '+
@@ -3427,6 +3486,9 @@ function dayBoard(rows){
      'is before the start, or a closure has nothing rostered to close — so it is shown untouched.</div>';
   return h;
 }
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&S.dbOpen&&S.page==='master'){ var k=S.dbOpen; S.dbOpen=''; renderMaster();
+    var b=document.querySelector('[data-dbopen="'+k+'"]'); if(b) try{ b.focus(); }catch(_){} } });
 function dbBaseIndex(){
   if(S.result._dbIdx) return S.result._dbIdx;
   var ix={};
@@ -4787,11 +4849,22 @@ function wireMaster(){
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-mact]'),function(b){
     b.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation(); toggleLeft(b.getAttribute('data-mact')); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbst]'),function(b){
-    b.onclick=function(){ S.mf.state=b.getAttribute('data-dbst'); S.mf.why=''; renderMaster(); }; });
+    b.onclick=function(){ S.mf.state=b.getAttribute('data-dbst'); S.mf.why=''; S.dbOpen=''; renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbns]'),function(b){
-    b.onclick=function(){ S.mf.nses=b.getAttribute('data-dbns'); renderMaster(); }; });
+    b.onclick=function(){ S.mf.nses=b.getAttribute('data-dbns'); S.dbOpen=''; renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbwhy]'),function(b){
-    b.onclick=function(){ var k=b.getAttribute('data-dbwhy'); S.mf.why=(S.mf.why===k)?'':k; renderMaster(); }; });
+    b.onclick=function(){ var k=b.getAttribute('data-dbwhy'); S.mf.why=(S.mf.why===k)?'':k; S.dbOpen=''; renderMaster(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbsp]'),function(b){
+    b.onclick=function(){ S.mf.dspec=b.getAttribute('data-dbsp'); S.dbOpen=''; renderMaster(); }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbopen]'),function(b){
+    b.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation(); var k=b.getAttribute('data-dbopen');
+      S.dbOpen=(S.dbOpen===k)? '' : k; renderMaster();
+      var f=document.querySelector(S.dbOpen==='spec'? '#dbfSpecQ' : S.dbOpen? '#dbfPanel .db2-fc.on, #dbfPanel .db2-fc' : '[data-dbopen="'+k+'"]'); if(f) try{ f.focus(); }catch(_){} }; });
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbclr]'),function(b){
+    b.onclick=function(){ S.mf.state=''; S.mf.why=''; S.mf.nses=''; S.mf.dspec=''; S.dbOpen=''; renderMaster(); }; });
+  var dsq=el('dbfSpecQ'); if(dsq) dsq.oninput=function(){ var q=low(this.value);
+    Array.prototype.forEach.call(document.querySelectorAll('#dbfPanel [data-dbsp]'),function(b){
+      var k=b.getAttribute('data-dbsp'); b.style.display=(!k||low(k).indexOf(q)>=0)? '' : 'none'; }); };
   on('mvDay',function(){ S.mView='day'; S.mEdit=''; S.mDraft=null; renderMaster(); });
   on('mgSess',function(){ S.mf.group=''; renderMaster(); });
   on('mgDept',function(){ S.mf.group='dept'; renderMaster(); });
@@ -6751,6 +6824,7 @@ if(typeof document!=='undefined'){
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
     var n;
+    if(S.dbOpen&&!t.closest('.dbf-wrap')&&S.page==='master'){ S.dbOpen=''; renderMaster(); }
     if((n=t.closest('[data-rqpk]'))){ var rq=n.getAttribute('data-rqpk'), ri=rq.lastIndexOf('|'), rid=rq.slice(0,ri), rv=rq.slice(ri+1);
       S.settings.reqPick=S.settings.reqPick||{};
       if(rv==='clear') delete S.settings.reqPick[rid]; else S.settings.reqPick[rid]=rv;
