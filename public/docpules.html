@@ -864,6 +864,10 @@ body.sbn .side .ft{border-top:1px solid rgba(255,255,255,.07);color:#6F84A8;padd
 .sm-p:hover{border-color:#94A3B8}.sm-p:focus-visible{outline:2px solid #2563EB;outline-offset:1px}.sm-p:disabled{cursor:default}
 .sm-none{font-size:12px;color:#94A3B8;padding:4px 0}
 @media (max-width:900px){.dsh-card.sm .sm-top{grid-template-columns:repeat(3,minmax(0,1fr))}.sm-ch{grid-column:1/-1}.sm-lists{grid-template-columns:1fr}}
+.rq-pay{display:inline-block;margin-top:5px;font-size:10.5px;font-weight:800;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.rq-pay.paid{background:#DCFCE7;color:#166534}.rq-pay.unpaid{background:#FEE2E2;color:#991B1B}
+.rq-pay.none{background:#F1F5F9;color:#64748B}.rq-pay.other{background:#FEF3C7;color:#92400E}
+.rq-payf{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;margin-left:8px}
 .rq-who{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px}
 .rq-nm{font-size:11.5px;font-weight:700;color:#334155}
 .rq-par{font-size:10.5px;font-weight:800;letter-spacing:.02em;padding:1px 8px;border-radius:999px;background:#EDE9FE;color:#5B21B6}
@@ -8077,6 +8081,10 @@ function renderDrawer(){
   var reasonKeys=Object.keys(reasonCount).sort(function(a,b){ return reasonCount[b]-reasonCount[a]; });
   if(S.dw.reason&&!reasonCount[S.dw.reason]) S.dw.reason='';
   if(S.dw.reason) sel=sel.filter(function(r){ return (r.main+' › '+r.sub)===S.dw.reason; });
+  var payCnt={paid:0,unpaid:0,none:0,other:0}, payCol=pdCol();
+  sel.forEach(function(r){ var p=rqPay(r).k; if(p) payCnt[p]++; });
+  if(S.dw.pay&&(!payCol||!payCnt[S.dw.pay])) S.dw.pay='';   /* nothing of that kind here: show all */
+  if(S.dw.pay) sel=sel.filter(function(r){ return rqPay(r).k===S.dw.pay; });
 
   var ini=nz(t.name).replace(/^(dr\.?|prof\.?)\s+/i,'').split(/\s+/).filter(Boolean);
   ini=((ini[0]||'?').charAt(0)+(ini.length>1? ini[ini.length-1].charAt(0) : '')).toUpperCase();
@@ -8319,6 +8327,11 @@ function renderDrawer(){
              esc(k)+' ('+reasonCount[k]+')</option>'; }).join('')+
        '</select>'+
        (S.dw.reason? '<button class="dchip" id="dwReasonClear">clear</button>':'')+
+       (payCol? '<span class="rq-payf" role="group" aria-label="Paid or unpaid"><label class="hint" style="font-weight:700">'+esc(payCol)+'</label>'+
+         [['','All'],['paid','Paid'],['unpaid','Unpaid'],['none','None']].concat(payCnt.other? [['other','Other']] : []).map(function(o){
+           var n=o[0]? payCnt[o[0]] : payCnt.paid+payCnt.unpaid+payCnt.none+payCnt.other;
+           return '<button type="button" class="db2-fc'+((S.dw.pay||'')===o[0]?' on':'')+(o[0]? ' pf-'+o[0] : '')+'" data-dwpay="'+o[0]+'" aria-pressed="'+((S.dw.pay||'')===o[0])+'">'+o[1]+' <b>'+n+'</b></button>'; }).join('')+
+         '</span>' : '')+
      '</div></div>';
 
   if(!sel.length){
@@ -8365,7 +8378,7 @@ function renderDrawer(){
           (r.reqDate? '<div class="mt">req '+r.reqDate.d+' '+MS[r.reqDate.m]+'</div>':'')+
           '<div class="mt">row '+r.row+'</div></td>'+
         '<td>'+(r._used? '<span class="sp '+(isC?'c':'o')+'">'+esc(r.status)+'</span>'
-                      : '<span class="sp x">'+esc(r.status||'—')+'</span>')+'</td>'+
+                      : '<span class="sp x">'+esc(r.status||'—')+'</span>')+rqPayHTML(r)+'</td>'+
         '<td>'+rqWhoHTML(r,t)+'<div>'+esc(r.main)+' <span class="mt">›</span> '+esc(r.sub)+swatches(r.fills)+'</div>'+
           '<div class="mt">'+esc(r.type||'—')+
           (r._openClash==='open'? ' · <span style="color:var(--teal)">same hours as his clinic \u2014 counted instead of the clinic</span>' :
@@ -8410,6 +8423,8 @@ function renderDrawer(){
   if(dwy) dwy.onclick=function(){ S.dw.month=null; renderDrawer(); };
   var drc=el('dwReasonClear');
   if(drc) drc.onclick=function(){ S.dw.reason=''; renderDrawer(); };
+  Array.prototype.forEach.call(document.querySelectorAll('#drawer [data-dwpay]'),function(b){
+    b.onclick=function(){ S.dw.pay=b.getAttribute('data-dwpay'); renderDrawer(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#drawer [data-dwr]'),function(tr){
     tr.onclick=function(){ var k=tr.getAttribute('data-dwr');
       S.dw.reason=(S.dw.reason===k)?'':k; renderDrawer(); }; });
@@ -12303,6 +12318,17 @@ function otUncount(t,r,why){
 }
 /* who the request was logged for: the name as written, and "Parallel" for a
    "(1)" line — so a parallel session is never mistaken for a double entry */
+/* the log's Paid / Unpaid column, read the way Paid extra reads it:
+   paid, unpaid, none (left empty) — or the word itself if it is neither */
+function rqPay(r){
+  var col=pdCol(); if(!col) return {k:'',t:''};
+  var v=nz((r.raw||{})[col]); if(!v) return {k:'none',t:'None'};
+  var m=otPayMark(r,col);
+  return m==='paid'? {k:'paid',t:'Paid',v:v} : m==='unpaid'? {k:'unpaid',t:'Unpaid',v:v} : {k:'other',t:v,v:v};
+}
+function rqPayHTML(r){ var p=rqPay(r); if(!p.k) return '';
+  return '<div><span class="rq-pay '+p.k+'" title="'+esc(pdCol())+': '+esc(p.v||'(empty)')+'">'+
+    (p.k==='paid'? '\u2713 ' : p.k==='unpaid'? '\u2715 ' : '')+esc(p.t)+'</span></div>'; }
 function rqWhoHTML(r,t){
   var par=reqParMark(r.name), other=nameKey(r.name)!==nameKey(t&&t.name);
   if(!par&&!other) return '';
