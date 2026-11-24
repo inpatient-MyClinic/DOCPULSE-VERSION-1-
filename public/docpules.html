@@ -360,6 +360,9 @@ td.day .altn{margin-top:2px;font-size:9.5px;font-weight:700;color:var(--purple)}
 .dbf-p{margin-top:10px;padding:12px 14px;border:1px solid #DCE3ED;border-radius:12px;background:#FBFCFE;box-shadow:0 6px 18px rgba(18,32,58,.06)}
 .dbf-g{display:flex;flex-wrap:wrap;gap:6px}
 .dbf-sp{max-height:240px;overflow:auto;padding:2px}
+.dbf-dh{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}.dbf-dh .dbf-q{margin-bottom:0}
+.dbf-box{width:14px;height:14px;border-radius:4px;border:1.5px solid #94A3B8;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1}
+.dbf-ck.on .dbf-box{border-color:#fff;background:#fff;color:#1B2A4A}
 .dbf-q{width:100%;max-width:320px;margin-bottom:10px;padding:7px 11px;border:1px solid #CBD5E1;border-radius:9px;font:inherit;font-size:13px;background:#fff}
 .dbf-q:focus-visible{outline:2px solid #2563EB;outline-offset:1px}
 .dbf-cols{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:10px 18px;align-items:start}
@@ -3355,6 +3358,32 @@ function verFmtIso(iso){
   var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(nz(iso));
   return m? (+m[3])+' '+MONTHS_EN[+m[2]-1]+' '+m[1] : nz(iso);
 }
+/* Department for the day-board filter. A blank Department in the master is filled
+   from the same doctor's other lines, then from the usual department of the same
+   specialty. Display/grouping only — it never touches counting. */
+var DB_DEPT_KW=[[/diabet|obes|metabolic/,/metabolic|endocrin/],[/ortho/,/ortho/],[/derma/,/derma/],[/\bent\b|otorhino|audiolog/,/\bent\b|audiolog/],
+  [/ob\s*\/?\s*gyn|obstet|gyne/,/obstet|gyne/],[/ophthalm|\beye\b/,/ophthalm/],[/pediat|paediat/,/pediat/],[/neuro|psychiat/,/neuro/],
+  [/cardio|pulmon/,/cardio|pulmon/],[/urolog/,/urolog/],[/gastro/,/gastro/],[/rheuma/,/rheuma/],[/surg/,/surg/],
+  [/internal|\bim\b|immunolog/,/internal/],[/family|\bfm\b|geriat/,/family/]];
+function dbDept(t){
+  var d=nz(t.dept); if(d) return d;
+  var rs=(S.result&&S.result.rows)||[];
+  if(dbDept._src!==rs){ var byId={}, bySp={};
+    rs.forEach(function(x){ var dd=nz(x.dept); if(!dd) return;
+      if(x.id) byId[x.id]=byId[x.id]||dd;
+      var k=low(nz(x.spec)); if(k){ bySp[k]=bySp[k]||{}; bySp[k][dd]=(bySp[k][dd]||0)+1; } });
+    dbDept._src=rs; dbDept._id=byId; dbDept._sp=bySp; }
+  if(t.id&&dbDept._id[t.id]) return dbDept._id[t.id];
+  var m=dbDept._sp[low(nz(t.spec))];
+  if(m){ var best='',bn=0; Object.keys(m).forEach(function(k){ if(m[k]>bn){ bn=m[k]; best=k; } }); if(best) return best; }
+  /* last try: a keyword in the specialty that names one of the departments in use */
+  var sp=low(nz(t.spec)), deps=Object.keys(dbDept._id).map(function(k){ return dbDept._id[k]; });
+  deps=deps.filter(function(d,i){ return deps.indexOf(d)===i; });
+  for(var i=0;i<DB_DEPT_KW.length;i++){ var kw=DB_DEPT_KW[i];
+    if(!kw[0].test(sp)) continue;
+    for(var j=0;j<deps.length;j++) if(kw[1].test(low(deps[j]))) return deps[j]; }
+  return '(no department)';
+}
 function dayBoard(rows){
   var iso=S.mDate||dbIso(new Date());
   var byKey=dbRowsFor(iso);
@@ -3374,6 +3403,7 @@ function dayBoard(rows){
   var out=[], nIn=0,nCl=0,nEx=0,nCk=0,docs=0;
   /* counts for the filter chips: every doctor that day, and every request type */
   var stc={'':0,'in':0,closed:0,extra:0,check:0}, why={}, nsc={'':0,'0':0,'1':0,'2':0,'3':0}, spc={};
+  var dsel=Array.isArray(S.mf.ddept)? S.mf.ddept : [];      /* departments chosen (any number) */
   function wkey(p){
     if(p.state==='bad') return 'check|Times need checking';
     if(p.orphan) return 'check|'+(p.why||'No reason given')+' — nothing rostered';
@@ -3395,8 +3425,8 @@ function dayBoard(rows){
     var nb=String(Math.min(nw,3));
     nsc['']++; nsc[nb]++;
     if(S.mf.nses&&S.mf.nses!==nb) return;
-    var sp=nz(t.spec)||'(no specialty)'; spc[sp]=(spc[sp]||0)+1;
-    if(S.mf.dspec&&S.mf.dspec!==sp) return;
+    var sp=dbDept(t); spc[sp]=(spc[sp]||0)+1;
+    if(dsel.length&&dsel.indexOf(sp)<0) return;
     out.push({t:t,plan:plan});
     var work=false;
     plan.forEach(function(p){
@@ -3432,7 +3462,7 @@ function dayBoard(rows){
   var wk=Object.keys(why).sort(function(a,b){ return why[b]-why[a] || (a<b?-1:1); });
   if(S.mf.why&&!why[S.mf.why]) wk.unshift(S.mf.why);
   var spk=Object.keys(spc).sort(function(a,b){ return spc[b]-spc[a] || (a<b?-1:1); });
-  if(S.mf.dspec&&!spc[S.mf.dspec]) spk.unshift(S.mf.dspec);
+  dsel.forEach(function(d){ if(!spc[d]) spk.push(d); });
   var lab=function(list,v){ var o=list.filter(function(x){ return x[0]===(v||''); })[0]; return o? o[1] : v; };
   var whyLab=function(k){ return k.split('|').slice(1).join('|'); };
   var open=S.dbOpen||'';
@@ -3440,7 +3470,7 @@ function dayBoard(rows){
     {k:'st',t:'Show',v:lab(ST,S.mf.state),on:!!S.mf.state,clr:'state'},
     {k:'why',t:'Request',v:S.mf.why? whyLab(S.mf.why) : 'Any',on:!!S.mf.why,clr:'why',n:wk.length},
     {k:'ns',t:'Sessions',v:lab(NS,S.mf.nses),on:!!S.mf.nses,clr:'nses'},
-    {k:'spec',t:'Specialty',v:S.mf.dspec||'Any',on:!!S.mf.dspec,clr:'dspec',n:spk.length}];
+    {k:'dept',t:'Department',v:!dsel.length? 'Any' : dsel.length===1? dsel[0] : dsel.length+' departments',on:dsel.length>0,n:spk.length}];
   var nOn=FB.filter(function(f){ return f.on; }).length;
   h+='<div class="cb dbf-wrap" style="border-bottom:1px solid var(--line-s)"><div class="dbf-bar" role="toolbar" aria-label="Filters for this day">'+
     '<span class="dbf-ic" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3.5h12M4.5 8h7M7 12.5h2"/></svg></span>'+
@@ -3470,10 +3500,14 @@ function dayBoard(rows){
               ks.map(function(k){ return '<button type="button" class="db2-fc '+g[0]+(S.mf.why===k?' on':'')+'" data-dbwhy="'+esc(k)+'"><i></i>'+esc(whyLab(k))+' <b>'+fmt(why[k]||0,0)+'</b></button>'; }).join('')+'</div>'; }).join('')+'</div>';
       }
     }
-    if(open==='spec'){
-      h+='<input type="search" class="dbf-q" id="dbfSpecQ" placeholder="Find a specialty" aria-label="Find a specialty" autocomplete="off">'+
-        '<div class="dbf-g dbf-sp"><button type="button" class="db2-fc'+(S.mf.dspec?'':' on')+'" data-dbsp="">Any specialty <b>'+fmt(spk.reduce(function(a,k){ return a+(spc[k]||0); },0),0)+'</b></button>'+
-        spk.map(function(k){ return '<button type="button" class="db2-fc'+(S.mf.dspec===k?' on':'')+'" data-dbsp="'+esc(k)+'">'+esc(k)+' <b>'+fmt(spc[k]||0,0)+'</b></button>'; }).join('')+'</div>';
+    if(open==='dept'){
+      h+='<div class="dbf-dh"><input type="search" class="dbf-q" id="dbfDeptQ" placeholder="Find a department" aria-label="Find a department" autocomplete="off">'+
+        '<span class="hint">Choose one or more.</span>'+
+        (dsel.length? '<button type="button" class="dbf-clr" data-dbdp="__none">Clear '+dsel.length+'</button>' : '')+'</div>'+
+        '<div class="dbf-g dbf-sp" role="group" aria-label="Departments">'+
+        spk.map(function(k){ var on=dsel.indexOf(k)>=0;
+          return '<button type="button" class="db2-fc dbf-ck'+(on?' on':'')+'" data-dbdp="'+esc(k)+'" role="checkbox" aria-checked="'+on+'">'+
+            '<span class="dbf-box" aria-hidden="true">'+(on?'✓':'')+'</span>'+esc(k)+' <b>'+fmt(spc[k]||0,0)+'</b></button>'; }).join('')+'</div>';
     }
     h+='<div class="dbf-pf"><span class="hint">Counts are for this day with the other filters applied.</span><button type="button" class="btn sm" data-dbopen="'+open+'">Done</button></div></div>';
   }
@@ -4854,17 +4888,22 @@ function wireMaster(){
     b.onclick=function(){ S.mf.nses=b.getAttribute('data-dbns'); S.dbOpen=''; renderMaster(); }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbwhy]'),function(b){
     b.onclick=function(){ var k=b.getAttribute('data-dbwhy'); S.mf.why=(S.mf.why===k)?'':k; S.dbOpen=''; renderMaster(); }; });
-  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbsp]'),function(b){
-    b.onclick=function(){ S.mf.dspec=b.getAttribute('data-dbsp'); S.dbOpen=''; renderMaster(); }; });
+  /* departments: tick as many as you like; the panel stays open */
+  Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbdp]'),function(b){
+    b.onclick=function(){ var k=b.getAttribute('data-dbdp'), cur=Array.isArray(S.mf.ddept)? S.mf.ddept.slice() : [];
+      if(k==='__none') cur=[]; else { var i=cur.indexOf(k); if(i>=0) cur.splice(i,1); else cur.push(k); }
+      S.mf.ddept=cur; var qv=(el('dbfDeptQ')||{}).value||''; renderMaster();
+      var q2=el('dbfDeptQ'); if(q2&&qv){ q2.value=qv; q2.oninput(); }
+      var nb=document.querySelector('#dbfPanel [data-dbdp="'+(window.CSS&&CSS.escape? CSS.escape(k) : k)+'"]'); if(nb) try{ nb.focus(); }catch(_){} }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbopen]'),function(b){
     b.onclick=function(e){ if(e&&e.stopPropagation) e.stopPropagation(); var k=b.getAttribute('data-dbopen');
       S.dbOpen=(S.dbOpen===k)? '' : k; renderMaster();
-      var f=document.querySelector(S.dbOpen==='spec'? '#dbfSpecQ' : S.dbOpen? '#dbfPanel .db2-fc.on, #dbfPanel .db2-fc' : '[data-dbopen="'+k+'"]'); if(f) try{ f.focus(); }catch(_){} }; });
+      var f=document.querySelector(S.dbOpen==='dept'? '#dbfDeptQ' : S.dbOpen? '#dbfPanel .db2-fc.on, #dbfPanel .db2-fc' : '[data-dbopen="'+k+'"]'); if(f) try{ f.focus(); }catch(_){} }; });
   Array.prototype.forEach.call(document.querySelectorAll('#pg-master [data-dbclr]'),function(b){
-    b.onclick=function(){ S.mf.state=''; S.mf.why=''; S.mf.nses=''; S.mf.dspec=''; S.dbOpen=''; renderMaster(); }; });
-  var dsq=el('dbfSpecQ'); if(dsq) dsq.oninput=function(){ var q=low(this.value);
-    Array.prototype.forEach.call(document.querySelectorAll('#dbfPanel [data-dbsp]'),function(b){
-      var k=b.getAttribute('data-dbsp'); b.style.display=(!k||low(k).indexOf(q)>=0)? '' : 'none'; }); };
+    b.onclick=function(){ S.mf.state=''; S.mf.why=''; S.mf.nses=''; S.mf.ddept=[]; S.dbOpen=''; renderMaster(); }; });
+  var dsq=el('dbfDeptQ'); if(dsq) dsq.oninput=function(){ var q=low(this.value);
+    Array.prototype.forEach.call(document.querySelectorAll('#dbfPanel [data-dbdp]'),function(b){
+      var k=b.getAttribute('data-dbdp'); b.style.display=(k==='__none'||low(k).indexOf(q)>=0)? '' : 'none'; }); };
   on('mvDay',function(){ S.mView='day'; S.mEdit=''; S.mDraft=null; renderMaster(); });
   on('mgSess',function(){ S.mf.group=''; renderMaster(); });
   on('mgDept',function(){ S.mf.group='dept'; renderMaster(); });
